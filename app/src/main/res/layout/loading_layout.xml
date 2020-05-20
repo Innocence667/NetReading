@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/loadingParent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00000000"
+    android:gravity="center"
+    android:orientation="vertical">
+
+  <LinearLayout
+      android:layout_width="260dp"
+      android:layout_height="160dp"
+      android:gravity="center_horizontal"
+      android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="62dp"
+        android:layout_marginTop="30dp"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+      <TextView
+          android:id="@+id/redDot"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:layout_alignParentLeft="true"
+          android:background="@drawable/loading_red" />
+
+      <TextView
+          android:id="@+id/blueDot"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:layout_alignParentRight="true"
+          android:background="@drawable/loading_blue" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="Loading..."
+        android:textColor="#233143"
+        android:textSize="24sp" />
+  </LinearLayout>
+
+  <ImageView
+      android:id="@+id/loading_gif"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="gone" />
+</LinearLayout>

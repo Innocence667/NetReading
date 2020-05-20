@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayou"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MarkingActivity">
+
+    <RelativeLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorSpenSimpleSurfaceView">
+
+        <RelativeLayout
+            android:id="@+id/spenView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/reightView" />
+
+        <CheckBox
+            android:id="@+id/titleNo"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/shut"
+            android:button="@null" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/myHorizontalScrollview"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_toLeftOf="@+id/progressTips"
+            android:layout_toRightOf="@+id/titleNo"
+            android:scrollbars="none" />
+
+        <!--分数面板-->
+        <RelativeLayout
+            android:id="@+id/reightView"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:background="@drawable/scorepanel_bg"
+            android:gravity="center_horizontal">
+
+            <LinearLayout
+                android:id="@+id/questionScoreView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:gravity="center_horizontal|bottom"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/questionScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:text="分"
+                    android:textColor="@color/colorWhite" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/questionNum"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/questionScoreView"
+                android:gravity="center"
+                android:text="13-9题"
+                android:textColor="@color/colorWhite" />
+
+            <ListView
+                android:id="@+id/scoreList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/questionSubmiss"
+                android:layout_below="@+id/questionNum"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:divider="@null" />
+
+            <Button
+                android:id="@+id/questionSubmiss"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/scorepanel_bg"
+                android:text="确 定"
+                android:textColor="@color/colorWhite"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+
+        <!--阅卷进度提示-->
+        <TextView
+            android:id="@+id/progressTips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_toLeftOf="@+id/reightView"
+            android:textSize="25sp" />
+
+        <!--功能区开关-->
+        <CheckBox
+            android:id="@+id/sideslip"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="25dp"
+            android:background="@drawable/shut"
+            android:button="@null"
+            android:padding="10dp" />
+
+        <!--功能区-->
+        <HorizontalScrollView
+            android:id="@+id/function"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="10dp"
+            android:layout_toLeftOf="@+id/reightView"
+            android:layout_toRightOf="@+id/sideslip"
+            android:elevation="5dp"
+            android:fillViewport="true"
+            android:outlineProvider="bounds">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorWhite"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/commentsP"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/comments"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:button="@null"
+                        android:drawableLeft="@drawable/comments_style"
+                        android:drawablePadding="5dp"
+                        android:text="批注"
+                        android:textColor="@color/colorScoreItem" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="20dp"
+                    android:background="@color/colorGrey2" />
+
+                <LinearLayout
+                    android:id="@+id/eliminateP"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/eliminate_style"
+                        android:duplicateParentState="true" />
+
+                    <TextView
+                        android:id="@+id/eliminate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:duplicateParentState="true"
+                        android:gravity="center"
+                        android:text="清除笔记"
+                        android:textColor="@drawable/text_font_style" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="20dp"
+                    android:background="@color/colorGrey2" />
+
+                <LinearLayout
+                    android:id="@+id/stepScoreP"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/stepScore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:button="@null"
+                        android:drawableLeft="@drawable/stepscore_style"
+                        android:drawablePadding="5dp"
+                        android:gravity="center"
+                        android:text="步骤分"
+                        android:textColor="@color/colorScoreItem" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="20dp"
+                    android:background="@color/colorGrey2" />
+
+                <LinearLayout
+                    android:id="@+id/collectionP"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <CheckBox
+                        android:id="@+id/collection"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:button="@null"
+                        android:drawableLeft="@drawable/collection_style"
+                        android:drawablePadding="5dp"
+                        android:gravity="center"
+                        android:text="收藏"
+                        android:textColor="@color/colorScoreItem" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="20dp"
+                    android:background="@color/colorGrey2" />
+
+                <LinearLayout
+                    android:id="@+id/historyP"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/history_style"
+                        android:duplicateParentState="true" />
+
+                    <TextView
+                        android:id="@+id/history"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:duplicateParentState="true"
+                        android:gravity="center"
+                        android:text="回评"
+                        android:textColor="@drawable/text_font_style" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="20dp"
+                    android:background="@color/colorGrey2" />
+
+                <LinearLayout
+                    android:id="@+id/scoringDatailsP"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/scoringdatails_style"
+                        android:duplicateParentState="true" />
+
+                    <TextView
+                        android:id="@+id/scoringDatails"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:duplicateParentState="true"
+                        android:gravity="center"
+                        android:text="评分详情"
+                        android:textColor="@drawable/text_font_style" />
+
+                </LinearLayout>
+
+
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="20dp"
+                    android:background="@color/colorGrey2" />
+
+                <LinearLayout
+                    android:id="@+id/settingP"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/setting_style"
+                        android:duplicateParentState="true" />
+
+                    <TextView
+                        android:id="@+id/setting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:duplicateParentState="true"
+                        android:gravity="center"
+                        android:text="设置"
+                        android:textColor="@drawable/text_font_style" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/reight"
+        android:layout_width="400dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:background="@color/colorWhite"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/number"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="试题ID" />
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="时间" />
+
+            <TextView
+                android:id="@+id/score"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="分数" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/reviewListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

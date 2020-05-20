@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorBlack">#000000</color>
+    <color name="colorGrey">#F0F0F0</color>
+    <color name="colorGrey2">#B2B2B2</color>
+    <color name="colorBlue">#245AD3</color>
+    <color name="colorScoreItem">#405060</color>
+    <color name="colorScoreItemCheck">#FF9263</color>
+    <color name="colorSpenSimpleSurfaceView">#D6E6F5</color>
+    <color name="colorSecondaryProgress">#DBE2EB</color>
+    <color name="colorProgress">#1890FF</color>
+    <color name="colorProgressBackgroud">#F5F5F5</color>
+    <color name="colorBtnEnable">#C8D6F2</color>
+</resources>

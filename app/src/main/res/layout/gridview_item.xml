@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:gravity="center">
+
+    <CheckBox
+        android:id="@+id/scoreItem"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/topscore_item_style"
+        android:button="@null"
+        android:gravity="center"
+        android:textColor="@color/colorScoreItem"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

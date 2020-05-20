@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="services">
+        <item>铧强中学</item>
+        <item>双流中学</item>
+        <item>青神中学（高一）</item>
+        <item>青神中学（高二、三）</item>
+        <item>北大附中-本部</item>
+        <!--<item>曲靖市第一中学</item>-->
+        <item>四川省高县中学</item>
+        <item>成都新津为明学校</item>
+        <!--<item>北大附中-北医</item>-->
+        <item>青岛第二中学分校</item>
+        <!--<item>广州中学(五山校区)</item>-->
+        <!--<item>北重三中</item>
+        <item>广汉中学</item>
+        <item>浙江省绍兴市新昌县澄潭中学</item>-->
+        <item>青岛第二中学（高一）</item>
+        <item>青岛第二中学（高二）</item>
+        <item>青岛第二中学（高三）</item>
+        <item>遂宁中学外国语实验学校</item>
+        <item>北京(测试)</item>
+        <item>北京(测试2)</item>
+        <item>云测评--乐学网</item>
+        <item>睿易学院</item>
+    </string-array>
+</resources>
