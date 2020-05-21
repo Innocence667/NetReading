@@ -481,6 +481,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      */
     private ScorePanel getScoreList(double score, double fullScore) {
         Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score);
+
+        //获取配置文件中的数据
+        //PreferencesService.getInstance(context)
+
+
         //Math.ceil(12.2)//返回13.0
         //Math.ceil(12.7)//返回13.0
         //Math.ceil(12.0)//返回12.0
@@ -489,7 +494,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         List<Boolean> scoresCheck = new ArrayList<>();
         //是否0.5模式
         if (PreferencesService.getInstance(context).getPointFive()) { //0.5模式
-            for (double i = 0; i < Math.ceil(fullScore + 1); i += 0.5) {
+            for (double i = 0; i < fullScore + 0.5; i += 0.5) {
                 if (i == (int) i) {
                     scores.add(String.valueOf((int) i));
                 } else {

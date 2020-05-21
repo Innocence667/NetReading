@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
+import com.ruiyi.netreading.activity.MainActivity;
 import com.ruiyi.netreading.activity.R;
 import com.ruiyi.netreading.bean.response.GetExamContextResponse;
 import com.ruiyi.netreading.bean.response.GetExamListResponse;
@@ -20,13 +21,13 @@ import java.util.List;
 
 public class TaskListAdapter extends BaseExpandableListAdapter {
 
-    private Context mContext;
+    private MainActivity mContext;
     private List<GetExamListResponse.ExamListBean> datas; //父数据源
     private List<GetExamContextResponse.TaskListBean> childs; //子数据源
     private LayoutInflater inflater;
 
     public TaskListAdapter(Context context, List<GetExamListResponse.ExamListBean> list) {
-        this.mContext = context;
+        this.mContext = (MainActivity) context;
         this.datas = list;
         inflater = LayoutInflater.from(context);
     }
@@ -135,7 +136,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                 chileViewHolder.startTask.setEnabled(true);
             }
         } else {
-            chileViewHolder.myMission.setText(Html.fromHtml("我的任务：<font color = '#245AD3'>" + (-1) + "</font>/" + 0));
+            chileViewHolder.myMission.setText(Html.fromHtml("我的任务：<font color = '#245AD3'>" + (0) + "</font>/" + 0));
             chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNumber() + "/" + childs.get(childPosition).getTaskCount());
             chileViewHolder.progress.setProgress(0);
             chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNumber());
@@ -147,7 +148,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
             chileViewHolder.startTask.setText("开始阅卷");
             chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
             chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
-            chileViewHolder.startTask.setEnabled(false);
+            chileViewHolder.startTask.setEnabled(true);
         }
 
         chileViewHolder.startTask.setOnClickListener(new View.OnClickListener() {
@@ -212,5 +213,34 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
 
     public void setChilds(List<GetExamContextResponse.TaskListBean> childs1) {
         this.childs = childs1;
+
+        //判断自己的任务是否全部阅完
+        boolean isOver = true;
+        for (int i = 0; i < childs.size(); i++) {
+            if (childs.get(i).getTaskCount() != childs.get(i).getMarkNumber()) {
+                isOver = false;
+            }
+        }
+
+        if (isOver) {
+            boolean isM = true;//是不是都是自己的任务
+            boolean isOv = true;//任务是否完成
+            //调用mymodel.getTaskContext()方法
+            for (int i = 0; i < childs.size(); i++) {
+                if (!childs.get(i).isCanMark()) {
+                    isM = false;
+                    break;
+                }
+                if (childs.get(i).getTaskCount() != childs.get(i).getMarkNumber()) {
+                    isOv = false;
+                    break;
+                }
+            }
+            if (isM && isOv) {
+
+            } else {
+                mContext.updataChildData();
+            }
+        }
     }
 }

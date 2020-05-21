@@ -79,7 +79,7 @@
                 android:lines="1"
                 android:maxLength="15"
                 android:singleLine="true"
-                android:text="yuwen001" />
+                android:text="" />
 
         </LinearLayout>
 
@@ -112,7 +112,7 @@
                 android:lines="1"
                 android:maxLength="15"
                 android:singleLine="true"
-                android:text="12345678" />
+                android:text="" />
 
         </LinearLayout>
 

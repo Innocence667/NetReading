@@ -69,7 +69,8 @@ public class Interfaces {
     private Interfaces(Context context) {
         SERVICEPATH = PreferencesService.getInstance(context).getServicePath();
         RUIYI = SERVICEPATH + "/RayeeMark/api/markset/";
-        LOGIN = SERVICEPATH + "/login/home/logincheck";
+        //LOGIN = SERVICEPATH + "/login/home/logincheck";
+        LOGIN = SERVICEPATH + "/base/home/logincheck";
         GETEXAMLISTAPP = RUIYI + "getExamListApp";
         GETTEACHERTASKLIST = RUIYI + "getTeacherTaskList";
         GETMARKDATA = RUIYI + "getMarkData";

@@ -21,11 +21,15 @@ import com.ruiyi.netreading.controller.MyCallBack;
 import com.ruiyi.netreading.controller.MyModel;
 import com.ruiyi.netreading.util.ToastUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
     private Context context;
     private boolean isFresh; //是否需要刷新任务列表
     private String teacherGuid;//教师guid
+    private String PaperGuid; //试卷guid
 
     private ExpandableListView listView;//二级listView
     private TaskListAdapter taskListAdapter;//适配器
@@ -59,9 +63,18 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void myOnclickListenet(int position) {
                                 if (!TextUtils.isEmpty(teacherGuid) && !TextUtils.isEmpty(getExamContextResponse.getTaskList().get(position).getTaskGuid())) {
+
+                                    //TODO 临时处理数据
+                                    List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                                    for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                        if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                            data.add(getExamContextResponse.getTaskList().get(i));
+                                        }
+                                    }
+
                                     Intent marking = new Intent(MainActivity.this, MarkingActivity.class);
                                     marking.putExtra("teacherGuid", teacherGuid);
-                                    marking.putExtra("taskGuid", getExamContextResponse.getTaskList().get(position).getTaskGuid());
+                                    marking.putExtra("taskGuid", data.get(position).getTaskGuid());
                                     startActivity(marking);
                                 } else {
                                     ToastUtils.showToast(context, "参数异常");
@@ -92,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
                 final GetExamContextRequest request = new GetExamContextRequest();
                 request.setTeacherGuid(teacherGuid);
-                request.setPaperGuid(getExamListResponse.getExamList().get(groupPosition).getPaperGuid());
+                PaperGuid = getExamListResponse.getExamList().get(groupPosition).getPaperGuid();
+                request.setPaperGuid(PaperGuid);
                 myModel.getTaskContext(context, request, new MyCallBack() {
 
                     @Override
@@ -101,7 +115,16 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                taskListAdapter.setChilds(getExamContextResponse.getTaskList());
+
+                                //TODO 临时处理数据
+                                List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                                for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                    if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                        data.add(getExamContextResponse.getTaskList().get(i));
+                                    }
+                                }
+
+                                taskListAdapter.setChilds(data);
                                 taskListAdapter.notifyDataSetChanged();
                             }
                         });
@@ -157,7 +180,16 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Log.e(TAG, "已更新任务列表");
-                            taskListAdapter.setChilds(getExamContextResponse.getTaskList());
+
+                            //TODO 临时处理数据
+                            List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                            for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                    data.add(getExamContextResponse.getTaskList().get(i));
+                                }
+                            }
+
+                            taskListAdapter.setChilds(data);
                             taskListAdapter.notifyDataSetChanged();
                         }
                     });
@@ -199,5 +231,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    public void updataChildData() {
+        GetExamContextRequest request = new GetExamContextRequest();
+        request.setTeacherGuid(teacherGuid);
+        request.setPaperGuid(PaperGuid);
+        myModel.getTaskContext(context, request, new MyCallBack() {
+            @Override
+            public void onSuccess(Object model) {
+                getExamContextResponse = (GetExamContextResponse) model;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                taskListAdapter.setChilds(getExamContextResponse.getTaskList());
+                                taskListAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                });
+            }
+
+            @Override
+            public void onFailed(String str) {
+                showFailedPage(str);
+            }
+        });
     }
 }

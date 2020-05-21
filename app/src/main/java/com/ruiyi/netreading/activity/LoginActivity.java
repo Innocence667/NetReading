@@ -29,7 +29,6 @@ import com.ruiyi.netreading.bean.UserBean;
 import com.ruiyi.netreading.bean.response.LoginResponse;
 import com.ruiyi.netreading.controller.MyCallBack;
 import com.ruiyi.netreading.controller.MyModel;
-import com.ruiyi.netreading.util.LoadingUtil;
 import com.ruiyi.netreading.util.PreferencesService;
 import com.ruiyi.netreading.util.ToastUtils;
 
@@ -88,7 +87,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         path = "https://rshqzx.lexuewang.cn:8028";
                         break;
                     case "双流中学":
-                        path = "https://slzxres.lexuewang.cn:8028";
+                        path = "https://slzxres.lexuewang.cn:8012";
                         break;
                     case "青神中学（高一）":
                         path = "https://qszxgyres.lexuewang.cn:8028";
@@ -160,7 +159,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    LoadingUtil.getInstance(context).showDialog();
+                    //LoadingUtil.getInstance(context).showDialog();
                     loginModel.getUser(context, userBean, new MyCallBack() {
 
                         @Override
@@ -185,7 +184,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case "https://rshqzx.lexuewang.cn:8028":
                 serName = "铧强中学";
                 break;
-            case "https://slzxres.lexuewang.cn:8028":
+            case "https://slzxres.lexuewang.cn:8012":
                 serName = "双流中学";
                 break;
             case "https://qszxgyres.lexuewang.cn:8028":
@@ -265,9 +264,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ToastUtils.showTopToast(context, "欢迎您：" + loginResponse.getData().getUsername(), R.style.Toast_Animation);
+                //ToastUtils.showTopToast(context, "欢迎您：" + loginResponse.getData().getUsername(), R.style.Toast_Animation);
+                ToastUtils.showTopToast(context, "欢迎您：" + loginResponse.getData().getRealname(), R.style.Toast_Animation);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra("userid", loginResponse.getData().getUserid());
+                //intent.putExtra("userid", loginResponse.getData().getUserid());
+                intent.putExtra("userid", loginResponse.getData().getUguid());
                 startActivity(intent);
                 finish();
             }
@@ -280,7 +281,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void run() {
                 loginBtn.setEnabled(true);
-                LoadingUtil.getInstance(context).closeDialog();
+                //LoadingUtil.getInstance(context).closeDialog();
                 Log.e(TAG, "登录失败：" + str);
                 ToastUtils.showToast(context, str);
             }
@@ -329,7 +330,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                LoadingUtil.getInstance(context).closeDialog();
+                //LoadingUtil.getInstance(context).closeDialog();
             }
         });
     }

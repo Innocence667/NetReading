@@ -38,7 +38,7 @@ public class GetExamContextResponse {
          * questions : [{"taskGuid":"8c627ccbb2063130d7810656c5cdf5dd","number":15,"subNumber":"0"}]
          * avgList : [{"number":15,"subNumber":"0","sumScore":10,"mySumScore":10,"count":1}]
          * teacherData : [{"teacherCount":0,"teacherNumber":1}]
-         * canMark : true
+         * canMark : true //是否是自己的任务
          */
 
         private String taskGuid;

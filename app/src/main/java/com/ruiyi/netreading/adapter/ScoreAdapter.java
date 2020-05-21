@@ -1,7 +1,7 @@
 package com.ruiyi.netreading.adapter;
 
 import android.content.Context;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,7 +123,8 @@ public class ScoreAdapter extends BaseAdapter {
                 str = scores.get(i);
                 break;
             }
-        }*/
+        }
+        Log.e(TAG, "updataData: 当前选中的值是" + str);*/
         //更新数据源操作
         this.scores = scorePanel.getScores();
         this.scoreCheck = scorePanel.getScoresCheck();

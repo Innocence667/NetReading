@@ -54,7 +54,8 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"code\":200,\"message\":\"SUCCESS\"")) {
+                //if (response.code() == 200 && json.contains("\"code\":200,\"message\":\"SUCCESS\"")) {
+                if (response.code() == 200 && json.contains("\"code\":200,\"msg\":\"SUCCESS\"")) {
                     LogUtils.logE("getUser", "登录返回结果" + json);
                     callback.onSuccess(gson.fromJson(json, LoginResponse.class));
                 } else {
