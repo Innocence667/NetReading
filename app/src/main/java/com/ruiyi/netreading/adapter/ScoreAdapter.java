@@ -1,6 +1,7 @@
 package com.ruiyi.netreading.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,5 +113,28 @@ public class ScoreAdapter extends BaseAdapter {
             }
         }
         return pos;
+    }
+
+    public void updataData(ScorePanel scorePanel) {
+        //保存当前选中的值
+        /*String str = null;
+        for (int i = 0; i < scoreCheck.size(); i++) {
+            if (scoreCheck.get(i)) {
+                str = scores.get(i);
+                break;
+            }
+        }*/
+        //更新数据源操作
+        this.scores = scorePanel.getScores();
+        this.scoreCheck = scorePanel.getScoresCheck();
+        //防止当前题目打分后没有提交，更新打分列表后，数据丢失
+        /*if (!TextUtils.isEmpty(str)) {
+            for (int i = 0; i < scores.size(); i++) {
+                if (str.equals(scores.get(i))) {
+                    scoreCheck.add(true);
+                    break;
+                }
+            }
+        }*/
     }
 }

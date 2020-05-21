@@ -284,6 +284,10 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
+                if (json.length() < 10) {
+                    callBack.onFailed("暂无数据");
+                    return;
+                }
                 if (response.code() == 200) {
                     LogUtils.logE("getMarkAvgScore", "获取评分详情结果：" + json);
                     // TODO Gson解析集合

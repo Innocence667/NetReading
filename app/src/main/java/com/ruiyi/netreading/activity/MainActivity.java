@@ -24,12 +24,13 @@ import com.ruiyi.netreading.util.ToastUtils;
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
     private Context context;
+    private boolean isFresh; //是否需要刷新任务列表
     private String teacherGuid;//教师guid
 
     private ExpandableListView listView;//二级listView
     private TaskListAdapter taskListAdapter;//适配器
 
-    private MyModel getExamListModel;
+    private MyModel myModel;
     private GetExamListResponse getExamListResponse;//考试任务模型(一级列表)
     private GetExamContextResponse getExamContextResponse;//某个任务题目列表模型(二级列表)
 
@@ -40,13 +41,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         context = this;
         initView();
-        getExamListModel = new MyModel();
+        myModel = new MyModel();
         Intent intent = getIntent();
         teacherGuid = intent.getStringExtra("userid");
         GetExamListRequest getExamListRequest = new GetExamListRequest();
         getExamListRequest.setStatus(1);
         getExamListRequest.setTeacherGuid(teacherGuid);
-        getExamListModel.getTaskList(this, getExamListRequest, new MyCallBack() {
+        myModel.getTaskList(this, getExamListRequest, new MyCallBack() {
             @Override
             public void onSuccess(Object object) {
                 getExamListResponse = (GetExamListResponse) object;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                                     marking.putExtra("taskGuid", getExamContextResponse.getTaskList().get(position).getTaskGuid());
                                     startActivity(marking);
                                 } else {
+                                    ToastUtils.showToast(context, "参数异常");
                                     if (TextUtils.isEmpty(teacherGuid)) {
                                         Log.e(TAG, "myOnclickListenet: 参数teacherGuid为null");
                                     } else {
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                 final GetExamContextRequest request = new GetExamContextRequest();
                 request.setTeacherGuid(teacherGuid);
                 request.setPaperGuid(getExamListResponse.getExamList().get(groupPosition).getPaperGuid());
-                getExamListModel.getTaskContext(context, request, new MyCallBack() {
+                myModel.getTaskContext(context, request, new MyCallBack() {
 
                     @Override
                     public void onSuccess(Object object) {
@@ -110,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                ToastUtils.showToast(context, str);
+                                showFailedPage(str);
                                 Log.e(TAG, "获取任务详情请求失败," + str);
                             }
                         });
@@ -140,6 +142,41 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (isFresh) {
+            GetExamListRequest getExamListRequest = new GetExamListRequest();
+            getExamListRequest.setStatus(1);
+            getExamListRequest.setTeacherGuid(teacherGuid);
+            myModel.getTaskList(context, getExamListRequest, new MyCallBack() {
+                @Override
+                public void onSuccess(Object model) {
+                    getExamListResponse = (GetExamListResponse) model;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.e(TAG, "已更新任务列表");
+                            taskListAdapter.setChilds(getExamContextResponse.getTaskList());
+                            taskListAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailed(String str) {
+                    showFailedPage(str);
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isFresh = true;
+    }
+
     //任务获取成功
     public void showSueecssPage(final LoginResponse loginResponse) {
         runOnUiThread(new Runnable() {
@@ -157,5 +194,10 @@ public class MainActivity extends AppCompatActivity {
                 ToastUtils.showToast(context, str);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

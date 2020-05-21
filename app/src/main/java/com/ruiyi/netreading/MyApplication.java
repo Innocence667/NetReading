@@ -33,7 +33,7 @@ public class MyApplication extends Application {
             download.mkdirs();
         }
         //设置默认：自动提交、小数赋分、置顶分数
-        PreferencesService.getInstance(context).saveAutoSubmit(true).savePointFive(false).saveTopScore("");
+        PreferencesService.getInstance(context).saveAutoSubmit(true).savePointFive(false);
     }
 
     public static Context getContext() {

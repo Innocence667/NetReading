@@ -48,6 +48,7 @@ import com.ruiyi.netreading.adapter.QuestionNumAdapter;
 import com.ruiyi.netreading.adapter.ReviewAdatper;
 import com.ruiyi.netreading.adapter.ScoreAdapter;
 import com.ruiyi.netreading.adapter.TopScoreAdapter;
+import com.ruiyi.netreading.bean.CustomBean;
 import com.ruiyi.netreading.bean.ImageData;
 import com.ruiyi.netreading.bean.LocalImageData;
 import com.ruiyi.netreading.bean.SaveMarkDataBean;
@@ -80,7 +81,9 @@ import com.samsung.android.sdk.pen.pen.SpenPenManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class MarkingActivity extends AppCompatActivity implements View.OnClickListener {
@@ -141,6 +144,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private TextView history; //回评
     private TextView scoringDatails; //评分详情
     private TextView setting; //设置
+    private AlertDialog settingDialog; //设置dialog
 
     private List<ImageData> imageDataList; //存放每张图片的宽高
 
@@ -150,6 +154,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private SaveMarkDataBean saveMarkDataBean; //新数据提交模型
     private SavaDataResponse saveResponse; //提交成功返回结果
     private List<SaveMarkDataBean.QuestionsBean> questionsBeanList; //新数据提交里的questions字段
+    private GetMarkNextStudentResponse getMarkUpdataStudentResponse; //获取已阅数据请求结果模型
 
     private ReviewStudentsResponse studentsResponse; //回评列表数
 
@@ -220,20 +225,20 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         @Override
                                         public void run() {
                                             collectRequest = new CollectRequest();
-                                            GetMarkNextStudentResponse studentResponse = (GetMarkNextStudentResponse) model;
-                                            if (studentResponse.getData() == null || studentResponse.getData().getStudentData() == null
-                                                    || studentResponse.getData().getStudentData().getQuestions() == null) {
+                                            getMarkUpdataStudentResponse = (GetMarkNextStudentResponse) model;
+                                            if (getMarkUpdataStudentResponse.getData() == null || getMarkUpdataStudentResponse.getData().getStudentData() == null
+                                                    || getMarkUpdataStudentResponse.getData().getStudentData().getQuestions() == null) {
                                                 Looper.prepare();
                                                 //需要弹出弹出，进行重新获取，暂时先提示用户
                                                 ToastUtils.showTopToast(context, "题目获取异常，请返回主页重新获取", R.style.Toast_Animation);
                                                 Looper.loop();
                                                 return;
                                             }
-                                            MaxScore = getMaxScore(studentResponse.getData().getStudentData().getQuestions());
-                                            String col = studentResponse.getData().getStudentData().isCollect() == true ? "1" : "0";
+                                            MaxScore = getMaxScore(getMarkUpdataStudentResponse.getData().getStudentData().getQuestions());
+                                            String col = getMarkUpdataStudentResponse.getData().getStudentData().isCollect() == true ? "1" : "0";
                                             collectRequest.setValue(col);
-                                            initUpDateData(studentResponse);
-                                            showSueecssPage(studentResponse);
+                                            initUpDateData(getMarkUpdataStudentResponse);
+                                            showSueecssPage(getMarkUpdataStudentResponse);
                                             submiss.setEnabled(true);
                                             progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + dataBeanList.size()
                                                     + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -475,12 +480,29 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      * @return
      */
     private ScorePanel getScoreList(double score, double fullScore) {
+        Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score);
+        //Math.ceil(12.2)//返回13.0
+        //Math.ceil(12.7)//返回13.0
+        //Math.ceil(12.0)//返回12.0
         ScorePanel scorePanel = new ScorePanel();
         List<String> scores = new ArrayList<>();
         List<Boolean> scoresCheck = new ArrayList<>();
         //是否0.5模式
-        if (false) { //0.5模式
-
+        if (PreferencesService.getInstance(context).getPointFive()) { //0.5模式
+            for (double i = 0; i < Math.ceil(fullScore + 1); i += 0.5) {
+                if (i == (int) i) {
+                    scores.add(String.valueOf((int) i));
+                } else {
+                    scores.add(String.valueOf(i));
+                }
+                if (i == score) {
+                    scoresCheck.add(true);
+                } else {
+                    scoresCheck.add(false);
+                }
+                scorePanel.setScores(scores);
+                scorePanel.setScoresCheck(scoresCheck);
+            }
         } else { //整数模式
             for (int i = 0; i < Math.ceil(fullScore + 1); i++) {
                 scores.add(String.valueOf(i));
@@ -514,7 +536,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         && !"[]".equals(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate())) {
                     addStroke(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate());
                 }
-
                 mSpenSimpleSurfaceView.update();
             }
 
@@ -818,7 +839,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 showSettingPage();
                 break;
             case R.id.questionSubmiss: //提交
-                if ("-1".equals(saveMarkDataBean.getQuestions().get(minLocation).getStepScore())) {
+                if ("-1".equals(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())) {
                     ToastUtils.showToast(context, "请先进行赋分操作");
                     return;
                 }
@@ -832,6 +853,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 topScoreSetting.setVisibility(View.GONE);
                 seting_main.setVisibility(View.VISIBLE);
                 //保存设置的置顶分数
+                PreferencesService.getInstance(context).saveTopScore(topScoreAdapter.getTopScoreDate());
                 break;
             case R.id.pointFiveView: //0.5父布局
                 if (pointFiveSwitch.isChecked()) {
@@ -875,27 +897,45 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.topScoreView: //常用分数置顶
                 if (getMarkNextStudentResponse == null) {
+                    ToastUtils.showToast(context, "获取题目分数失败");
                     return;
                 }
                 seting_main.setVisibility(View.GONE);
                 setting_back.setVisibility(View.VISIBLE);
                 topScoreSetting.setVisibility(View.VISIBLE);
-                topScoreAdapter = new TopScoreAdapter(context, initTopScoreData(false));
+                topScoreAdapter = new TopScoreAdapter(context, initTopScoreData(PreferencesService.getInstance(context).getPointFive()));
                 topScoreGridView.setAdapter(topScoreAdapter);
+                if (!TextUtils.isEmpty(PreferencesService.getInstance(context).getTopScore())) {
+                    if (PreferencesService.getInstance(context).getTopScore().contains(".5")
+                            && PreferencesService.getInstance(context).getPointFive()) {
+                        topSocre_0_5.setChecked(true);
+                    } else {
+                        topSocre_0_5.setChecked(false);
+                    }
+                } else {
+                    topSocre_0_5.setChecked(false);
+                }
                 break;
             case R.id.topSocre_0_5: //自定义分数0.5开关
                 if (topSocre_0_5.isChecked()) {
                     topSocre_0_5.setChecked(true);
                     topScoreAdapter.updataData(initTopScoreData(true));
+                    topSocre_0_5.setTextColor(getResources().getColor(R.color.colorWhite));
                 } else {
                     topSocre_0_5.setChecked(false);
                     topScoreAdapter.updataData(initTopScoreData(false));
+                    topSocre_0_5.setTextColor(getResources().getColor(R.color.colorScoreItem));
                 }
                 topScoreAdapter.notifyDataSetChanged();
                 break;
             case R.id.topScoreClear: //自定义分数选中清空
+                topScoreAdapter.clearSelect();
+                PreferencesService.getInstance(context).saveTopScore("");
+                topScoreAdapter.notifyDataSetChanged();
                 break;
             case R.id.topScoreDetermine: //自定义分数确定
+                PreferencesService.getInstance(context).saveTopScore(topScoreAdapter.getTopScoreDate());
+                settingDialog.cancel();
                 break;
         }
     }
@@ -921,19 +961,97 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      * @param b 是否开启0.5
      * @return
      */
-    private List<String> initTopScoreData(boolean b) {
-        List<String> data = new ArrayList<>();
-        if (b) {
-            for (double i = 0; i < MaxScore + 0.5; i += 0.5) {
-                if ((int) i == i) {  //强制转换后来会丢失精度,如果丢源失精度的数和原数相等，说明就是整数
-                    data.add(String.valueOf((int) i));
+    private Map<Integer, CustomBean> initTopScoreData(boolean b) {
+        Map<Integer, CustomBean> data = new HashMap<>();
+        Log.e(TAG, "配置文件置顶分数：" + PreferencesService.getInstance(context).getTopScore());
+        if (!TextUtils.isEmpty(PreferencesService.getInstance(context).getTopScore())) {
+            String[] split = PreferencesService.getInstance(context).getTopScore().split(",");
+            List<String> list1 = new ArrayList<>(); //存放整数(置顶分数)
+            List<String> list2 = new ArrayList<>(); //存放小数数(置顶分数)
+            //判断保存的分数是否是开启0.5分功能
+            for (int i = 0; i < split.length; i++) {
+                if (split[i].contains(".5")) {
+                    list2.add(split[i]);
                 } else {
-                    data.add(String.valueOf(i));
+                    list1.add(split[i]);
+                }
+            }
+
+            if (b) {
+                int num = 0;
+                for (double i = 0; i < MaxScore + 0.5; i += 0.5) {
+                    for (int j = 0; j < split.length; j++) {
+                        if (j == split.length - 1) {
+                            CustomBean customBean = new CustomBean();
+                            if (i == Double.valueOf(split[j])) {
+                                customBean.setSelect(true);
+                            } else {
+                                customBean.setSelect(false);
+                            }
+                            customBean.setScore(i);
+                            data.put(num, customBean);
+                            num++;
+                            break;
+                        } else {
+                            if (i == Double.valueOf(split[j])) {
+                                CustomBean customBean = new CustomBean();
+                                customBean.setSelect(true);
+                                customBean.setScore(i);
+                                data.put(num, customBean);
+                                num++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (int i = 0; i < MaxScore; i++) {
+                    for (int j = 0; j < list1.size(); j++) {
+                        if (j == list1.size() - 1) {
+                            CustomBean customBean = new CustomBean();
+                            if (Integer.valueOf(list1.get(j)) == i) {
+                                customBean.setScore(Double.valueOf(String.valueOf(list1.get(j))));
+                                customBean.setSelect(true);
+                            } else {
+                                customBean.setScore(Double.valueOf(String.valueOf(i)));
+                                customBean.setSelect(false);
+                            }
+                            data.put(i, customBean);
+                            break;
+                        } else {
+                            if (Integer.valueOf(list1.get(j)) == i) {
+                                CustomBean customBean = new CustomBean();
+                                customBean.setScore(Double.valueOf(String.valueOf(list1.get(j))));
+                                customBean.setSelect(true);
+                                data.put(i, customBean);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         } else {
-            for (int i = 0; i < MaxScore + 1; i++) {
-                data.add(String.valueOf(i));
+            if (b) {
+                int num = 0;
+                for (double i = 0; i < MaxScore + 0.5; i += 0.5) {
+                    CustomBean bean = new CustomBean();
+                    bean.setSelect(false);
+                    if ((int) i == i) {  //强制转换后来会丢失精度,如果丢源失精度的数和原数相等，说明就是整数
+                        bean.setScore(Double.valueOf(String.valueOf(i)));
+                        data.put(num, bean);
+                    } else {
+                        bean.setScore(Double.valueOf(String.valueOf(i)));
+                        data.put(num, bean);
+                    }
+                    num++;
+                }
+            } else {
+                for (int i = 0; i < MaxScore + 1; i++) {
+                    CustomBean bean = new CustomBean();
+                    bean.setSelect(false);
+                    bean.setScore(Double.valueOf(String.valueOf(i)));
+                    data.put(i, bean);
+                }
             }
         }
         return data;
@@ -993,20 +1111,20 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                GetMarkNextStudentResponse studentResponse = (GetMarkNextStudentResponse) model;
-                                                if (studentResponse.getData() == null || studentResponse.getData().getStudentData() == null
-                                                        || studentResponse.getData().getStudentData().getQuestions() == null) {
+                                                getMarkUpdataStudentResponse = (GetMarkNextStudentResponse) model;
+                                                if (getMarkUpdataStudentResponse.getData() == null || getMarkUpdataStudentResponse.getData().getStudentData() == null
+                                                        || getMarkUpdataStudentResponse.getData().getStudentData().getQuestions() == null) {
                                                     Looper.prepare();
                                                     //需要弹出弹出，进行重新获取，暂时先提示用户
                                                     ToastUtils.showTopToast(context, "题目获取异常，请返回主页重新获取", R.style.Toast_Animation);
                                                     Looper.loop();
                                                     return;
                                                 }
-                                                MaxScore = getMaxScore(studentResponse.getData().getStudentData().getQuestions());
-                                                String col = studentResponse.getData().getStudentData().isCollect() == true ? "1" : "0";
+                                                MaxScore = getMaxScore(getMarkUpdataStudentResponse.getData().getStudentData().getQuestions());
+                                                String col = getMarkUpdataStudentResponse.getData().getStudentData().isCollect() == true ? "1" : "0";
                                                 collectRequest.setValue(col);
-                                                initUpDateData(studentResponse);
-                                                showSueecssPage(studentResponse);
+                                                initUpDateData(getMarkUpdataStudentResponse);
+                                                showSueecssPage(getMarkUpdataStudentResponse);
                                                 submiss.setEnabled(true);
                                                 progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (position + 1)
                                                         + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -1140,18 +1258,18 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                GetMarkNextStudentResponse studentResponse = (GetMarkNextStudentResponse) model;
-                                                if (studentResponse.getData() == null || studentResponse.getData().getStudentData() == null
-                                                        || studentResponse.getData().getStudentData().getQuestions() == null) {
+                                                getMarkUpdataStudentResponse = (GetMarkNextStudentResponse) model;
+                                                if (getMarkUpdataStudentResponse.getData() == null || getMarkUpdataStudentResponse.getData().getStudentData() == null
+                                                        || getMarkUpdataStudentResponse.getData().getStudentData().getQuestions() == null) {
                                                     //需要弹出弹出，进行重新获取，暂时先提示用户
                                                     ToastUtils.showTopToast(context, "题目获取异常，请返回主页重新获取", R.style.Toast_Animation);
                                                     return;
                                                 }
-                                                MaxScore = getMaxScore(studentResponse.getData().getStudentData().getQuestions());
-                                                String col = studentResponse.getData().getStudentData().isCollect() == true ? "1" : "0";
+                                                MaxScore = getMaxScore(getMarkUpdataStudentResponse.getData().getStudentData().getQuestions());
+                                                String col = getMarkUpdataStudentResponse.getData().getStudentData().isCollect() == true ? "1" : "0";
                                                 collectRequest.setValue(col);
-                                                initUpDateData(studentResponse);
-                                                showSueecssPage(studentResponse);
+                                                initUpDateData(getMarkUpdataStudentResponse);
+                                                showSueecssPage(getMarkUpdataStudentResponse);
                                                 submiss.setEnabled(true);
                                                 progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (LOCATION + 1)
                                                         + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -1241,12 +1359,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         View view = LayoutInflater.from(context).inflate(R.layout.setting_page, null);
         builder.setView(view);
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+        settingDialog = builder.create();
+        settingDialog.show();
+        WindowManager.LayoutParams params = settingDialog.getWindow().getAttributes();
         //设置成平面高度的0.75倍
         params.height = (int) (Tool.getScreenparameters(MarkingActivity.this).height() * 0.75);
-        dialog.getWindow().setAttributes(params);
+        settingDialog.getWindow().setAttributes(params);
         seting_main = view.findViewById(R.id.setting_main);
         topScoreSetting = view.findViewById(R.id.topScoreSetting);
         setting_back = view.findViewById(R.id.setting_back);
@@ -1287,5 +1405,19 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         } else {
             autoSubmitSwitch.setChecked(false);
         }
+
+        settingDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (reviewMode) {
+                    scoreAdapter.updataData(getScoreList(getMarkUpdataStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
+                            getMarkUpdataStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
+                } else {
+                    scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
+                            getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
+                }
+                scoreAdapter.notifyDataSetChanged();
+            }
+        });
     }
 }

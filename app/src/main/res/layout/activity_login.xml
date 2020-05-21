@@ -1,42 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/login_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
+    android:background="@drawable/login_bg"
     tools:context=".LoginActivity">
 
-    <Spinner
-        android:id="@+id/login_servicePath"
+    <View
+        android:id="@+id/locationView"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_centerInParent="true"
+        android:layout_margin="20dp" />
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:entries="@array/services"
-        android:gravity="center_horizontal"
-        android:padding="5dp" />
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/locationView"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/login_name"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:hint="请输入账号"
-        android:text="yuwen001" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="睿易网阅系统"
+            android:textColor="@color/colorFont"
+            android:layout_marginBottom="20dp"
+            android:textSize="35sp" />
 
-    <EditText
-        android:id="@+id/login_pwd"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:hint="请输入密码"
-        android:inputType="textPassword"
-        android:text="12345678" />
+        <LinearLayout
+            android:layout_width="250dp"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/loginBtn"
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/school" />
+
+            <Spinner
+                android:id="@+id/login_servicePath"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:entries="@array/services"
+                android:gravity="center_horizontal" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="250dp"
+            android:layout_height="2dp"
+            android:layout_margin="10dp"
+            android:background="@color/colorGrey" />
+
+        <LinearLayout
+            android:layout_width="250dp"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/user" />
+
+            <EditText
+                android:id="@+id/login_name"
+                android:layout_width="250dp"
+                android:layout_height="50dp"
+                android:background="@null"
+                android:paddingLeft="10dp"
+                android:hint="请输入账号"
+                android:lines="1"
+                android:maxLength="15"
+                android:singleLine="true"
+                android:text="yuwen001" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="250dp"
+            android:layout_height="2dp"
+            android:layout_margin="10dp"
+            android:background="@color/colorGrey" />
+
+        <LinearLayout
+            android:layout_width="250dp"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/pwd" />
+
+            <EditText
+                android:id="@+id/login_pwd"
+                android:layout_width="250dp"
+                android:layout_height="50dp"
+                android:background="@null"
+                android:hint="请输入密码"
+                android:paddingLeft="10dp"
+                android:inputType="textPassword"
+                android:lines="1"
+                android:maxLength="15"
+                android:singleLine="true"
+                android:text="12345678" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="250dp"
+            android:layout_height="2dp"
+            android:layout_margin="10dp"
+            android:background="@color/colorGrey" />
+
+        <Button
+            android:id="@+id/loginBtn"
+            android:layout_width="230dp"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/btn_login_click"
+            android:elevation="5dp"
+            android:text="登 录"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/versionTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
         android:padding="5dp"
-        android:text="登录" />
+        android:text="v3.0.0"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp" />
 
-</LinearLayout>
+</RelativeLayout>

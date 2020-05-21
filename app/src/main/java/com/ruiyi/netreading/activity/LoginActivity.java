@@ -19,7 +19,6 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -30,6 +29,7 @@ import com.ruiyi.netreading.bean.UserBean;
 import com.ruiyi.netreading.bean.response.LoginResponse;
 import com.ruiyi.netreading.controller.MyCallBack;
 import com.ruiyi.netreading.controller.MyModel;
+import com.ruiyi.netreading.util.LoadingUtil;
 import com.ruiyi.netreading.util.PreferencesService;
 import com.ruiyi.netreading.util.ToastUtils;
 
@@ -43,9 +43,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     //请求状态码
     private static int REQUEST_PERMISSION_CODE = 1;
     private Context context;
-
-    //测试代码
-    private LinearLayout login_main;
 
     private Spinner spinner; //地址选择器
     private EditText userName; //用户名
@@ -74,14 +71,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void initView() {
-        login_main = findViewById(R.id.login_main);
-        login_main.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ToastUtils.showTopToast(context, "欢迎你，测试人员，欢迎你，测试人员，欢迎你，测试人员，欢迎你，测试人员，欢迎你，测试人员，欢迎你，测试人员", R.style.Toast_Animation);
-            }
-        });
-
         paths = getResources().getStringArray(R.array.services);
         spinner = findViewById(R.id.login_servicePath);
         userName = findViewById(R.id.login_name);
@@ -162,25 +151,30 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
-        //LoadingUtil.getInstance(context).showDialog();
         loginBtn.setEnabled(false);
         servicePath = getServiceName(PreferencesService.getInstance(context).getServicePath());
-        UserBean userBean = getUserInput();
+        final UserBean userBean = getUserInput();
         if (userBean != null) {
             userBean.setIsmemory(false);
             userBean.setTerminal(2);
-            loginModel.getUser(context, userBean, new MyCallBack() {
-
+            runOnUiThread(new Runnable() {
                 @Override
-                public void onSuccess(Object model) {
-                    showSueecssPage((LoginResponse) model);
-                }
+                public void run() {
+                    LoadingUtil.getInstance(context).showDialog();
+                    loginModel.getUser(context, userBean, new MyCallBack() {
 
-                @Override
-                public void onFailed(String str) {
-                    showFailedPage(str);
-                }
+                        @Override
+                        public void onSuccess(Object model) {
+                            showSueecssPage((LoginResponse) model);
+                        }
 
+                        @Override
+                        public void onFailed(String str) {
+                            showFailedPage(str);
+                        }
+
+                    });
+                }
             });
         }
     }
@@ -286,6 +280,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void run() {
                 loginBtn.setEnabled(true);
+                LoadingUtil.getInstance(context).closeDialog();
+                Log.e(TAG, "登录失败：" + str);
                 ToastUtils.showToast(context, str);
             }
         });
@@ -325,5 +321,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 }
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                LoadingUtil.getInstance(context).closeDialog();
+            }
+        });
     }
 }

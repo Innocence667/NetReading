@@ -30,7 +30,7 @@ public class LoadingUtil {
         return util;
     }
 
-    public static void showDialog() {
+    public void showDialog() {
         dialog.setCancelable(false);
         View view = LayoutInflater.from(context).inflate(R.layout.loading_layout, null);
         TextView redDot = view.findViewById(R.id.redDot);
@@ -47,11 +47,11 @@ public class LoadingUtil {
         dialog.setContentView(view);
     }
 
-    public static void closeDialog() {
+    public void closeDialog() {
         if (set != null) {
             set.cancel();
         }
         dialog.cancel();
-        dialog = null;
+        //dialog = null;
     }
 }

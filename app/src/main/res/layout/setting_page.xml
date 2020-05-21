@@ -231,7 +231,7 @@
 
         <LinearLayout
             android:id="@+id/topScoreOperation"
-            android:layout_width="200dp"
+            android:layout_width="wrap_content"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
@@ -241,32 +241,37 @@
 
             <CheckBox
                 android:id="@+id/topSocre_0_5"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_margin="5dp"
-                android:layout_weight="1"
+                android:layout_marginLeft="20dp"
                 android:background="@drawable/topscore_item_style"
                 android:button="@null"
                 android:gravity="center"
-                android:text="0.5" />
+                android:text="0.5"
+                android:textColor="@color/colorScoreItem" />
 
             <TextView
                 android:id="@+id/topScoreClear"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/btn_login_bg_up"
                 android:gravity="center"
-                android:text="清空" />
+                android:text="清空"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/topScoreDetermine"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/btn_login_bg_up"
                 android:gravity="center"
-                android:text="确定" />
+                android:text="确定"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp" />
         </LinearLayout>
 
     </RelativeLayout>
