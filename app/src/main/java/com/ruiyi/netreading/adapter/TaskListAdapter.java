@@ -80,6 +80,11 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
         }
 
         groupViewHolder.examName.setText(datas.get(groupPosition).getExamName());
+       if (isExpanded) {
+            groupViewHolder.examName.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, ContextCompat.getDrawable(mContext, R.drawable.down), null);
+        } else {
+            groupViewHolder.examName.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, ContextCompat.getDrawable(mContext, R.drawable.right), null);
+        }
 
         return convertView;
     }

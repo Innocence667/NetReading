@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.ruiyi.netreading.bean.SaveMarkDataBean;
 import com.ruiyi.netreading.bean.UserBean;
@@ -54,12 +55,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                //if (response.code() == 200 && json.contains("\"code\":200,\"message\":\"SUCCESS\"")) {
-                if (response.code() == 200 && json.contains("\"code\":200,\"msg\":\"SUCCESS\"")) {
-                    LogUtils.logE("getUser", "登录返回结果" + json);
-                    callback.onSuccess(gson.fromJson(json, LoginResponse.class));
-                } else {
-                    callback.onFailed(json);
+                try {
+                    if (response.code() == 200 && (json.contains("\"code\":200,\"message\":\"SUCCESS\"") || json.contains("\"code\":200,\"msg\":\"SUCCESS\""))) {
+                        LogUtils.logE("getUser", "登录返回结果" + json);
+                        callback.onSuccess(gson.fromJson(json, LoginResponse.class));
+                    } else {
+                        callback.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callback.onFailed(e.getMessage());
                 }
             }
         });
@@ -78,11 +82,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("GetExamListModel", "获取考试列表：" + json);
-                    callback.onSuccess(gson.fromJson(json, GetExamListResponse.class));
-                } else {
-                    callback.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("GetExamListModel", "获取考试列表：" + json);
+                        callback.onSuccess(gson.fromJson(json, GetExamListResponse.class));
+                    } else {
+                        callback.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callback.onFailed(e.getMessage());
                 }
             }
         });
@@ -101,11 +109,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("getTaskContext", "获取考试题目列表：" + json);
-                    childCallback.onSuccess(gson.fromJson(json, GetExamContextResponse.class));
-                } else {
-                    childCallback.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("getTaskContext", "获取考试题目列表：" + json);
+                        childCallback.onSuccess(gson.fromJson(json, GetExamContextResponse.class));
+                    } else {
+                        childCallback.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    childCallback.onFailed(e.getMessage());
                 }
             }
         });
@@ -124,11 +136,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("getMarkData", "获取阅卷数据：" + json);
-                    callBack.onSuccess(gson.fromJson(json, GetMarkDataResponse.class));
-                } else {
-                    callBack.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("getMarkData", "获取阅卷数据：" + json);
+                        callBack.onSuccess(gson.fromJson(json, GetMarkDataResponse.class));
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callBack.onFailed(e.getMessage());
                 }
             }
         });
@@ -147,11 +163,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("getMarkNextStudent", "获取新数据结果：" + json);
-                    callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
-                } else {
-                    callBack.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("getMarkNextStudent", "获取新数据结果：" + json);
+                        callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callBack.onFailed(e.getMessage());
                 }
             }
         });
@@ -170,11 +190,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("getStudentMarkData", "获取已批阅数据：" + json);
-                    callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
-                } else {
-                    callBack.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("getStudentMarkData", "获取已批阅数据：" + json);
+                        callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callBack.onFailed(e.getMessage());
                 }
             }
         });
@@ -193,11 +217,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("reviewStudents", "回评列表接口:" + json);
-                    callBack.onSuccess(gson.fromJson(json, ReviewStudentsResponse.class));
-                } else {
-                    callBack.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("reviewStudents", "回评列表接口:" + json);
+                        callBack.onSuccess(gson.fromJson(json, ReviewStudentsResponse.class));
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callBack.onFailed(e.getMessage());
                 }
             }
         });
@@ -216,11 +244,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("saveMarkData", "新数据提交返回结果：" + json);
-                    callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
-                } else {
-                    callBack.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("saveMarkData", "新数据提交返回结果：" + json);
+                        callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callBack.onFailed(e.getMessage());
                 }
             }
         });
@@ -239,11 +271,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("upDateMarkData", "回评数据提交返回结果：" + json);
-                    callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
-                } else {
-                    callBack.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("upDateMarkData", "回评数据提交返回结果：" + json);
+                        callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callBack.onFailed(e.getMessage());
                 }
             }
         });
@@ -262,11 +298,15 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
-                if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("collectQuestion", "收藏、取消题目结果：" + json);
-                    callBack.onSuccess(null);
-                } else {
-                    callBack.onFailed(json);
+                try {
+                    if (response.code() == 200 && json.contains("\"success\":200")) {
+                        LogUtils.logE("collectQuestion", "收藏、取消题目结果：" + json);
+                        callBack.onSuccess(null);
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (Exception e) {
+                    callBack.onFailed(e.getMessage());
                 }
             }
         });
@@ -289,14 +329,64 @@ public class MyModel {
                     callBack.onFailed("暂无数据");
                     return;
                 }
-                if (response.code() == 200) {
-                    LogUtils.logE("getMarkAvgScore", "获取评分详情结果：" + json);
-                    // TODO Gson解析集合
-                    List<GetMarkAvgScoreResponse> avgScoreResponseList = gson.fromJson(json, new TypeToken<List<GetMarkAvgScoreResponse>>() {
-                    }.getType());
-                    callBack.onSuccess(avgScoreResponseList);
+                try {
+                    if (response.code() == 200) {
+                        LogUtils.logE("getMarkAvgScore", "获取评分详情结果：" + json);
+                        // TODO Gson解析集合
+                        List<GetMarkAvgScoreResponse> avgScoreResponseList = gson.fromJson(json, new TypeToken<List<GetMarkAvgScoreResponse>>() {
+                        }.getType());
+                        callBack.onSuccess(avgScoreResponseList);
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (JsonSyntaxException e) {
+                    callBack.onFailed(e.getMessage());
+                }
+            }
+        });
+    }
+
+    //获取当前服务器最新版本
+    public void Authenticate(Context context, final MyCallBack callBack) {
+        Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).AUTHENTICATE, "");
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                callBack.onFailed(e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String json = response.body().string();
+                try {
+                    if (response.code() == 200 && json.contains("\"version\":\"MarkApp")) {
+                        Log.e("Authenticate", "获取版本信息: " + json);
+                        callBack.onSuccess(json);
+                    } else {
+                        callBack.onFailed(json);
+                    }
+                } catch (Exception e) {
+                    callBack.onFailed(e.getMessage());
+                }
+            }
+        });
+    }
+
+    public void Download(Context context, final MyCallBack callBack) {
+        Call call = HttpUtil.getInstance().DownLoadFile(Interfaces.getInstance(context).DOWNLOAD);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                callBack.onFailed(e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                Log.e("Download", "onResponse: " + response.body().contentLength());
+                if (response.body().contentLength() <= 0) {
+                    callBack.onFailed("文件下载失败:" + response.body().contentLength());
                 } else {
-                    callBack.onFailed(json);
+                    callBack.onSuccess(response);
                 }
             }
         });

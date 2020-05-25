@@ -79,7 +79,7 @@
                 android:lines="1"
                 android:maxLength="15"
                 android:singleLine="true"
-                android:text="" />
+                android:text="yuwen001" />
 
         </LinearLayout>
 
@@ -112,7 +112,7 @@
                 android:lines="1"
                 android:maxLength="15"
                 android:singleLine="true"
-                android:text="" />
+                android:text="12345678" />
 
         </LinearLayout>
 
@@ -142,7 +142,6 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:padding="5dp"
-        android:text="v3.0.0"
         android:textColor="@color/colorWhite"
         android:textSize="18sp" />
 

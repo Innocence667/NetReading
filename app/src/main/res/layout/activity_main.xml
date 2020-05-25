@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <ExpandableListView
-        android:id="@+id/taskListView"
+    <include layout="@layout/layout_head" />
+
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        android:id="@+id/refreshLayou"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:background="@color/colorGrey"
-        android:divider="@null"
-        android:groupIndicator="@null"
-        android:scrollbars="none" />
+        android:layout_height="match_parent"
+        app:srlAccentColor="@color/colorWhite"
+        app:srlPrimaryColor="@color/colorProgress">
+
+        <ExpandableListView
+            android:id="@+id/taskListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/colorGrey"
+            android:divider="@null"
+            android:groupIndicator="@null"
+            android:scrollbars="none" />
+
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
 </LinearLayout>

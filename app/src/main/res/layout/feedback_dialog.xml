@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/colorTitleBG"
+        android:gravity="center_vertical"
+        android:padding="15dp"
+        android:text="意见反馈" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:padding="20dp">
+
+        <EditText
+            android:id="@+id/feedback_input"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/edittext_style"
+            android:gravity="left"
+            android:hint="在使用中有什么问题，或有什么功能建议，欢迎提给我们，谢谢！"
+            android:maxLength="500"
+            android:padding="5dp" />
+
+        <TextView
+            android:id="@+id/feedback_fontNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="10dp"
+            android:text="500/500"
+            android:textColor="@color/colorRed" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/feedback_commit"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/btn_login_click"
+            android:text="提 交"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/feedback_cancel"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:background="@drawable/btn_login_click"
+            android:text="取 消"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+</LinearLayout>

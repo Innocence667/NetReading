@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:background="@color/colorProgress">
+
+    <TextView
+        android:id="@+id/head_title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="睿易云阅卷系统"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/main_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_margin="15dp"
+        android:drawableLeft="@drawable/setup"
+        android:drawablePadding="5dp"
+        android:gravity="center"
+        android:text="设置"
+        android:textColor="@color/colorWhite" />
+
+    <TextView
+        android:id="@+id/head_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_margin="15dp"
+        android:background="@drawable/back"
+        android:visibility="gone" />
+
+</RelativeLayout>

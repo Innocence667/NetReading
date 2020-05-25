@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -14,12 +15,13 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +29,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.ruiyi.netreading.bean.UserBean;
 import com.ruiyi.netreading.bean.response.LoginResponse;
+import com.ruiyi.netreading.controller.ActivityCollector;
 import com.ruiyi.netreading.controller.MyCallBack;
 import com.ruiyi.netreading.controller.MyModel;
 import com.ruiyi.netreading.util.PreferencesService;
@@ -47,6 +50,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText userName; //用户名
     private EditText userPwd; //密码
     private Button loginBtn; //登录
+    private TextView versionTv;
 
     private MyModel loginModel;
     private String[] paths; //服务器地址数据源
@@ -55,8 +59,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //隐藏顶部title栏
-        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        ActivityCollector.addActivity(this);
         setContentView(R.layout.activity_login);
         context = this;
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
@@ -76,6 +79,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         userPwd = findViewById(R.id.login_pwd);
         loginBtn = findViewById(R.id.loginBtn);
         loginBtn.setOnClickListener(this);
+        versionTv = findViewById(R.id.versionTv);
+        PackageManager manager = this.getPackageManager();
+        try {
+            PackageInfo packageInfo = manager.getPackageInfo(this.getPackageName(), 0);
+            versionTv.setText("v" + packageInfo.versionName);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -125,12 +136,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     case "遂宁中学外国语实验学校":
                         path = "https://szwgyg1res.lexuewang.cn:8028";
                         break;
-                    case "北京(测试)":
-                        path = "https://192.168.1.130:8028";
-                        break;
-                    case "北京(测试2)":
-                        path = "https://192.168.10.21:8028";
-                        break;
                     case "云测评--乐学网":
                         path = "https://riyun.lexuewang.cn:8002";
                         break;
@@ -151,6 +156,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         loginBtn.setEnabled(false);
+        loginBtn.setText("登录中……");
+        loginBtn.setBackground(getResources().getDrawable(R.drawable.btn_login_bg_down));
         servicePath = getServiceName(PreferencesService.getInstance(context).getServicePath());
         final UserBean userBean = getUserInput();
         if (userBean != null) {
@@ -223,12 +230,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             case "https://szwgyg1res.lexuewang.cn:8028":
                 serName = "遂宁中学外国语实验学校";
                 break;
-            case "https://192.168.1.130:8028":
-                serName = "北京(测试)";
-                break;
-            case "https://192.168.10.21:8028":
-                serName = "北京(测试2)";
-                break;
             case "https://riyun.lexuewang.cn:8002":
                 serName = "云测评--乐学网";
                 break;
@@ -264,7 +265,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                //ToastUtils.showTopToast(context, "欢迎您：" + loginResponse.getData().getUsername(), R.style.Toast_Animation);
+                PreferencesService.getInstance(context).saveUser(loginResponse.getData().getRealname(), loginResponse.getData().getSname());
                 ToastUtils.showTopToast(context, "欢迎您：" + loginResponse.getData().getRealname(), R.style.Toast_Animation);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 //intent.putExtra("userid", loginResponse.getData().getUserid());
@@ -281,6 +282,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void run() {
                 loginBtn.setEnabled(true);
+                loginBtn.setText("登 录");
+                loginBtn.setBackground(getResources().getDrawable(R.drawable.btn_login_click));
                 //LoadingUtil.getInstance(context).closeDialog();
                 Log.e(TAG, "登录失败：" + str);
                 ToastUtils.showToast(context, str);
@@ -327,11 +330,28 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        ActivityCollector.removeActivity(this);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 //LoadingUtil.getInstance(context).closeDialog();
             }
         });
+    }
+
+    private long clickTime = 0;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (System.currentTimeMillis() - clickTime > 2000) {
+                ToastUtils.showToast(context, "再按一次退出程序");
+                clickTime = System.currentTimeMillis();
+                return true;
+            } else {
+                ActivityCollector.finishAll();
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

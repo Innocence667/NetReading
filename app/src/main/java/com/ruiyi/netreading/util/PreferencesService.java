@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * //数据保存到本地
  * Created by mayn on 2018/6/20
@@ -53,6 +56,28 @@ public class PreferencesService {
     public String getServicePath() {
         return sharedPreferences.getString("servicePath", "");
     }
+
+    /**
+     * 保存用户信息
+     *
+     * @param uName
+     * @param uSchool
+     * @return
+     */
+    public PreferencesService saveUser(String uName, String uSchool) {
+        editor.putString("userName", uName);
+        editor.putString("userSchool", uSchool);
+        editor.commit();
+        return this;
+    }
+
+    public Map<String, String> getUser() {
+        Map<String, String> map = new HashMap<>();
+        map.put("userName", sharedPreferences.getString("userName", ""));
+        map.put("userSchool", sharedPreferences.getString("userSchool", ""));
+        return map;
+    }
+
 
     /**
      * 设置自动提交

@@ -41,10 +41,12 @@ public class Interfaces {
     public String COLLECTQUEXTION;
     //获取评分详情
     public String GETMARKAVGSCORE;
-
-
     //获取最新版本接口
     public String AUTHENTICATE;
+    //最新版本下载接口
+    public String DOWNLOAD;
+
+
     //我的任务列表接口
     public String TASKS;
     //全部任务列表接口(自己的任务完成时，帮阅调用的接口)GET请求(参数taskGuid、userGUID、userName)
@@ -61,16 +63,14 @@ public class Interfaces {
     public String SHOWSTUDENTMART;
     //获取所有收藏的数据
     public String STARLIST;
-    //最新版本下载接口
-    public String DOWNLOAD;
     //意见反馈接口
     public String SAVEOPINION;
 
     private Interfaces(Context context) {
         SERVICEPATH = PreferencesService.getInstance(context).getServicePath();
         RUIYI = SERVICEPATH + "/RayeeMark/api/markset/";
-        //LOGIN = SERVICEPATH + "/login/home/logincheck";
-        LOGIN = SERVICEPATH + "/base/home/logincheck";
+        LOGIN = SERVICEPATH + "/login/home/logincheck";
+        //LOGIN = SERVICEPATH + "/base/home/logincheck";
         GETEXAMLISTAPP = RUIYI + "getExamListApp";
         GETTEACHERTASKLIST = RUIYI + "getTeacherTaskList";
         GETMARKDATA = RUIYI + "getMarkData";
@@ -81,9 +81,11 @@ public class Interfaces {
         GETSTUDENTMARKDATA = RUIYI + "GetStudentMarkData";
         COLLECTQUEXTION = RUIYI + "CollectQuestion";
         GETMARKAVGSCORE = RUIYI + "GetMarkAvgScore";
-
-
         AUTHENTICATE = RUIYI + "Authenticate";
+        DOWNLOAD = RUIYI + "Download";
+
+
+
         TASKS = RUIYI + "Tasks";
         OTHERTASK = RUIYI + "OtherTask";
         TASKINFO = RUIYI + "TaskInfo";
@@ -92,7 +94,6 @@ public class Interfaces {
         CLAIMTASK = RUIYI + "ClaimTask";
         SHOWSTUDENTMART = RUIYI + "ShowStudentMark";
         STARLIST = RUIYI + "StarList";
-        DOWNLOAD = RUIYI + "Download";
         SAVEOPINION = RUIYI + "SaveOpinion";
     }
 }

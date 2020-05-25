@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorTitleBG"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    tools:context=".SettingActivity">
+
+    <include layout="@layout/layout_head" />
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/userhead" />
+
+    <TextView
+        android:id="@+id/userName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="张三"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/schoolName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="北京朝阳中学"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/checkForUpdates"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@color/colorWhite"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:drawableLeft="@drawable/update"
+            android:drawablePadding="15dp"
+            android:gravity="center_vertical"
+            android:text="检查更新"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/versionNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="(当前版本vx.x.x)"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/userFeedback"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:visibility="gone"
+        android:background="@color/colorWhite"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
+            android:drawableLeft="@drawable/opinion"
+            android:drawablePadding="15dp"
+            android:gravity="center_vertical"
+            android:text="用户反馈"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/userExit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorWhite"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="5dp"
+            android:drawableLeft="@drawable/change"
+            android:drawablePadding="15dp"
+            android:gravity="center_vertical"
+            android:text="退出登录"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

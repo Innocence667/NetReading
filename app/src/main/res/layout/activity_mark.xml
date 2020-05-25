@@ -355,37 +355,64 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="10dp">
 
             <TextView
                 android:id="@+id/number"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="试题ID" />
 
+            <View
+                android:layout_width="2dp"
+                android:layout_height="30dp"
+                android:background="@color/colorGrey2" />
+
             <TextView
                 android:id="@+id/time"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="时间" />
 
+            <View
+                android:layout_width="2dp"
+                android:layout_height="30dp"
+                android:background="@color/colorGrey2" />
+
             <TextView
                 android:id="@+id/score"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="分数" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorGrey2" />
+
         <ListView
             android:id="@+id/reviewListView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:padding="5dp" />
+
+        <TextView
+            android:id="@+id/nodatahint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="暂无数据"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
     </LinearLayout>
 

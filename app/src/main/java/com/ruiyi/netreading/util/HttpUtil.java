@@ -24,6 +24,7 @@ import okhttp3.RequestBody;
 public class HttpUtil {
 
     public static final MediaType TYPEJSON = MediaType.parse("application/json; charset=utf-8");
+    public static final MediaType APPLICATION = MediaType.parse("application/json; charset=utf-8");
     private static HttpUtil httpUtil;
     private OkHttpClient okHttpClient;
 
@@ -113,7 +114,7 @@ public class HttpUtil {
     private Call _PostJSON(String url, String json) {
         //已过时，使用下面方法代替
         //RequestBody body = RequestBody.create(TYPEJSON, json);
-        RequestBody body = RequestBody.Companion.create(json, MediaType.parse("application/json;charset=utf-8"));
+        RequestBody body = RequestBody.Companion.create(json, TYPEJSON);
         Request request = new Request.Builder().url(url).post(body).build();
         Call call = okHttpClient.newCall(request);
         return call;
@@ -121,5 +122,17 @@ public class HttpUtil {
 
     public Call PostResponse(String url, String json) {
         return _PostJSON(url, json);
+    }
+
+    //apk文件下载
+    private Call _DownLoadFile(String url) {
+        RequestBody body = RequestBody.Companion.create("", APPLICATION);
+        Request.Builder builder = new Request.Builder();
+        Request request = builder.url(url).post(body).build();
+        return okHttpClient.newCall(request);
+    }
+
+    public Call DownLoadFile(String url) {
+        return _DownLoadFile(url);
     }
 }
