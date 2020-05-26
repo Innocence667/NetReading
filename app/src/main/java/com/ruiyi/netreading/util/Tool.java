@@ -12,9 +12,9 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Display;
 
-import com.ruiyi.netreading.bean.response.GetMarkNextStudentResponse;
 import com.ruiyi.netreading.bean.ImageData;
 import com.ruiyi.netreading.bean.LocalImageData;
+import com.ruiyi.netreading.bean.response.GetMarkNextStudentResponse;
 import com.ruiyi.netreading.controller.MyCallBack;
 
 import java.io.File;

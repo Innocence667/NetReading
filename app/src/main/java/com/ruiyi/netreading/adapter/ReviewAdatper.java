@@ -50,6 +50,12 @@ public class ReviewAdatper extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
+        if (dataBeans.get(position).isCollect()) {
+            holder.flag.setVisibility(View.VISIBLE);
+        } else {
+            holder.flag.setVisibility(View.GONE);
+        }
+
         holder.number.setText(dataBeans.get(position).getTestCode());
         holder.time.setText(dataBeans.get(position).getTime().split("T")[0]);
         String[] split = String.valueOf(dataBeans.get(position).getScore()).split("\\.");
@@ -70,11 +76,13 @@ public class ReviewAdatper extends BaseAdapter {
         TextView number;
         TextView time;
         TextView score;
+        TextView flag;
 
         public ViewHolder(View view) {
             number = view.findViewById(R.id.questionNum);
             time = view.findViewById(R.id.questionTime);
             score = view.findViewById(R.id.questionScore);
+            flag = view.findViewById(R.id.flag);
         }
     }
 }

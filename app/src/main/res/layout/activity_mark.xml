@@ -18,6 +18,14 @@
             android:layout_height="match_parent"
             android:layout_toLeftOf="@+id/reightView" />
 
+        <!--步骤分标签布局-->
+        <RelativeLayout
+            android:id="@+id/tableParent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/reightView"
+            android:visibility="gone" />
+
         <CheckBox
             android:id="@+id/titleNo"
             android:layout_width="30dp"
@@ -26,6 +34,7 @@
             android:background="@drawable/shut"
             android:button="@null" />
 
+        <!--小题号面板-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/myHorizontalScrollview"
             android:layout_width="match_parent"
@@ -95,7 +104,8 @@
                 android:background="@drawable/scorepanel_bg"
                 android:text="确 定"
                 android:textColor="@color/colorWhite"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:visibility="gone" />
 
         </RelativeLayout>
 

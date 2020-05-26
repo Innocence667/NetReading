@@ -80,7 +80,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
         }
 
         groupViewHolder.examName.setText(datas.get(groupPosition).getExamName());
-       if (isExpanded) {
+        if (isExpanded) {
             groupViewHolder.examName.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, ContextCompat.getDrawable(mContext, R.drawable.down), null);
         } else {
             groupViewHolder.examName.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, ContextCompat.getDrawable(mContext, R.drawable.right), null);
@@ -107,6 +107,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
             chileViewHolder.progress.setProgress(childs.get(childPosition).getTeacherData().get(0).getTeacherNumber());
             chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNumber());
             if (childs.get(childPosition).getMarkNumber() != 0) {
+                //TODO 保留一位小数
                 chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getMarkNumber() * 100 / childs.get(childPosition).getTaskCount())) + "%");
             } else {
                 chileViewHolder.percentage.setText("0%");

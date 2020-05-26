@@ -372,6 +372,7 @@ public class MyModel {
         });
     }
 
+    //下载新版本apk
     public void Download(Context context, final MyCallBack callBack) {
         Call call = HttpUtil.getInstance().DownLoadFile(Interfaces.getInstance(context).DOWNLOAD);
         call.enqueue(new Callback() {
@@ -390,10 +391,5 @@ public class MyModel {
                 }
             }
         });
-    }
-
-    //确定按钮提交数据
-    public void Submitdata() {
-
     }
 }

@@ -21,6 +21,7 @@ public class ScoreAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private List<String> scores;
     private List<Boolean> scoreCheck;
+    private boolean isStepScore; //是否是步骤分模式
 
     public ScoreAdapter(Context cont, ScorePanel data) {
         this.context = cont;
@@ -63,7 +64,15 @@ public class ScoreAdapter extends BaseAdapter {
             holder.scoreItem.setTextColor(ContextCompat.getColor(context, R.color.colorScoreItem));
         }
 
-        holder.scoreItem.setText(scores.get(position));
+        if (isStepScore) {
+            if (position == 0) {
+                holder.scoreItem.setText(scores.get(position));
+            } else {
+                holder.scoreItem.setText("+" + scores.get(position));
+            }
+        } else {
+            holder.scoreItem.setText(scores.get(position));
+        }
         holder.scoreItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,26 +125,12 @@ public class ScoreAdapter extends BaseAdapter {
     }
 
     public void updataData(ScorePanel scorePanel) {
-        //保存当前选中的值
-        /*String str = null;
-        for (int i = 0; i < scoreCheck.size(); i++) {
-            if (scoreCheck.get(i)) {
-                str = scores.get(i);
-                break;
-            }
-        }
-        Log.e(TAG, "updataData: 当前选中的值是" + str);*/
         //更新数据源操作
         this.scores = scorePanel.getScores();
         this.scoreCheck = scorePanel.getScoresCheck();
-        //防止当前题目打分后没有提交，更新打分列表后，数据丢失
-        /*if (!TextUtils.isEmpty(str)) {
-            for (int i = 0; i < scores.size(); i++) {
-                if (str.equals(scores.get(i))) {
-                    scoreCheck.add(true);
-                    break;
-                }
-            }
-        }*/
+    }
+
+    public void setStepScore(boolean b) {
+        this.isStepScore = b;
     }
 }
