@@ -237,6 +237,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     taskListAdapter.setChilds(data);
                                     taskListAdapter.notifyDataSetChanged();
                                 } else {
+                                    taskListAdapter.clearChilds();
+                                    taskListAdapter.notifyDataSetChanged();
                                     ToastUtils.showToast(context, "暂无数据");
                                 }
                             }
@@ -371,6 +373,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     taskListAdapter.setChilds(getExamContextResponse.getTaskList());
                                     taskListAdapter.notifyDataSetChanged();
                                 } else {
+                                    taskListAdapter.clearChilds();
+                                    taskListAdapter.notifyDataSetChanged();
                                     ToastUtils.showToast(context, "暂无数据");
                                 }
                             }

@@ -112,18 +112,6 @@ public class ScoreAdapter extends BaseAdapter {
         }
     }
 
-    //获取当前选中的值
-    public int getPositon() {
-        int pos = -1;
-        for (int i = 0; i < scoreCheck.size(); i++) {
-            if (scoreCheck.get(i)) {
-                pos = i;
-                break;
-            }
-        }
-        return pos;
-    }
-
     public void updataData(ScorePanel scorePanel) {
         //更新数据源操作
         this.scores = scorePanel.getScores();

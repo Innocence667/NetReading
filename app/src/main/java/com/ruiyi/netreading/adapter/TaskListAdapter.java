@@ -104,6 +104,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
         if (childs.get(childPosition).getTeacherData() != null && childs.get(childPosition).getTeacherData().size() > 0) {
             chileViewHolder.myMission.setText(Html.fromHtml("我的任务：<font color = '#245AD3'>" + childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() + "</font>/" + childs.get(childPosition).getTeacherData().get(0).getTeacherCount()));
             chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNumber() + "/" + childs.get(childPosition).getTaskCount());
+            chileViewHolder.progress.setMax(childs.get(childPosition).getTaskCount());
             chileViewHolder.progress.setProgress(childs.get(childPosition).getTeacherData().get(0).getTeacherNumber());
             chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNumber());
             if (childs.get(childPosition).getMarkNumber() != 0) {
@@ -248,5 +249,9 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                 mContext.updataChildData();
             }
         }
+    }
+
+    public void clearChilds() {
+        this.childs.clear();
     }
 }

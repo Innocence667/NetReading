@@ -171,7 +171,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private GetMarkDataResponse response; //获取试卷试卷
     private GetMarkDataRequest request; //获取新数据请求模型
     private GetMarkNextStudentResponse getMarkNextStudentResponse; //获取新数据请求结果模型
-    private SaveMarkDataBean saveMarkDataBean; //新数据提交模型
+    private SaveMarkDataBean saveMarkDataBean; //数据提交模型
     private SavaDataResponse saveResponse; //提交成功返回结果
     private List<SaveMarkDataBean.QuestionsBean> questionsBeanList; //新数据提交里的questions字段
     private GetMarkNextStudentResponse getMarkUpdataStudentResponse; //获取已阅数据请求结果模型
@@ -693,12 +693,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      * @return
      */
     private ScorePanel getScoreList(double score, double fullScore) {
-        Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score);
-
-        //获取配置文件中的数据
-        //PreferencesService.getInstance(context)
-
-
+        Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score + "   是否是步骤分模式" + isStepScore);
         //Math.ceil(12.2)//返回13.0
         //Math.ceil(12.7)//返回13.0
         //Math.ceil(12.0)//返回12.0
@@ -787,6 +782,14 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     scoresCheck.add(false);
                 }
             }
+            if (!TextUtils.isEmpty(tableStepScore)) { //步骤分模式不需要刷新列表
+                for (int i = 0; i < scores.size(); i++) {
+                    if (tableStepScore.equals(scores.get(i))) {
+                        scoresCheck.set(i, true);
+                        break;
+                    }
+                }
+            }
             scorePanel.setScores(scores);
             scorePanel.setScoresCheck(scoresCheck);
         }
@@ -830,8 +833,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate())
                         && !"[]".equals(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate())) {
                     addStroke(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate());
+                    isStepScore = false;
                 } else if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore())) {
                     addStepScore(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore());
+                    isStepScore = true;
                 }
                 mSpenSimpleSurfaceView.update();
             }
@@ -845,6 +850,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void run() {
                 strings = getQuestions(nextStudentResponse.getData().getStudentData().getQuestions());
+
+                if (strings.size() > 1) {
+                    //合并任务暂时不支持步骤分
+                    stepScore.setEnabled(false);
+                }
+
                 //初始化题号选择列表
                 questionNumAdapter = new QuestionNumAdapter(context, strings);
                 LinearLayoutManager manager = new LinearLayoutManager(context);
@@ -878,9 +889,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 //步骤分未开启
                                 //addStepScore(saveMarkDataBean.getQuestions().get(minLocation).getStepScore());
                             }
+                            scoreAdapter.updataData(getScoreList(Double.valueOf(saveMarkDataBean.getQuestions().get(positon).getMarkScore()),
+                                    nextStudentResponse.getData().getStudentData().getQuestions().get(positon).getFullScore()));
                         } else {
-                            scoreAdapter.updataData(getScoreList(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
-                                    nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
+                            scoreAdapter.updataData(getScoreList(nextStudentResponse.getData().getStudentData().getQuestions().get(positon).getScore(),
+                                    nextStudentResponse.getData().getStudentData().getQuestions().get(positon).getFullScore()));
                         }
                         scoreAdapter.notifyDataSetChanged();
 
@@ -931,8 +944,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore());
 
                 scoreAdapter = new ScoreAdapter(context, scorePanel);
+                scoreAdapter.setStepScore(isStepScore);
 
-                if (!"-1".equals(SCORE)) {
+                if (!"-1".equals(SCORE) && !isStepScore) {
                     for (int i = 0; i < scorePanel.getScores().size(); i++) {
                         if (scorePanel.getScores().get(i).equals(SCORE)) {
                             scoreAdapter.setScoreCheck(i);
@@ -987,6 +1001,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         Log.e(TAG, "addStepScore: 设置步骤分数据");
         List<StepScore> stepScores = new Gson().fromJson(stepScore, new TypeToken<List<StepScore>>() {
         }.getType());
+        //选择步骤分的第一个标签的数据为默认显示选中的标签选项
+        double d = stepScores.get(0).getParams();
+        if (d != (int) d) {
+            tableStepScore = String.valueOf(d);
+        } else {
+            tableStepScore = String.valueOf((int) d);
+        }
         childLocations = new ArrayList<>();
         for (int i = 0; i < stepScores.size(); i++) {
             ChildLocation location = new ChildLocation();
@@ -1034,6 +1055,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
             //更新分数列表
             scoreAdapter.setScoreCheck(-1);
+            scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
+                    getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
             scoreAdapter.notifyDataSetChanged();
         }
     }
@@ -1217,6 +1240,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 } else {
                     ToastUtils.showToast(context, "关闭步骤分");
                     childLocations = null;
+                    tableStepScore = null;
                     isStepScore = false;
                     mSpenSimpleSurfaceView.setMaxZoomRatio(3);
                     mSpenSimpleSurfaceView.setMinZoomRatio(0.5f);
@@ -1838,8 +1862,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     response.getTeacherTask().setMarkNumber(saveResponse.getMyNumber());
                     response.getTeacherTask().setMarkCount(saveResponse.getMyCount());
                     if (saveResponse.getTaskNumber() < saveResponse.getTaskCount()) { //任务已阅量 < 任务总量
-                        if (saveResponse.getMyNumber() < saveResponse.getMyCount() //自己的已阅量 < 自己的任务量
-                        ||saveResponse.getMyNumber() >= saveResponse.getMyCount()) { //我的已阅量 > 我的任务量
+                        if (saveResponse.getMyNumber() != saveResponse.getMyCount()) { //我的已阅量 != 我的任务量（可能会是帮阅）
                             reviewMode = false;
                             myModel.getMarkNextStudent(context, request, new MyCallBack() {
                                 @Override
@@ -1873,11 +1896,53 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     showFailedPage(str);
                                 }
                             });
-                        } else if (saveResponse.getMyNumber() >= saveResponse.getMyCount()) { //我的已阅量 > 我的任务量
-                            //可能存在帮阅模式
+                        } else if (saveResponse.getMyNumber() == saveResponse.getMyCount()) { //我的已阅量 = 我的任务量
+                            //阅卷结束
+                            builder = new AlertDialog.Builder(context);
+                            builder.setTitle("提示");
+                            builder.setMessage("任务已完成，您可以如下操作");
+                            AlertDialog dialog = builder.create();
+                            dialog.setCancelable(false);
+                            dialog.setButton(DialogInterface.BUTTON_POSITIVE, "回评", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    showReviewList();
+                                    submiss.setEnabled(true);
+                                    dialog.cancel();
+                                }
+                            });
+                            dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "退出", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                    MarkingActivity.this.finish();
+                                }
+                            });
+                            dialog.show();
                         }
                     } else {
-                        //任务已经完成
+                        //阅卷结束
+                        builder = new AlertDialog.Builder(context);
+                        builder.setTitle("提示");
+                        builder.setMessage("任务已完成，您可以如下操作");
+                        AlertDialog dialog = builder.create();
+                        dialog.setCancelable(false);
+                        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "回评", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                showReviewList();
+                                submiss.setEnabled(true);
+                                dialog.cancel();
+                            }
+                        });
+                        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "退出", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                                MarkingActivity.this.finish();
+                            }
+                        });
+                        dialog.show();
                     }
                 }
 
@@ -1905,9 +1970,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void run() {
                         if (reviewMode) {
+                            Log.e(TAG, "OnClickLener: 2222222222222");
                             scoreAdapter.updataData(getScoreList(getMarkUpdataStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
                                     getMarkUpdataStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
                         } else {
+                            Log.e(TAG, "OnClickLener: 33333333333");
                             scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
                                     getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
                         }
