@@ -43,6 +43,43 @@
             android:layout_toRightOf="@+id/titleNo"
             android:scrollbars="none" />
 
+        <!--双栏模式-->
+        <LinearLayout
+            android:id="@+id/soubleLayout"
+            android:layout_width="60dp"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100dp"
+            android:layout_marginBottom="30dp"
+            android:layout_toLeftOf="@+id/reightView"
+            android:gravity="center_vertical|right"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginBottom="15dp"
+                android:layout_toLeftOf="@+id/reightView"
+                android:background="@drawable/double_parent_style"
+                android:gravity="center_vertical|right">
+
+                <CheckBox
+                    android:id="@+id/douleScoreCheckBox"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/doublescore_style"
+                    android:button="@null" />
+
+            </LinearLayout>
+
+            <include
+                android:id="@+id/doubleScoreLayout"
+                layout="@layout/doublescore_layout"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
         <!--分数面板-->
         <RelativeLayout
             android:id="@+id/reightView"

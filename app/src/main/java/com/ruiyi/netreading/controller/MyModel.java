@@ -165,7 +165,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("getMarkNextStudent", "获取新数据结果：" + json);
+                        //LogUtils.logE("getMarkNextStudent", "获取新数据结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
                     } else {
                         callBack.onFailed(json);
@@ -192,7 +192,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("getStudentMarkData", "获取已批阅数据：" + json);
+                        //LogUtils.logE("getStudentMarkData", "获取已批阅数据：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
                     } else {
                         callBack.onFailed(json);

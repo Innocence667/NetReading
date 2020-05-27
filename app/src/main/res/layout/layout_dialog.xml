@@ -30,21 +30,21 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/dialog_determine"
-            android:layout_width="90dp"
-            android:layout_height="40dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/begin_btn_style"
-            android:text="确定"
-            android:textColor="@color/colorWhite" />
-
-        <Button
             android:id="@+id/dialog_cancel"
             android:layout_width="90dp"
             android:layout_height="40dp"
             android:layout_margin="10dp"
             android:background="@drawable/begin_btn_style"
-            android:text="取消"
+            android:text="取 消"
+            android:textColor="@color/colorWhite" />
+
+        <Button
+            android:id="@+id/dialog_determine"
+            android:layout_width="90dp"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/begin_btn_style"
+            android:text="确 定"
             android:textColor="@color/colorWhite" />
 
     </LinearLayout>

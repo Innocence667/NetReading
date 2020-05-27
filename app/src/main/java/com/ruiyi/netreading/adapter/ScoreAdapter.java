@@ -1,7 +1,6 @@
 package com.ruiyi.netreading.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -118,7 +117,18 @@ public class ScoreAdapter extends BaseAdapter {
         this.scoreCheck = scorePanel.getScoresCheck();
     }
 
+    //是否是步骤分模式
     public void setStepScore(boolean b) {
         this.isStepScore = b;
+    }
+
+    //得到当前选中的值
+    public double getChectValue() {
+        for (int i = 0; i < scoreCheck.size(); i++) {
+            if (scoreCheck.get(i)) {
+                return Double.valueOf(scores.get(i));
+            }
+        }
+        return -1.0;
     }
 }
