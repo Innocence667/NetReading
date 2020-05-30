@@ -47,7 +47,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:entries="@array/services"
-                android:gravity="center_horizontal" />
+                android:gravity="center_horizontal"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/servicePath"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical" />
 
         </LinearLayout>
 
@@ -120,11 +127,28 @@
             android:layout_margin="10dp"
             android:background="@color/colorGrey" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right">
+
+            <TextView
+                android:id="@+id/modifyServicePath"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="切换地址"
+                android:textColor="@color/colorProgress"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
         <Button
             android:id="@+id/loginBtn"
             android:layout_width="230dp"
             android:layout_height="50dp"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:background="@drawable/btn_login_click"
             android:elevation="5dp"
             android:text="登 录"

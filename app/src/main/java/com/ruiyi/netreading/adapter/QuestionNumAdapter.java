@@ -1,7 +1,6 @@
 package com.ruiyi.netreading.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,5 +83,10 @@ public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.
     //修改选中的item
     public void setPos(int pos1) {
         this.pos = pos1;
+    }
+
+    //更新数据
+    public void udataeData(List<String> data1) {
+        this.data = data1;
     }
 }

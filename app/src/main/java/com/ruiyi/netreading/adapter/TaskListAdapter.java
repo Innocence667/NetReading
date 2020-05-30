@@ -218,6 +218,13 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
         }
     }
 
+    //设置父数据源
+    public void setParentData(List<GetExamListResponse.ExamListBean> datas1) {
+        this.datas = datas1;
+        this.childs.clear();
+    }
+
+    //设置子据源
     public void setChilds(List<GetExamContextResponse.TaskListBean> childs1) {
         this.childs = childs1;
 

@@ -111,8 +111,8 @@ public class ScoreAdapter extends BaseAdapter {
         }
     }
 
+    //更新数据源操作
     public void updataData(ScorePanel scorePanel) {
-        //更新数据源操作
         this.scores = scorePanel.getScores();
         this.scoreCheck = scorePanel.getScoresCheck();
     }

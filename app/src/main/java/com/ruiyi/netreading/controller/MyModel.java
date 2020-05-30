@@ -41,6 +41,29 @@ public class MyModel {
 
     private static Gson gson = new GsonBuilder().serializeNulls().create();
 
+    //测试用户输入地址是否正确
+    public void testUrl(Context context, String url, final MyCallBack callBack) {
+        Log.e("testUrl", "testUrl: " + url);
+        Call call = HttpUtil.getInstance().PostResponse(url, "");
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                callBack.onFailed(e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String json = response.body().string();
+                if (response.code() == 200) {
+                    Log.e("testUrl", response.code() + "   返回结果：" + json);
+                    callBack.onSuccess(response.code());
+                } else {
+                    callBack.onFailed(json);
+                }
+            }
+        });
+    }
+
     //登录账号
     public void getUser(Context context, UserBean userBean, final MyCallBack callback) {
         Log.e("getUser", gson.toJson(userBean));
@@ -84,7 +107,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("GetExamListModel", "获取考试列表：" + json);
+                        LogUtils.logE("getTaskList", "获取考试列表：" + json);
                         callback.onSuccess(gson.fromJson(json, GetExamListResponse.class));
                     } else {
                         callback.onFailed(json);

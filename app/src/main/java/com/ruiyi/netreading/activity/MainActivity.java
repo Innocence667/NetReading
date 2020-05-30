@@ -173,11 +173,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 myModel.getTaskList(context, getExamListRequest, new MyCallBack() {
                     @Override
                     public void onSuccess(Object model) {
+                        //下拉刷新任务列表
                         getExamListResponse = (GetExamListResponse) model;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Log.e(TAG, "已更新任务列表");
+                                Log.e(TAG, "下拉刷新  已更新任务列表");
                                 if (getExamContextResponse == null) {
                                     Log.e(TAG, "run: getExamContextResponse是空的");
                                     return;
@@ -187,16 +188,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         return;
                                     }
                                 }
-
-                                //TODO 临时处理数据
-                                List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                                for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                    if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                        data.add(getExamContextResponse.getTaskList().get(i));
-                                    }
+                                //TODO 二级列表全部关闭
+                                for (int i = 0; i < listView.getExpandableListAdapter().getGroupCount(); i++) {
+                                    listView.collapseGroup(i);
                                 }
-
-                                taskListAdapter.setChilds(data);
+                                taskListAdapter.setParentData(getExamListResponse.getExamList());
                                 taskListAdapter.notifyDataSetChanged();
                                 refreshLayou.finishRefresh();
                             }

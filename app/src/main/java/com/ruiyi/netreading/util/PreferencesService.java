@@ -64,8 +64,9 @@ public class PreferencesService {
      * @param uSchool
      * @return
      */
-    public PreferencesService saveUser(String uName, String uSchool) {
+    public PreferencesService saveUser(String uName, String uGuid, String uSchool) {
         editor.putString("userName", uName);
+        editor.putString("userGuid", uGuid);
         editor.putString("userSchool", uSchool);
         editor.commit();
         return this;
@@ -76,6 +77,19 @@ public class PreferencesService {
         map.put("userName", sharedPreferences.getString("userName", ""));
         map.put("userSchool", sharedPreferences.getString("userSchool", ""));
         return map;
+    }
+
+    //获取用户guid
+    public String getUserGuid() {
+        return sharedPreferences.getString("userGuid", "");
+    }
+
+    public void clearUserData() {
+        editor.putString("userName", "");
+        editor.putString("userGuid", "");
+        editor.putString("userSchool", "");
+        editor.putString("topScore", "");
+        editor.commit();
     }
 
 

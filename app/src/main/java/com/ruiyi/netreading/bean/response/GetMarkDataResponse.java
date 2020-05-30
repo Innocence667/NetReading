@@ -114,7 +114,7 @@ public class GetMarkDataResponse {
         private String teacherName;
         private int taskCount; ///所有教师任务总量
         private int markSum; //所有教师已阅量
-        private boolean isFree;
+        private boolean isFree; //是否是自由阅卷
 
         public String getTaskGuid() {
             return taskGuid;

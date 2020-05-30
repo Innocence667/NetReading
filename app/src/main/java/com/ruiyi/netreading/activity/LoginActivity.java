@@ -2,6 +2,7 @@ package com.ruiyi.netreading.activity;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,13 +14,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +37,7 @@ import com.ruiyi.netreading.bean.response.LoginResponse;
 import com.ruiyi.netreading.controller.ActivityCollector;
 import com.ruiyi.netreading.controller.MyCallBack;
 import com.ruiyi.netreading.controller.MyModel;
+import com.ruiyi.netreading.util.LogUtils;
 import com.ruiyi.netreading.util.PreferencesService;
 import com.ruiyi.netreading.util.ToastUtils;
 
@@ -47,14 +53,23 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private Context context;
 
     private Spinner spinner; //地址选择器
+    private TextView servicePathTv; //服务器地址
+    private TextView modifyServicePath; //切换地址
     private EditText userName; //用户名
     private EditText userPwd; //密码
     private Button loginBtn; //登录
-    private TextView versionTv;
+    private TextView versionTv; //版本号
 
     private MyModel loginModel;
     private String[] paths; //服务器地址数据源
     private String servicePath; //当前学校名称
+
+    private Dialog dialog;
+    private TextView urlHint; //title
+    private EditText location, port; //地址、端口
+    private LinearLayout btnLayout; //btn父布局
+    private Button testUrlBtn, testUrlBtnCancel; //取消、测试
+    private ProgressBar testProgress; //圆形进度条
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,14 +82,30 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_CODE);
             }
         }
-        servicePath = "铧强中学";
-        initView();
-        loginModel = new MyModel();
+        if (!TextUtils.isEmpty(PreferencesService.getInstance(context).getUserGuid())) {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            //intent.putExtra("userid", loginResponse.getData().getUserid());
+            intent.putExtra("userid", PreferencesService.getInstance(context).getUserGuid());
+            startActivity(intent);
+            finish();
+        } else {
+            servicePath = "铧强中学";
+            initView();
+            loginModel = new MyModel();
+            if (TextUtils.isEmpty(PreferencesService.getInstance(context).getServicePath())) {
+                dialog.show();
+            } else {
+                servicePathTv.setText(PreferencesService.getInstance(context).getServicePath());
+            }
+        }
     }
 
     private void initView() {
         paths = getResources().getStringArray(R.array.services);
         spinner = findViewById(R.id.login_servicePath);
+        servicePathTv = findViewById(R.id.servicePath);
+        modifyServicePath = findViewById(R.id.modifyServicePath);
+        modifyServicePath.setOnClickListener(this);
         userName = findViewById(R.id.login_name);
         userPwd = findViewById(R.id.login_pwd);
         loginBtn = findViewById(R.id.loginBtn);
@@ -151,38 +182,125 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             }
         });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        View view = LayoutInflater.from(context).inflate(R.layout.setting_dialog, null);
+        builder.setView(view);
+        dialog = builder.create();
+        dialog.setCancelable(false);
+        urlHint = view.findViewById(R.id.urlHint);
+        location = view.findViewById(R.id.location);
+        port = view.findViewById(R.id.port);
+        btnLayout = view.findViewById(R.id.btnLayout);
+        testUrlBtn = view.findViewById(R.id.testUrlBtn);
+        testUrlBtnCancel = view.findViewById(R.id.testUrlBtnCancel);
+        testUrlBtn.setOnClickListener(this);
+        testUrlBtnCancel.setOnClickListener(this);
+        testProgress = view.findViewById(R.id.testProgress);
+        urlHint.setText(Html.fromHtml("格式:https://<font color = '#FF0000'>xxxx</font>.lexuewang.cn:<font color = '#FF0000'>1234</font>"));
+        testUrlBtnCancel.setVisibility(View.GONE);
     }
 
     @Override
     public void onClick(View v) {
-        loginBtn.setEnabled(false);
-        loginBtn.setText("登录中……");
-        loginBtn.setBackground(getResources().getDrawable(R.drawable.btn_login_bg_down));
-        servicePath = getServiceName(PreferencesService.getInstance(context).getServicePath());
-        final UserBean userBean = getUserInput();
-        if (userBean != null) {
-            userBean.setIsmemory(false);
-            userBean.setTerminal(2);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    //LoadingUtil.getInstance(context).showDialog();
-                    loginModel.getUser(context, userBean, new MyCallBack() {
-
+        switch (v.getId()) {
+            case R.id.modifyServicePath:
+                location.setText("");
+                port.setText("");
+                testUrlBtnCancel.setVisibility(View.VISIBLE);
+                testUrlBtn.setVisibility(View.VISIBLE);
+                testProgress.setVisibility(View.GONE);
+                dialog.show();
+                break;
+            case R.id.loginBtn:
+                loginBtn.setEnabled(false);
+                loginBtn.setText("登录中……");
+                loginBtn.setBackground(getResources().getDrawable(R.drawable.btn_login_bg_down));
+                servicePath = getServiceName(PreferencesService.getInstance(context).getServicePath());
+                final UserBean userBean = getUserInput();
+                if (userBean != null) {
+                    userBean.setIsmemory(false);
+                    userBean.setTerminal(2);
+                    runOnUiThread(new Runnable() {
                         @Override
-                        public void onSuccess(Object model) {
-                            showSueecssPage((LoginResponse) model);
-                        }
+                        public void run() {
+                            //LoadingUtil.getInstance(context).showDialog();
+                            loginModel.getUser(context, userBean, new MyCallBack() {
 
-                        @Override
-                        public void onFailed(String str) {
-                            showFailedPage(str);
-                        }
+                                @Override
+                                public void onSuccess(Object model) {
+                                    showSueecssPage((LoginResponse) model);
+                                }
 
+                                @Override
+                                public void onFailed(String str) {
+                                    showFailedPage(str);
+                                }
+
+                            });
+                        }
                     });
                 }
-            });
+                break;
+            case R.id.testUrlBtn:
+                /*if (TextUtils.isEmpty(location.getText().toString().trim())) {
+                    ToastUtils.showToast(context, "请输入地址");
+                    return;
+                }*/
+                if (TextUtils.isEmpty(port.getText().toString().trim())) {
+                    ToastUtils.showToast(context, "请输入端口");
+                    return;
+                }
+                testUrlBtn.setEnabled(false);
+                testProgress.setVisibility(View.VISIBLE);
+                testUrlBtnCancel.setVisibility(View.GONE);
+                testUrlBtn.setVisibility(View.GONE);
+                testUrl();
+                break;
+            case R.id.testUrlBtnCancel:
+                dialog.cancel();
+                break;
         }
+    }
+
+    //测试用户输入的网址是否正确
+    private void testUrl() {
+        String url = "https://" + location.getText().toString().trim() + ".lexuewang.cn:" + port.getText().toString().trim() + "/login/home/index";
+        if (TextUtils.isEmpty(location.getText().toString().trim())) {
+            url = "https://riyun.lexuewang.cn:" + port.getText().toString().trim() + "/login/home/index";
+        }
+        loginModel.testUrl(context, url, new MyCallBack() {
+            @Override
+            public void onSuccess(Object model) {
+                int code = (int) model;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        servicePath = "https://" + location.getText().toString().trim() + ".lexuewang.cn:" + port.getText().toString().trim();
+                        if (TextUtils.isEmpty(location.getText().toString().trim())) {
+                            servicePath = "https://riyun.lexuewang.cn:" + port.getText().toString().trim();
+                        }
+                        PreferencesService.getInstance(context).saveServicePath(servicePath);
+                        servicePathTv.setText(servicePath);
+                        dialog.cancel();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailed(final String str) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        testUrlBtn.setEnabled(true);
+                        testProgress.setVisibility(View.GONE);
+                        testUrlBtn.setVisibility(View.VISIBLE);
+                        LogUtils.logE("testUrl", "请求服务器失败：" + str);
+                        ToastUtils.showToast(context, str);
+                    }
+                });
+            }
+        });
     }
 
     private String getServiceName(String servicePath) {
@@ -265,7 +383,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                PreferencesService.getInstance(context).saveUser(loginResponse.getData().getRealname(), loginResponse.getData().getSname());
+                PreferencesService.getInstance(context).saveUser(loginResponse.getData().getRealname(), loginResponse.getData().getUguid(), loginResponse.getData().getSname());
                 ToastUtils.showTopToast(context, "欢迎您：" + loginResponse.getData().getRealname(), R.style.Toast_Animation);
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 //intent.putExtra("userid", loginResponse.getData().getUserid());
