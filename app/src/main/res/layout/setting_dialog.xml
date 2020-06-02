@@ -79,7 +79,7 @@
             android:layout_height="40dp"
             android:layout_margin="10dp"
             android:background="@drawable/btn_login_click"
-            android:text="连 接"
+            android:text="连接服务器"
             android:textColor="@color/colorWhite" />
 
     </LinearLayout>

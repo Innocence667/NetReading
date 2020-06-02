@@ -209,6 +209,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 port.setText("");
                 testUrlBtnCancel.setVisibility(View.VISIBLE);
                 testUrlBtn.setVisibility(View.VISIBLE);
+                testUrlBtn.setEnabled(true);
                 testProgress.setVisibility(View.GONE);
                 dialog.show();
                 break;
@@ -234,7 +235,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                                 @Override
                                 public void onFailed(String str) {
-                                    showFailedPage(str);
+                                    showFailedPage("用户名或密码错误");
                                 }
 
                             });
@@ -295,7 +296,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         testUrlBtn.setEnabled(true);
                         testProgress.setVisibility(View.GONE);
                         testUrlBtn.setVisibility(View.VISIBLE);
-                        LogUtils.logE("testUrl", "请求服务器失败：" + str);
+                        LogUtils.logE("testUrl", "连接服务器失败，请检查服务器地址或端口号");
                         ToastUtils.showToast(context, str);
                     }
                 });

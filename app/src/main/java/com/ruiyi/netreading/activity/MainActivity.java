@@ -24,6 +24,7 @@ import com.ruiyi.netreading.bean.response.LoginResponse;
 import com.ruiyi.netreading.controller.ActivityCollector;
 import com.ruiyi.netreading.controller.MyCallBack;
 import com.ruiyi.netreading.controller.MyModel;
+import com.ruiyi.netreading.util.LoadingUtil;
 import com.ruiyi.netreading.util.ToastUtils;
 import com.scwang.smartrefresh.header.BezierCircleHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private GetExamListRequest getExamListRequest;//考试任务请求参数
     private GetExamListResponse getExamListResponse;//考试任务请求返回模型(一级列表)
     private GetExamContextResponse getExamContextResponse;//某个任务题目列表返回模型(二级列表)
+    private GetExamContextRequest getExamContextRequest; //获取二级列表请求模型
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         getExamListRequest = new GetExamListRequest();
         getExamListRequest.setStatus(1);
         getExamListRequest.setTeacherGuid(teacherGuid);
+        LoadingUtil.showDialog(context);
         myModel.getTaskList(this, getExamListRequest, new MyCallBack() {
             @Override
             public void onSuccess(Object object) {
@@ -76,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        LoadingUtil.closeDialog();
                         taskListAdapter = new TaskListAdapter(context, getExamListResponse.getExamList());
                         taskListAdapter.setMyClickListener(new TaskListAdapter.OnclickListener() {
                             @Override
@@ -107,11 +111,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                         //默认展开第一个step
                         listView.expandGroup(0);
-                        GetExamContextRequest request = new GetExamContextRequest();
-                        request.setTeacherGuid(teacherGuid);
+                        getExamContextRequest = new GetExamContextRequest();
+                        getExamContextRequest.setTeacherGuid(teacherGuid);
                         PaperGuid = getExamListResponse.getExamList().get(0).getPaperGuid();
-                        request.setPaperGuid(PaperGuid);
-                        myModel.getTaskContext(context, request, new MyCallBack() {
+                        getExamContextRequest.setPaperGuid(PaperGuid);
+                        myModel.getTaskContext(context, getExamContextRequest, new MyCallBack() {
 
                             @Override
                             public void onSuccess(Object object) {
@@ -192,9 +196,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 for (int i = 0; i < listView.getExpandableListAdapter().getGroupCount(); i++) {
                                     listView.collapseGroup(i);
                                 }
+                                //默认展开第一个item
+                                listView.expandGroup(0);
                                 taskListAdapter.setParentData(getExamListResponse.getExamList());
                                 taskListAdapter.notifyDataSetChanged();
                                 refreshLayou.finishRefresh();
+                                getExamContextRequest = new GetExamContextRequest();
+                                getExamContextRequest.setTeacherGuid(teacherGuid);
+                                PaperGuid = getExamListResponse.getExamList().get(0).getPaperGuid();
+                                getExamContextRequest.setPaperGuid(PaperGuid);
+                                myModel.getTaskContext(context, getExamContextRequest, new MyCallBack() {
+                                    @Override
+                                    public void onSuccess(Object object) {
+                                        getExamContextResponse = (GetExamContextResponse) object;
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
+                                                    //TODO 临时处理数据
+                                                    List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                                                    for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                                        if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                                            data.add(getExamContextResponse.getTaskList().get(i));
+                                                        }
+                                                    }
+                                                    taskListAdapter.setChilds(data);
+                                                    taskListAdapter.notifyDataSetChanged();
+                                                } else {
+                                                    taskListAdapter.clearChilds();
+                                                    taskListAdapter.notifyDataSetChanged();
+                                                    ToastUtils.showToast(context, "暂无数据");
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onFailed(final String str) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                showFailedPage(str);
+                                                Log.e(TAG, "获取任务详情请求失败," + str);
+                                            }
+                                        });
+                                    }
+                                });
                             }
                         });
                     }
@@ -210,48 +257,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                final GetExamContextRequest request = new GetExamContextRequest();
-                request.setTeacherGuid(teacherGuid);
-                PaperGuid = getExamListResponse.getExamList().get(groupPosition).getPaperGuid();
-                request.setPaperGuid(PaperGuid);
-                myModel.getTaskContext(context, request, new MyCallBack() {
-
-                    @Override
-                    public void onSuccess(Object object) {
-                        getExamContextResponse = (GetExamContextResponse) object;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
-                                    //TODO 临时处理数据
-                                    List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                                    for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                        if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                            data.add(getExamContextResponse.getTaskList().get(i));
+                if(!listView.isGroupExpanded(groupPosition)){
+                    getExamContextRequest = new GetExamContextRequest();
+                    getExamContextRequest.setTeacherGuid(teacherGuid);
+                    PaperGuid = getExamListResponse.getExamList().get(groupPosition).getPaperGuid();
+                    getExamContextRequest.setPaperGuid(PaperGuid);
+                    LoadingUtil.showDialog(context);
+                    myModel.getTaskContext(context, getExamContextRequest, new MyCallBack() {
+                        @Override
+                        public void onSuccess(Object object) {
+                            LoadingUtil.closeDialog();
+                            getExamContextResponse = (GetExamContextResponse) object;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
+                                        //TODO 临时处理数据
+                                        List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                                        for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                            if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                                data.add(getExamContextResponse.getTaskList().get(i));
+                                            }
                                         }
+                                        taskListAdapter.setChilds(data);
+                                        taskListAdapter.notifyDataSetChanged();
+                                    } else {
+                                        taskListAdapter.clearChilds();
+                                        taskListAdapter.notifyDataSetChanged();
+                                        ToastUtils.showToast(context, "暂无数据");
                                     }
-                                    taskListAdapter.setChilds(data);
-                                    taskListAdapter.notifyDataSetChanged();
-                                } else {
-                                    taskListAdapter.clearChilds();
-                                    taskListAdapter.notifyDataSetChanged();
-                                    ToastUtils.showToast(context, "暂无数据");
                                 }
-                            }
-                        });
-                    }
+                            });
+                        }
 
-                    @Override
-                    public void onFailed(final String str) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                showFailedPage(str);
-                                Log.e(TAG, "获取任务详情请求失败," + str);
-                            }
-                        });
-                    }
-                });
+                        @Override
+                        public void onFailed(final String str) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showFailedPage(str);
+                                    Log.e(TAG, "获取任务详情请求失败," + str);
+                                }
+                            });
+                        }
+                    });
+                }else{
+                    listView.collapseGroup(groupPosition);
+                }
                 return false;
             }
         });
@@ -280,41 +332,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onResume() {
         super.onResume();
         if (isFresh) {
-            myModel.getTaskList(context, getExamListRequest, new MyCallBack() {
+            myModel.getTaskContext(context, getExamContextRequest, new MyCallBack() {
                 @Override
-                public void onSuccess(Object model) {
-                    getExamListResponse = (GetExamListResponse) model;
+                public void onSuccess(Object object) {
+                    getExamContextResponse = (GetExamContextResponse) object;
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.e(TAG, "已更新任务列表");
-                            if (getExamContextResponse == null) {
-                                Log.e(TAG, "run: getExamContextResponse是空的");
-                                return;
+                            if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
+                                //TODO 临时处理数据
+                                List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                                for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                    if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                        data.add(getExamContextResponse.getTaskList().get(i));
+                                    }
+                                }
+                                taskListAdapter.setChilds(data);
+                                taskListAdapter.notifyDataSetChanged();
                             } else {
-                                if (getExamContextResponse.getTaskList() == null) {
-                                    Log.e(TAG, "run: getExamContextResponse.getTaskList()是空的");
-                                    return;
-                                }
+                                taskListAdapter.clearChilds();
+                                taskListAdapter.notifyDataSetChanged();
+                                ToastUtils.showToast(context, "暂无数据");
                             }
-
-                            //TODO 临时处理数据
-                            List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                            for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                    data.add(getExamContextResponse.getTaskList().get(i));
-                                }
-                            }
-
-                            taskListAdapter.setChilds(data);
-                            taskListAdapter.notifyDataSetChanged();
                         }
                     });
                 }
 
                 @Override
-                public void onFailed(String str) {
-                    showFailedPage(str);
+                public void onFailed(final String str) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showFailedPage(str);
+                            Log.e(TAG, "获取任务详情请求失败," + str);
+                        }
+                    });
                 }
             });
         }
@@ -337,6 +389,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //任务获取失败
     public void showFailedPage(final String str) {
+        LoadingUtil.closeDialog();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

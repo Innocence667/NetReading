@@ -6,6 +6,7 @@ import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -15,22 +16,12 @@ import com.ruiyi.netreading.activity.R;
 
 public class LoadingUtil {
 
-    private static LoadingUtil util;
     private static Dialog dialog;
     private static AnimatorSet set;
-    private static Context context;
 
-    public static LoadingUtil getInstance(Context con) {
-        context = con;
-        if (util == null) {
-            util = new LoadingUtil();
-            dialog = new AlertDialog.Builder(context).create();
-            set = new AnimatorSet();
-        }
-        return util;
-    }
-
-    public void showDialog() {
+    public static void showDialog(Context context) {
+        dialog = new AlertDialog.Builder(context).create();
+        AnimatorSet set = new AnimatorSet();
         dialog.setCancelable(false);
         View view = LayoutInflater.from(context).inflate(R.layout.loading_layout, null);
         TextView redDot = view.findViewById(R.id.redDot);
@@ -47,11 +38,13 @@ public class LoadingUtil {
         dialog.setContentView(view);
     }
 
-    public void closeDialog() {
-        if (set != null) {
-            set.cancel();
+    public static void closeDialog() {
+        if (dialog != null && dialog.isShowing()) {
+            if (set != null) {
+                set.cancel();
+            }
+            dialog.cancel();
+            //dialog = null;
         }
-        dialog.cancel();
-        //dialog = null;
     }
 }

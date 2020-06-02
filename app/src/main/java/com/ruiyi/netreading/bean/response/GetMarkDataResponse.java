@@ -109,8 +109,8 @@ public class GetMarkDataResponse {
 
         private String taskGuid;
         private String paperGuid;
-        private int markNumber; //当前教师已阅量
-        private int markCount; //当前教师任务总量
+        private int markNumber; //登录教师已阅量
+        private int markCount; //登录教师任务总量
         private String teacherName;
         private int taskCount; ///所有教师任务总量
         private int markSum; //所有教师已阅量

@@ -47,13 +47,13 @@
         <LinearLayout
             android:id="@+id/soubleLayout"
             android:layout_width="60dp"
-            android:visibility="gone"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
             android:layout_marginBottom="30dp"
             android:layout_toLeftOf="@+id/reightView"
             android:gravity="center_vertical|right"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -325,6 +325,40 @@
                     android:layout_width="2dp"
                     android:layout_height="20dp"
                     android:background="@color/colorGrey2" />
+
+                <LinearLayout
+                    android:id="@+id/goOnParent"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:background="@drawable/history_style"
+                        android:duplicateParentState="true" />
+
+                    <TextView
+                        android:id="@+id/goOn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:duplicateParentState="true"
+                        android:gravity="center"
+                        android:text="继续阅卷"
+                        android:textColor="@drawable/text_font_style" />
+
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/goOnLine"
+                    android:layout_width="2dp"
+                    android:layout_height="20dp"
+                    android:background="@color/colorGrey2"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/scoringDatailsP"
