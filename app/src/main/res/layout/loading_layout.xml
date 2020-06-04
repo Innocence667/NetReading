@@ -38,9 +38,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:text="Loading..."
+        android:text="加载中..."
         android:textColor="#233143"
-        android:textSize="24sp" />
+        android:textSize="20sp" />
   </LinearLayout>
 
   <ImageView

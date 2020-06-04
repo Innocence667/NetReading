@@ -869,7 +869,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 Bitmap bitmap = BitmapFactory.decodeFile(localImageData.getPath());
                 imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
                 Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
-                Log.e(TAG, "图片保存到本地的地址是：" + localImageData.getPath());
+                Log.e(TAG, "图片保存到本地：" + localImageData.getPath());
 
                 Rect rect = Tool.getScreenparameters(MarkingActivity.this);
                 if (bitmap.getHeight() > rect.height() - Tool.getStatusBarHeight(context) || bitmap.getWidth() > rect.width() - 80) { //图片比屏幕大
@@ -1080,7 +1080,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void myOnclickListenet(final int position) {
                         if (System.currentTimeMillis() - scoreClickTime < 1000) {
-                            ToastUtils.showToast(context, "点击过于频繁");
+                            //ToastUtils.showToast(context, "点击过于频繁");
                             return;
                         } else {
                             scoreClickTime = System.currentTimeMillis();
@@ -2105,7 +2105,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     //获取一个新学生缓存数据
     private void getNextStudentCache() {
         Log.e(TAG, "getNextStudentCache: 缓存未批阅学生的数据");
-        myModel.getMarkNextStudent(context, request, new MyCallBack() {
+        GetMarkDataRequest cacheRequest = new GetMarkDataRequest();
+        cacheRequest.setTaskGuid(taskGuid);
+        cacheRequest.setTeacherGuid(teacherGuid);
+        myModel.getMarkNextStudent(context, cacheRequest, new MyCallBack() {
             @Override
             public void onSuccess(Object model) {
                 GetMarkNextStudentResponse nextStudentResponse = (GetMarkNextStudentResponse) model;
@@ -2114,6 +2117,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void onSuccess(Object model) {
                         LocalImageData localImageData = (LocalImageData) model;
+                        Log.e(TAG, "缓存数据图片：" + localImageData.getPath());
                         /*Bitmap bitmap = BitmapFactory.decodeFile(localImageData.getPath());
                         imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
                         Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
@@ -2203,7 +2207,14 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             }
                             //判断后面是否有回评数据
                             if (LOCATION == studentsResponse.getData().size()) { //回评结束了
-                                if (response.getTeacherTask().getTaskCount() != response.getTeacherTask().getMarkSum()) {
+                                if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //总任务没完成
+                                    if (response.getTeacherTask().getMarkCount() == 0) { //自己任务数量为0
+                                        getNewStudent();
+                                        if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount() - 1) {
+                                            //获取下一个缓存数据
+                                            getNextStudentCache();
+                                        }
+                                    }
                                     if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount()) {
                                         getNewStudent();
                                     } else { //自己的任务已经完成
@@ -2282,7 +2293,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 doubleScoreTableAdapter.setPos(-1);
                                 doubleScoreTableAdapter.notifyDataSetChanged();
                             }
-                            LOCATION = -1;
+                            LOCATION = saveResponse.getMyNumber();
                             //修改一下原先获取的试卷数据(已阅、未阅)
                             response.getTeacherTask().setMarkNumber(saveResponse.getMyNumber());
                             response.getTeacherTask().setMarkCount(saveResponse.getMyCount());
@@ -2292,11 +2303,19 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 if (response.getTeacherTask().getMarkCount() != 0) { //有自己的任务
                                     if (response.getTeacherTask().getMarkNumber() < response.getTeacherTask().getMarkCount()) {
                                         loadCacheData();
+                                        if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount() - 1) {
+                                            //获取下一个缓存数据
+                                            getNextStudentCache();
+                                        }
                                     } else {
                                         myTaskOverDialog();
                                     }
                                 } else { //帮阅模式
                                     loadCacheData();
+                                    if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount() - 1) {
+                                        //获取下一个缓存数据
+                                        getNextStudentCache();
+                                    }
                                 }
                             } else {
                                 //阅卷结束

@@ -57,7 +57,7 @@ public class ReviewAdatper extends BaseAdapter {
         }
 
         holder.number.setText(dataBeans.get(position).getTestCode());
-        holder.time.setText(dataBeans.get(position).getTime().split("T")[0]);
+        holder.time.setText(dataBeans.get(position).getTime().split("T")[1].split("\\.")[0]);
         String[] split = String.valueOf(dataBeans.get(position).getScore()).split("\\.");
         if (split != null && split.length > 0) {
             if ("0".equals(split[1])) {
@@ -84,5 +84,9 @@ public class ReviewAdatper extends BaseAdapter {
             score = view.findViewById(R.id.questionScore);
             flag = view.findViewById(R.id.flag);
         }
+    }
+
+    public void updateDatas(List<ReviewStudentsResponse.DataBean> dataBeanList) {
+        this.dataBeans = dataBeanList;
     }
 }
