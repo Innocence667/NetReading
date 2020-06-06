@@ -25,6 +25,8 @@ public class Interfaces {
     public String GETEXAMLISTAPP;
     //获取考试题目列表
     public String GETTEACHERTASKLIST;
+    //判断是否可以进行帮阅
+    public String OTHERTASK;
     //获取阅卷数据
     public String GETMARKDATA;
     //获取下一个学生的数据
@@ -49,8 +51,6 @@ public class Interfaces {
 
     //我的任务列表接口
     public String TASKS;
-    //全部任务列表接口(自己的任务完成时，帮阅调用的接口)GET请求(参数taskGuid、userGUID、userName)
-    public String OTHERTASK;
     //任务具体信息接口
     public String TASKINFO;
     //是否已领取任务接口
@@ -73,6 +73,7 @@ public class Interfaces {
         //LOGIN = SERVICEPATH + "/base/home/logincheck";
         GETEXAMLISTAPP = RUIYI + "getExamListApp";
         GETTEACHERTASKLIST = RUIYI + "getTeacherTaskList";
+        OTHERTASK = RUIYI + "OtherTask";
         GETMARKDATA = RUIYI + "getMarkData";
         MARKNEXTSTUDENT = RUIYI + "MarkNextStudent";
         SAVEMARKDATA = RUIYI + "SaveMarkDataApp";
@@ -85,9 +86,7 @@ public class Interfaces {
         DOWNLOAD = RUIYI + "Download";
 
 
-
         TASKS = RUIYI + "Tasks";
-        OTHERTASK = RUIYI + "OtherTask";
         TASKINFO = RUIYI + "TaskInfo";
         EXISTTASK = RUIYI + "ExistTask";
         UNCLAIMEDTASK = RUIYI + "UnClaimedTask";

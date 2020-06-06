@@ -146,6 +146,29 @@ public class MyModel {
         });
     }
 
+    //判断是否可以进行帮阅
+    public void OtherTask(Context context, final GetMarkDataRequest request, final MyCallBack callBack) {
+        Log.e("OtherTask", "检测是否可以帮阅: " + gson.toJson(request));
+        Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).OTHERTASK, gson.toJson(request));
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                callBack.onFailed(e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String json = response.body().string();
+                if (response.code() == 200 && json.contains("\"success\":200")) {
+                    LogUtils.logE("OtherTask", json);
+                    callBack.onSuccess(json);
+                } else {
+                    callBack.onFailed(json);
+                }
+            }
+        });
+    }
+
     //获取阅卷数据
     public void getMarkData(Context context, final GetMarkDataRequest request, final MyCallBack callBack) {
         Log.e("getMarkData", gson.toJson(request));
@@ -215,7 +238,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        //LogUtils.logE("getStudentMarkData", "获取已批阅数据：" + json);
+                        LogUtils.logE("getStudentMarkData", "获取已批阅数据：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
                     } else {
                         callBack.onFailed(json);

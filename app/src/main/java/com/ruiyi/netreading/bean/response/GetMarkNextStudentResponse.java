@@ -287,7 +287,7 @@ public class GetMarkNextStudentResponse {
             }
         }
 
-        public static class ImageArrBean implements Comparable {
+        public static class ImageArrBean implements Comparable<ImageArrBean> {
             /**
              * src : data:image/jpeg;base64
              * index : 0
@@ -313,12 +313,8 @@ public class GetMarkNextStudentResponse {
             }
 
             @Override
-            public int compareTo(Object o) {
-                if (o instanceof ImageArrBean) {
-                    ImageArrBean bean = (ImageArrBean) o;
-                    return bean.index;
-                }
-                return 0;
+            public int compareTo(ImageArrBean o) {
+                return this.getIndex() - o.getIndex();
             }
         }
     }

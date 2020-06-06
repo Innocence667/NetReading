@@ -78,7 +78,7 @@ public class Tool {
             if (imgArrData.size() != 1) {
                 imgArrData.remove(0);
                 Bitmap bitmap1 = base64ToBitmap2(imageDataList, imgArrData);
-                Bitmap pictur = MergePictur(bitmap1, bitmap1);
+                Bitmap pictur = MergePictur(bitmap, bitmap1);
                 imageData.setPath(savePic(pictur, id));
                 imageData.setList(imageDataList);
                 callBack.onSuccess(imageData);
@@ -109,8 +109,8 @@ public class Tool {
         imageDataList.add(new ImageData(bitmap1.getWidth(), bitmap1.getHeight()));
 
         if (imageArrBeanList.size() != 1) {
-            imgArrData.remove(0);
-            Bitmap bitmap2 = base64ToBitmap2(imageDataList, imgArrData);
+            imageArrBeanList.remove(0);
+            Bitmap bitmap2 = base64ToBitmap2(imageDataList, imageArrBeanList);
             return MergePictur(bitmap1, bitmap2);
         } else {
             return bitmap1;

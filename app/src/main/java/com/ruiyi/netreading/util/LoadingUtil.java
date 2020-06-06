@@ -36,6 +36,7 @@ public class LoadingUtil {
         set.start();
         dialog.show();
         dialog.setContentView(view);
+        Log.e("123", "显示加载dialog");
     }
 
     public static void closeDialog() {
@@ -46,5 +47,6 @@ public class LoadingUtil {
             dialog.cancel();
             //dialog = null;
         }
+        Log.e("123", "关闭加载dialog");
     }
 }
