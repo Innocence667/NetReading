@@ -52,8 +52,8 @@ public class GetExamListResponse {
         private String paperGuid; //试卷guid
         private String paperName; //试卷名称
         private String courseId;
-        private int status;
-        private int number;
+        private int status; //(2可以阅卷、3统计完成)
+        private int number; //答题卡的数量
         private boolean isClosed; //是否关闭考试
         private String examTime;
 

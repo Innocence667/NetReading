@@ -192,7 +192,7 @@ public class GetMarkDataResponse {
         private String taskGuid;
         private int number;
         private String subNumber;
-        private int score;
+        private double score;
 
         public String getTaskGuid() {
             return taskGuid;
@@ -218,11 +218,11 @@ public class GetMarkDataResponse {
             this.subNumber = subNumber;
         }
 
-        public int getScore() {
+        public double getScore() {
             return score;
         }
 
-        public void setScore(int score) {
+        public void setScore(double score) {
             this.score = score;
         }
     }

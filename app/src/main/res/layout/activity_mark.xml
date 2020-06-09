@@ -181,80 +181,76 @@
             android:outlineProvider="bounds">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@color/colorWhite"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/commentsP"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    android:layout_weight="1">
 
                     <CheckBox
                         android:id="@+id/comments"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
                         android:button="@null"
                         android:drawableLeft="@drawable/comments_style"
                         android:drawablePadding="5dp"
                         android:text="批注"
                         android:textColor="@color/colorScoreItem" />
 
-                </LinearLayout>
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
 
-                <View
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorGrey2" />
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/eliminateP"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/eliminate_style"
-                        android:duplicateParentState="true" />
+                    android:layout_weight="1">
 
                     <TextView
                         android:id="@+id/eliminate"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:drawableLeft="@drawable/eliminate_style"
+                        android:drawablePadding="5dp"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="清除笔记"
                         android:textColor="@drawable/text_font_style" />
 
-                </LinearLayout>
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
 
-                <View
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorGrey2" />
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/stepScoreP"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    android:layout_weight="1">
 
                     <CheckBox
                         android:id="@+id/stepScore"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
                         android:button="@null"
                         android:drawableLeft="@drawable/stepscore_style"
                         android:drawablePadding="5dp"
@@ -262,25 +258,26 @@
                         android:text="步骤分"
                         android:textColor="@color/colorScoreItem" />
 
-                </LinearLayout>
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
 
-                <View
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorGrey2" />
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/collectionP"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    android:layout_weight="1">
 
                     <CheckBox
                         android:id="@+id/collection"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
                         android:button="@null"
                         android:drawableLeft="@drawable/collection_style"
                         android:drawablePadding="5dp"
@@ -288,135 +285,116 @@
                         android:text="收藏"
                         android:textColor="@color/colorScoreItem" />
 
-                </LinearLayout>
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
 
-                <View
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorGrey2" />
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/historyP"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/history_style"
-                        android:duplicateParentState="true" />
+                    android:layout_weight="1">
 
                     <TextView
                         android:id="@+id/history"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:drawableLeft="@drawable/history_style"
+                        android:drawablePadding="5dp"
                         android:duplicateParentState="true"
                         android:gravity="center"
-                        android:text="回评"
+                        android:text="回 评"
                         android:textColor="@drawable/text_font_style" />
 
-                </LinearLayout>
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
 
-                <View
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorGrey2" />
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/goOnParent"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal"
                     android:visibility="gone">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/history_style"
-                        android:duplicateParentState="true" />
 
                     <TextView
                         android:id="@+id/goOn"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:drawableLeft="@drawable/history_style"
+                        android:drawablePadding="5dp"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="继续阅卷"
                         android:textColor="@drawable/text_font_style" />
 
-                </LinearLayout>
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
 
-                <View
-                    android:id="@+id/goOnLine"
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorGrey2"
-                    android:visibility="gone" />
+                </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/scoringDatailsP"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/scoringdatails_style"
-                        android:duplicateParentState="true" />
+                    android:layout_weight="1">
 
                     <TextView
                         android:id="@+id/scoringDatails"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:drawableLeft="@drawable/scoringdatails_style"
+                        android:drawablePadding="5dp"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="评分详情"
                         android:textColor="@drawable/text_font_style" />
 
-                </LinearLayout>
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
 
+                </RelativeLayout>
 
-                <View
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
-                    android:background="@color/colorGrey2" />
-
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/settingP"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:background="@drawable/setting_style"
-                        android:duplicateParentState="true" />
+                    android:gravity="center">
 
                     <TextView
                         android:id="@+id/setting"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
+                        android:drawableLeft="@drawable/setting_style"
+                        android:drawablePadding="5dp"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="设置"
                         android:textColor="@drawable/text_font_style" />
 
-                </LinearLayout>
+                </RelativeLayout>
 
             </LinearLayout>
 

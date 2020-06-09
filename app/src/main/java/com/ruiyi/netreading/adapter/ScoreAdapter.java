@@ -20,6 +20,7 @@ public class ScoreAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private List<String> scores;
     private List<Boolean> scoreCheck;
+    private boolean status = true; //当前状态是否可以进行修改分数操作
     private boolean isStepScore; //是否是步骤分模式
 
     public ScoreAdapter(Context cont, ScorePanel data) {
@@ -53,6 +54,11 @@ public class ScoreAdapter extends BaseAdapter {
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
+        }
+        if (status) {
+            holder.scoreItem.setEnabled(true);
+        } else {
+            holder.scoreItem.setEnabled(false);
         }
 
         if (scoreCheck.get(position)) {
@@ -130,5 +136,9 @@ public class ScoreAdapter extends BaseAdapter {
             }
         }
         return -1.0;
+    }
+
+    public void clickEnable(boolean enabled) {
+        this.status = enabled;
     }
 }

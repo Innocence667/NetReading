@@ -16,7 +16,8 @@ import java.util.List;
 
 public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.ViewHolder> {
 
-    private List<String> data;
+    private List<String> data; //题号
+    private List<String> scores; //得分
     private Context mContext;
     private int pos = 0; //当前选中的item下标
     private LayoutInflater inflater;
@@ -32,8 +33,9 @@ public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.
     }
 
 
-    public QuestionNumAdapter(Context context, List<String> list) {
+    public QuestionNumAdapter(Context context, List<String> list, List<String> mScores) {
         this.data = list;
+        this.scores = mScores;
         this.mContext = context;
         this.inflater = LayoutInflater.from(context);
     }
@@ -48,7 +50,11 @@ public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
-        holder.questionNo.setText(data.get(position));
+        if (!"-1".equals(scores.get(position))) {
+            holder.questionNo.setText(data.get(position) + "(" + scores.get(position) + "分)");
+        } else {
+            holder.questionNo.setText(data.get(position));
+        }
         if (pos == position) {
             holder.questionNo.setChecked(true);
             holder.questionNo.setTextColor(ContextCompat.getColor(mContext, R.color.colorBlue));
@@ -88,5 +94,10 @@ public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.
     //更新数据
     public void udataeData(List<String> data1) {
         this.data = data1;
+    }
+
+    //更新指定位置的分数
+    public void updateScore(int pos, String score) {
+        scores.set(pos, score);
     }
 }

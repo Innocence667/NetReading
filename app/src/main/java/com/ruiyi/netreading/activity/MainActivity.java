@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SmartRefreshLayout refreshLayou;//只能刷新控件
     private ExpandableListView listView;//二级listView
     private TaskListAdapter taskListAdapter;//适配器
+    private int status; //当前考试的状态(2可以阅卷、3统计完成不可修改)
 
     private MyModel myModel;
     private GetExamListRequest getExamListRequest;//考试任务请求参数
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     Intent marking = new Intent(MainActivity.this, MarkingActivity.class);
                                     marking.putExtra("teacherGuid", teacherGuid);
                                     marking.putExtra("taskGuid", data.get(position).getTaskGuid());
+                                    marking.putExtra("status", status);
                                     startActivity(marking);
                                 } else {
                                     ToastUtils.showToast(context, "参数异常");
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         });
                         listView.setAdapter(taskListAdapter);
-
+                        status = getExamListResponse.getExamList().get(0).getStatus();
                         //默认展开第一个step
                         listView.expandGroup(0);
                         getExamContextRequest = new GetExamContextRequest();
@@ -131,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                                     data.add(getExamContextResponse.getTaskList().get(i));
                                                 }
                                             }
-
                                             taskListAdapter.setChilds(data);
                                             taskListAdapter.notifyDataSetChanged();
                                         }
@@ -196,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 for (int i = 0; i < listView.getExpandableListAdapter().getGroupCount(); i++) {
                                     listView.collapseGroup(i);
                                 }
+                                status = getExamListResponse.getExamList().get(0).getStatus();
                                 //默认展开第一个item
                                 listView.expandGroup(0);
                                 taskListAdapter.setParentData(getExamListResponse.getExamList());
@@ -257,12 +259,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                if(!listView.isGroupExpanded(groupPosition)){
+                if (!listView.isGroupExpanded(groupPosition)) {
                     getExamContextRequest = new GetExamContextRequest();
                     getExamContextRequest.setTeacherGuid(teacherGuid);
                     PaperGuid = getExamListResponse.getExamList().get(groupPosition).getPaperGuid();
                     getExamContextRequest.setPaperGuid(PaperGuid);
                     LoadingUtil.showDialog(context);
+                    status = getExamListResponse.getExamList().get(groupPosition).getStatus();
                     myModel.getTaskContext(context, getExamContextRequest, new MyCallBack() {
                         @Override
                         public void onSuccess(Object object) {
@@ -301,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             });
                         }
                     });
-                }else{
+                } else {
                     listView.collapseGroup(groupPosition);
                 }
                 return false;
@@ -318,6 +321,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
+                status = getExamListResponse.getExamList().get(groupPosition).getStatus();
                 int count = taskListAdapter.getGroupCount();
                 for (int i = 0; i < count; i++) {
                     if (i != groupPosition) {
