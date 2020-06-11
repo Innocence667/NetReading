@@ -796,7 +796,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         scorePanel.setScores(stringList);
                         scorePanel.setScoresCheck(booleanList);
                     } else {
-                        for (int i = 0; i < Math.ceil(fullScore + 1); i++) {
+                        for (int i = 0; i < Math.floor(fullScore + 1.0); i++) {
                             scores.add(String.valueOf(i));
                             if (i == score) {
                                 scoresCheck.add(true);
@@ -952,7 +952,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 mSpenPageDoc.setBackgroundImage(localImageData.getPath());
                 mSpenSimpleSurfaceView.update();
                 LoadingUtil.closeDialog();
-                if (status == 3) {
+                //业务逻辑修改，当前任务统计完成绩后依然可以随时回评修改，发布导出成绩时需要重新统计
+                /*if (status == 3) {
                     ToastUtils.showTopToast(context, "当前考试已统计成绩，无法进行修改数据", R.style.Toast_Animation);
                     runOnUiThread(new Runnable() {
                         @Override
@@ -969,7 +970,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             }
                         }
                     });
-                }
+                }*/
             }
 
             @Override
@@ -985,8 +986,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             comments.setTextColor(getResources().getColor(R.color.colorBlue));
             stepScore.setChecked(false);
             stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
-            childLocations = null;
-            mSpenSimpleSurfaceView.setTouchListener(null);
+            if (reviewMode) {
+                if (childLocations != null) {
+                    childLocations.clear();
+                }
+                mSpenSimpleSurfaceView.setTouchListener(null);
+            }
         } else if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore())
                 && nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore().length() > 10) {
             addStepScore(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore());
@@ -995,7 +1000,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
             stepScore.setChecked(true);
             stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
-            mSpenSimpleSurfaceView.setTouchListener(this);
+            if (reviewMode) {
+                mSpenSimpleSurfaceView.setTouchListener(this);
+            }
         }
         initUI(nextStudentResponse);
     }
@@ -1207,6 +1214,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
                                     questionNumAdapter.updateScore(minLocation, scorePanel.getScores().get(position));
                                     questionNumAdapter.notifyDataSetChanged();
+                                    saveNowPageData(minLocation);
 
                                     new Thread(new Runnable() {
                                         @Override
@@ -1300,7 +1308,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 submiss.setVisibility(View.VISIBLE);
             }
         } else {
-            saveNowPageData(minLocation);
             submiss.setVisibility(View.GONE);
 
             //更新题号列表和分数
@@ -1347,6 +1354,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      */
 
     private void saveNowPageData(int loc) {
+        Log.e(TAG, "saveNowPageData: 保存当前页面数据到对象中，位置是" + loc);
         if (!"-1".equals(saveMarkDataBean.getQuestions().get(loc).getMarkScore())) {
             if (mSpenPageDoc.getObjectList().size() != 0) {
                 getPageDocObject();
@@ -1523,6 +1531,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 if (stepScore.isChecked()) {
                     mSpenSimpleSurfaceView.setTouchListener(this);
+                    stepScoreModeScore = 0;
                     ToastUtils.showToast(context, "开启步骤分");
                     mSpenPageDoc.removeAllObject();
                     mSpenSimpleSurfaceView.update();
@@ -1556,11 +1565,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     scoreAdapter.setStepScore(true);
                     scoreAdapter.setScoreCheck(-1);
                     saveMarkDataBean.getQuestions().get(minLocation).setMarkScore("-1");
+                    saveMarkDataBean.getQuestions().get(minLocation).setCoordinate("");
                     questionScore.setText(String.valueOf(0));
                 } else {
                     mSpenSimpleSurfaceView.setTouchListener(null);
                     ToastUtils.showToast(context, "关闭步骤分");
-                    childLocations = null;
+                    childLocations.clear();
                     tableStepScore = null;
                     isStepScore = false;
                     PreferencesService.getInstance(context).saveAutoSubmit(true);
@@ -1637,7 +1647,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.goOn: //继续阅卷
                 LoadingUtil.showDialog(context);
                 tableParent.removeAllViews();
-                childLocations.clear();
+                if (childLocations != null)
+                    childLocations.clear();
                 getNewStudent();
                 break;
             case R.id.settingP: //设置
@@ -2314,7 +2325,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         @Override
                         public void run() {
                             LOCATION++;
-                            childLocations = null;
+                            if (childLocations != null) {
+                                childLocations.clear();
+                            }
                             tableParent.removeAllViews();
                             doubleScore = "0";
                             if (doubleMode) {
@@ -2409,7 +2422,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            childLocations = null;
+                            if (childLocations != null) {
+                                childLocations.clear();
+                            }
                             tableParent.removeAllViews();
                             doubleScore = "0";
                             stepScoreModeScore = 0;
@@ -2424,25 +2439,26 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             response.getTeacherTask().setTaskCount(saveResponse.getTaskCount());
                             response.getTeacherTask().setMarkSum(saveResponse.getTaskNumber());
                             if (saveResponse.getTaskNumber() < saveResponse.getTaskCount()) { //任务已阅量 < 任务总量
-                                if (response.getTeacherTask().getMarkCount() != 0) { //有自己的任务
-                                    if (response.getTeacherTask().getMarkNumber() < response.getTeacherTask().getMarkCount()) {
+                                if (saveResponse.getMyCount() != 0) { //有自己的任务
+                                    if (saveResponse.getMyNumber() < saveResponse.getMyCount()) {
                                         //loadCacheData();
+                                        getNewStudent();
                                         if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount() - 1) {
                                             //获取下一个缓存数据
                                             //getNextStudentCache();
-                                            getNewStudent();
+                                            //getNewStudent();
                                         }
                                     } else {
                                         myTaskOverDialog();
                                     }
                                 } else { //帮阅模式
                                     //loadCacheData();
-                                    if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount() - 1) {
+                                    getNewStudent();
+                                    if (saveResponse.getTaskNumber() != saveResponse.getTaskCount() - 1) {
                                         //获取下一个缓存数据
                                         //getNextStudentCache();
-                                        getNewStudent();
+                                        //getNewStudent();
                                     }
-
                                 }
                             } else {
                                 //阅卷结束
@@ -2730,6 +2746,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     public boolean onTouch(View view, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                Log.e(TAG, "onTouch: 点击了");
                 //第一个触摸是电子笔
                 if (event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS) {
                     if (TextUtils.isEmpty(tableStepScore) || "0".equals(tableStepScore)) {
@@ -2751,6 +2768,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         }
                     }
                     if (stepScoreModeScore + (Double.valueOf(tableStepScore)) > Double.valueOf(TOTAL)) {
+                        Log.e(TAG, "onTouch: 得分" + stepScoreModeScore);
+                        Log.e(TAG, "onTouch: 当前选中的标签" + tableStepScore);
+                        Log.e(TAG, "onTouch: 当前题目总分" + TOTAL);
                         ToastUtils.showToast(context, "不能超过题目总分");
                     }
                 }
