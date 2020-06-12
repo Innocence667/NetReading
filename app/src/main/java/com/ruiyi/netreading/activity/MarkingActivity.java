@@ -1039,9 +1039,15 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 doubleMode = false;
                 //双栏模式开关是否开启
                 if (getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFullScore() >= 10) {
-                    soubleLayout.setVisibility(View.VISIBLE);
-                    douleScoreCheckBox.setChecked(false);
-                    doubleScoreLayout.setVisibility(View.GONE);
+                    if (!isStepScore) {
+                        soubleLayout.setVisibility(View.VISIBLE);
+                        douleScoreCheckBox.setChecked(false);
+                        doubleScoreLayout.setVisibility(View.GONE);
+                    } else {
+                        soubleLayout.setVisibility(View.GONE);
+                        douleScoreCheckBox.setChecked(false);
+                        doubleScoreLayout.setVisibility(View.GONE);
+                    }
                 } else {
                     soubleLayout.setVisibility(View.GONE);
                     douleScoreCheckBox.setChecked(false);
@@ -1215,12 +1221,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         }
                                         questionScore.setText(SCORE);
                                         saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(SCORE);
+                                        questionNumAdapter.updateScore(minLocation, SCORE);
                                     } else {
                                         questionScore.setText(scorePanel.getScores().get(position));
                                         saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(scorePanel.getScores().get(position)));
+                                        questionNumAdapter.updateScore(minLocation, scorePanel.getScores().get(position));
                                     }
 
-                                    questionNumAdapter.updateScore(minLocation, SCORE);
                                     questionNumAdapter.notifyDataSetChanged();
                                     saveNowPageData(minLocation);
 
