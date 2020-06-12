@@ -45,7 +45,8 @@ public class GetExamContextResponse {
         private String taskName;
         private int taskCount; //所有教师的任务总量
         private int markNumber; //所有教师的已阅量
-        private int order;
+        private int order; //顺序
+        private int style; //阅卷类型(1单评、3按班)
         private boolean canMark; //是否可以阅卷
         private List<QuestionsBean> questions;
         private List<AvgListBean> avgList;

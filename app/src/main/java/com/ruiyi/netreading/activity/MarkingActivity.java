@@ -978,6 +978,15 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 showFailedPage(str);
             }
         });
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tableParent.removeAllViews();
+                if (childLocations != null) {
+                    childLocations.clear();
+                }
+            }
+        });
         if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate())
                 && nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate().length() > 10) {
             addStroke(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate());
@@ -1183,7 +1192,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void myOnclickListenet(final int position) {
                         if (System.currentTimeMillis() - scoreClickTime < 1000) {
-                            //ToastUtils.showToast(context, "点击过于频繁");
                             return;
                         } else {
                             scoreClickTime = System.currentTimeMillis();
@@ -1212,7 +1220,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(scorePanel.getScores().get(position)));
                                     }
 
-                                    questionNumAdapter.updateScore(minLocation, scorePanel.getScores().get(position));
+                                    questionNumAdapter.updateScore(minLocation, SCORE);
                                     questionNumAdapter.notifyDataSetChanged();
                                     saveNowPageData(minLocation);
 
@@ -1239,7 +1247,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         submiss.setVisibility(View.VISIBLE);
                                     } else {
                                         tableStepScore = scorePanel.getScores().get(position);
-                                        submiss.setVisibility(View.GONE);
+                                        //submiss.setVisibility(View.GONE);
                                     }
                                 }
                                 scoreAdapter.setScoreCheck(position);
@@ -1325,6 +1333,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             questionNumAdapter.setPos(minLocation);
             questionNumAdapter.notifyDataSetChanged();
 
+            doubleScore = "0";
+            doubleScoreTableAdapter.update(getQuestionScore(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
+            doubleScoreTableAdapter.setPos(-1);
+            doubleScoreTableAdapter.notifyDataSetChanged();
+
             if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore() >= 10) {
                 soubleLayout.setVisibility(View.VISIBLE);
             } else {
@@ -1354,7 +1367,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      */
 
     private void saveNowPageData(int loc) {
-        Log.e(TAG, "saveNowPageData: 保存当前页面数据到对象中，位置是" + loc);
         if (!"-1".equals(saveMarkDataBean.getQuestions().get(loc).getMarkScore())) {
             if (mSpenPageDoc.getObjectList().size() != 0) {
                 getPageDocObject();
@@ -1760,11 +1772,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         submiss.setVisibility(View.GONE);
                     }
                     doubleScoreLayout.setVisibility(View.VISIBLE);
-                    integers = new ArrayList<>();
-                    for (int i = 10; i <= Double.valueOf(TOTAL); i += 10) {
-                        integers.add(i);
-                    }
-                    doubleScoreTableAdapter = new DoubleScoreTableAdapter(context, integers);
+                    doubleScoreTableAdapter = new DoubleScoreTableAdapter(context, getQuestionScore(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
                     doubleScoreTableAdapter.setMyOnClickLisener(new DoubleScoreTableAdapter.MyOnClickLisener() {
                         @Override
                         public void MyClick(int position) {
@@ -1867,6 +1875,15 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 submiss.setVisibility(View.VISIBLE);
                 break;
         }
+    }
+
+    //更新双栏模式的选项
+    private List<Integer> getQuestionScore(double fullScore) {
+        integers = new ArrayList<>();
+        for (int i = 10; i <= fullScore; i += 10) {
+            integers.add(i);
+        }
+        return integers;
     }
 
     //获取一个新的未批学生数据
