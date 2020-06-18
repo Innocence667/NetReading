@@ -39,6 +39,7 @@ public class GetExamContextResponse {
          * avgList : [{"number":15,"subNumber":"0","sumScore":10,"mySumScore":10,"count":1}]
          * teacherData : [{"teacherCount":0,"teacherNumber":1}]
          * canMark : true //是否是自己的任务
+         * style : 1
          */
 
         private String taskGuid;
@@ -90,6 +91,14 @@ public class GetExamContextResponse {
 
         public void setOrder(int order) {
             this.order = order;
+        }
+
+        public int getStyle() {
+            return style;
+        }
+
+        public void setStyle(int style) {
+            this.style = style;
         }
 
         public boolean isCanMark() {

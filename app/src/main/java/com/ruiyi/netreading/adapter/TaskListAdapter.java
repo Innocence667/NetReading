@@ -25,6 +25,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
     private List<GetExamListResponse.ExamListBean> datas; //父数据源
     private List<GetExamContextResponse.TaskListBean> childs; //子数据源
     private LayoutInflater inflater;
+    private boolean isOver; //自己的任务手全部阅完
 
     public TaskListAdapter(Context context, List<GetExamListResponse.ExamListBean> list) {
         this.mContext = (MainActivity) context;
@@ -134,7 +135,13 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                         if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() != childs.get(childPosition).getTeacherData().get(0).getTeacherCount()) {
                             chileViewHolder.startTask.setText("继续阅卷");
                         } else {
-                            chileViewHolder.startTask.setText("回 评");
+                            //单评模式下，自己的任务全部阅完了就可以帮阅别人的任务
+                            if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() == childs.get(childPosition).getTeacherData().get(0).getTeacherCount()
+                                    && childs.get(childPosition).getMarkNumber() != childs.get(childPosition).getTaskCount()) {
+                                chileViewHolder.startTask.setText("继续阅卷");
+                            } else {
+                                chileViewHolder.startTask.setText("回 评");
+                            }
                         }
                     }
                 }
@@ -229,30 +236,26 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
         this.childs = childs1;
 
         //判断自己的任务是否全部阅完
-        boolean isOver = true;
+        isOver = true;
         for (int i = 0; i < childs.size(); i++) {
-            if (childs.get(i).getTaskCount() != childs.get(i).getMarkNumber()) {
-                isOver = false;
+            if (childs.get(i).isCanMark()) { //是自己的任务
+                if (childs.get(i).getTaskCount() != childs.get(i).getMarkNumber()) {
+                    isOver = false;
+                    break;
+                }
             }
         }
 
         if (isOver) {
-            boolean isM = true;//是不是都是自己的任务
             boolean isOv = true;//任务是否完成
             //调用mymodel.getTaskContext()方法
             for (int i = 0; i < childs.size(); i++) {
-                if (!childs.get(i).isCanMark()) {
-                    isM = false;
-                    break;
-                }
                 if (childs.get(i).getTaskCount() != childs.get(i).getMarkNumber()) {
                     isOv = false;
                     break;
                 }
             }
-            if (isM && isOv) {
-
-            } else {
+            if (!isOv) {
                 mContext.updataChildData();
             }
         }

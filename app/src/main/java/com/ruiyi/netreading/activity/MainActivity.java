@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     marking.putExtra("teacherGuid", teacherGuid);
                                     marking.putExtra("taskGuid", data.get(position).getTaskGuid());
                                     marking.putExtra("status", status);
+                                    marking.putExtra("type", getExamContextResponse.getTaskList().get(position).getStyle());
                                     startActivity(marking);
                                 } else {
                                     ToastUtils.showToast(context, "参数异常");
@@ -145,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
+                                        //failed to connect to riyun.lexuewang.cn/116.62.133.77 (port 8002) after 3000ms
                                         showFailedPage(str);
                                         Log.e(TAG, "获取任务详情请求失败," + str);
                                     }
@@ -397,7 +399,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                ToastUtils.showToast(context, str);
+                if (str.contains("failed to connect to") || str.contains("after 5000ms")) {
+                    ToastUtils.showToast(context, "请求超时，无法连接到服务器");
+                } else {
+                    ToastUtils.showToast(context, str);
+                }
             }
         });
     }

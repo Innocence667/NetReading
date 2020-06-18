@@ -41,9 +41,9 @@ public class HttpUtil {
 
     private HttpUtil() {
         okHttpClient = new OkHttpClient().newBuilder()
-                .connectTimeout(3, TimeUnit.SECONDS)
-                .readTimeout(3, TimeUnit.SECONDS)
-                .writeTimeout(3, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS)
                 .sslSocketFactory(getSSLSocketFactory())
                 .build();
     }

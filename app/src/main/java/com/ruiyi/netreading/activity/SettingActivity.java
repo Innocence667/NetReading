@@ -125,6 +125,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 dialog.show();
                 break;
             case R.id.dialog_determine:
+                dialog.cancel();
                 //ActivityCollector.finishAll();
                 PreferencesService.getInstance(context).clearUserData();
                 startActivity(new Intent(SettingActivity.this, LoginActivity.class));

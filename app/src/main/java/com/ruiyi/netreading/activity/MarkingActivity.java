@@ -122,6 +122,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private String teacherGuid;//教师guid
     private String taskGuid;//任务guid
     private int status; //当前阅卷状态
+    private int style; //当前阅卷模式(1单评、3按班)
 
     private int LOCATION = 0; //当前题目的进度(12/100中的12，回评模式用的到),是集合的下标
     private int minLocation = 0; //当前显示题目的位置(合并题：当前第几个小题；非合并题：当前位置为0)
@@ -235,6 +236,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         teacherGuid = intent.getStringExtra("teacherGuid");
         taskGuid = intent.getStringExtra("taskGuid");
         status = intent.getIntExtra("status", 2);
+        style = intent.getIntExtra("style", 1);
         request = new GetMarkDataRequest();
         request.setTaskGuid(taskGuid);
         request.setTeacherGuid(teacherGuid);
@@ -252,8 +254,16 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             if (response.getTeacherTask().getMarkCount() != 0) { //不是自由阅卷
                                 if (response.getTeacherTask().getMarkNumber() < response.getTeacherTask().getMarkCount()) { //继续阅卷
                                     normalMOde();
-                                } else { //回评
-                                    goBackMode();
+                                } else {
+                                    if (style == 1) { //单评模式下自己的任务完成后可以继续批阅任务
+                                        if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) {
+                                            normalMOde(); //正常批阅
+                                        } else {
+                                            goBackMode(); //回评
+                                        }
+                                    } else {
+                                        goBackMode(); //回评
+                                    }
                                 }
                             } else { //自由阅卷
                                 if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //继续阅卷
@@ -298,11 +308,17 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 cachePool.add(getMarkNextStudentResponse);
                 if (response.getTeacherTask().getMarkCount() == 0) { //自由阅卷
                     if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //当前任务没有阅完
-                        //getNextStudentCache();
+                        getNextStudentCache();
                     }
                 } else { //有任务
                     if (response.getTeacherTask().getMarkNumber() < response.getTeacherTask().getMarkCount()) { //自己的任务没有阅完
-                        //getNextStudentCache();
+                        getNextStudentCache();
+                    } else {
+                        if (style == 1) {
+                            if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) {
+                                getNextStudentCache();
+                            }
+                        }
                     }
                 }
                 if (getMarkNextStudentResponse.getData() == null || getMarkNextStudentResponse.getData().getStudentData() == null
@@ -1032,10 +1048,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     goOnParent.setVisibility(View.GONE);
                 }
                 strings = getQuestions(getMarkNextStudentResponse1.getData().getStudentData().getQuestions());
-                if (strings.size() > 1) {
-                    //合并任务暂时不支持步骤分
-                    stepScore.setEnabled(false);
-                }
                 doubleMode = false;
                 //双栏模式开关是否开启
                 if (getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFullScore() >= 10) {
@@ -1072,6 +1084,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
                         int loc = minLocation;
                         saveNowPageData(loc);
+                        mSpenPageDoc.removeAllObject();
+                        mSpenSimpleSurfaceView.update();
 
                         // 小题切换
                         minLocation = positon;
@@ -1254,7 +1268,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         submiss.setVisibility(View.VISIBLE);
                                     } else {
                                         tableStepScore = scorePanel.getScores().get(position);
-                                        //submiss.setVisibility(View.GONE);
                                     }
                                 }
                                 scoreAdapter.setScoreCheck(position);
@@ -1324,6 +1337,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             }
         } else {
             submiss.setVisibility(View.GONE);
+            mSpenPageDoc.removeAllObject();
+            mSpenSimpleSurfaceView.update();
 
             //更新题号列表和分数
             questionNum.setText(strings.get(minLocation));
@@ -1340,13 +1355,14 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             questionNumAdapter.setPos(minLocation);
             questionNumAdapter.notifyDataSetChanged();
 
-            doubleScore = "0";
-            doubleScoreTableAdapter.update(getQuestionScore(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
-            doubleScoreTableAdapter.setPos(-1);
-            doubleScoreTableAdapter.notifyDataSetChanged();
-
             if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore() >= 10) {
                 soubleLayout.setVisibility(View.VISIBLE);
+                doubleScore = "0";
+                if (doubleScoreTableAdapter != null) {
+                    doubleScoreTableAdapter.update(getQuestionScore(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
+                    doubleScoreTableAdapter.setPos(-1);
+                    doubleScoreTableAdapter.notifyDataSetChanged();
+                }
             } else {
                 soubleLayout.setVisibility(View.GONE);
                 doubleMode = false;
@@ -1377,8 +1393,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         if (!"-1".equals(saveMarkDataBean.getQuestions().get(loc).getMarkScore())) {
             if (mSpenPageDoc.getObjectList().size() != 0) {
                 getPageDocObject();
-                mSpenPageDoc.removeAllObject();
-                mSpenSimpleSurfaceView.update();
+                /*mSpenPageDoc.removeAllObject();
+                mSpenSimpleSurfaceView.update();*/
             } else {
                 //saveMarkDataBean.getQuestions().get(loc).setStepScore();
             }
@@ -1544,8 +1560,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 }
                 if (comments.isChecked()) {
-                    stepScore.setChecked(false);
                     ToastUtils.showToast(context, "当前模式无法开启步骤分");
+                    stepScore.setChecked(false);
+                    return;
+                }
+                if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().size() > 1) {
+                    ToastUtils.showToast(context, "该题目不支持步骤分");
+                    stepScore.setChecked(false);
                     return;
                 }
                 if (stepScore.isChecked()) {
@@ -2195,11 +2216,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                     } else {
                                                         if (response.getTeacherTask().getMarkCount() == 0) { //自己的任务数量为0(自由阅卷)
                                                             if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //当前任务是否所有教师没有批阅完
-                                                                //getNextStudentCache();
+                                                                getNextStudentCache();
                                                             }
                                                         } else { //有自己的任务数量
                                                             if (response.getTeacherTask().getMarkNumber() < response.getTeacherTask().getMarkCount()) {
-                                                                //getNextStudentCache();
+                                                                getNextStudentCache();
                                                             }
                                                         }
                                                     }
@@ -2243,10 +2264,15 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-    //TODO 当前获取新数据接口百分百会得到上一个数据，导致缓存的数据是上一个数据，无法提交会返回该学生已提交的问题，暂时取消新数据缓存功能
     //获取一个新学生缓存数据
     private void getNextStudentCache() {
-        Log.e(TAG, "getNextStudentCache: 缓存未批阅学生的数据");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // LoadingUtil.showDialog(context);
+            }
+        });
+        Log.e(TAG, "getNextStudentCache: 缓存一个未批阅学生的数据");
         GetMarkDataRequest cacheRequest = new GetMarkDataRequest();
         cacheRequest.setTaskGuid(taskGuid);
         cacheRequest.setTeacherGuid(teacherGuid);
@@ -2254,14 +2280,14 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onSuccess(Object model) {
                 GetMarkNextStudentResponse nextStudentResponse = (GetMarkNextStudentResponse) model;
-                //有几率会得到和上一个数据一样的学生数据
-                if (nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId() ==
+                /*if (nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId() ==
                         cachePool.get(0).getData().getStudentData().getQuestions().get(0).getId()) {
                     Log.e(TAG, cachePool.get(0).getData().getStudentData().getQuestions().get(0).getId() + "   cachePool: 当前缓存数据的id：" + nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId());
                     getNextStudentCache();
                     return;
-                }
+                }*/
                 cachePool.add(nextStudentResponse);
+                Log.e(TAG, "缓存数据成功，当前的数量是" + cachePool.size());
                 Tool.base64ToBitmap(nextStudentResponse.getData().getImageArr(), nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId(), new MyCallBack() {
                     @Override
                     public void onSuccess(Object model) {
@@ -2276,6 +2302,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void onFailed(String str) {
                         showFailedPage(str);
+                    }
+                });
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //LoadingUtil.closeDialog();
                     }
                 });
             }
@@ -2365,7 +2397,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         getNewStudent();
                                         if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount() - 1) {
                                             //获取下一个缓存数据
-                                            //getNextStudentCache();
+                                            getNextStudentCache();
                                         }
                                     }
                                     if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount()) {
@@ -2441,6 +2473,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 public void onSuccess(Object model) {
                     if (cachePool != null && cachePool.size() > 0) {
                         cachePool.remove(0); //清除第一个数据
+                        Log.e(TAG, "提交数据成功，清除第一个缓存数据后的长度是：" + cachePool.size());
                     }
                     saveResponse = (SavaDataResponse) model;
                     runOnUiThread(new Runnable() {
@@ -2465,22 +2498,41 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             if (saveResponse.getTaskNumber() < saveResponse.getTaskCount()) { //任务已阅量 < 任务总量
                                 if (saveResponse.getMyCount() != 0) { //有自己的任务
                                     if (saveResponse.getMyNumber() < saveResponse.getMyCount()) {
-                                        //loadCacheData();
-                                        getNewStudent();
+                                        if (cachePool.size() > 0) {
+                                            loadCacheData();
+                                        } else {
+                                            getNewStudent();
+                                        }
                                         if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount() - 1) {
                                             //获取下一个缓存数据
-                                            //getNextStudentCache();
+                                            getNextStudentCache();
                                             //getNewStudent();
                                         }
                                     } else {
-                                        myTaskOverDialog();
+                                        if (style == 1) {
+                                            if (saveResponse.getTaskNumber() < saveResponse.getTaskCount()) {
+                                                if (cachePool.size() > 0) {
+                                                    loadCacheData();
+                                                } else {
+                                                    getNewStudent();
+                                                }
+                                                getNextStudentCache();
+                                            } else {
+                                                myTaskOverDialog();
+                                            }
+                                        } else {
+                                            myTaskOverDialog();
+                                        }
                                     }
                                 } else { //帮阅模式
-                                    //loadCacheData();
-                                    getNewStudent();
+                                    if (cachePool.size() > 0) {
+                                        loadCacheData();
+                                    } else {
+                                        getNewStudent();
+                                    }
                                     if (saveResponse.getTaskNumber() != saveResponse.getTaskCount() - 1) {
                                         //获取下一个缓存数据
-                                        //getNextStudentCache();
+                                        getNextStudentCache();
                                         //getNewStudent();
                                     }
                                 }
