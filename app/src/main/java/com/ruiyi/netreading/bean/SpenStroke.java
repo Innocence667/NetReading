@@ -3,9 +3,37 @@ package com.ruiyi.netreading.bean;
 import android.graphics.PointF;
 
 public class SpenStroke {
+    private int size; //笔的宽度
+    private String color; //笔的颜色
+    private String pageName; //当前页面(A、B面)
     private PointF[] pointS; //触摸点
     //private float[] floatS; //压力
     //private int[] integerS; //时间戳
+
+
+    public int getSize() {
+        return size;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public String getPageName() {
+        return pageName;
+    }
+
+    public void setPageName(String pageName) {
+        this.pageName = pageName;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 
     public PointF[] getPointS() {
         return pointS;

@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     marking.putExtra("teacherGuid", teacherGuid);
                                     marking.putExtra("taskGuid", data.get(position).getTaskGuid());
                                     marking.putExtra("status", status);
-                                    marking.putExtra("type", getExamContextResponse.getTaskList().get(position).getStyle());
+                                    marking.putExtra("style", getExamContextResponse.getTaskList().get(position).getStyle());
                                     startActivity(marking);
                                 } else {
                                     ToastUtils.showToast(context, "参数异常");
@@ -399,7 +399,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (str.contains("failed to connect to") || str.contains("after 5000ms")) {
+                if (str.contains("failed to connect to") || str.contains("after 10000ms")) {
                     ToastUtils.showToast(context, "请求超时，无法连接到服务器");
                 } else {
                     ToastUtils.showToast(context, str);

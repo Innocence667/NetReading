@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -101,7 +102,8 @@ import java.util.Map;
 
 public class MarkingActivity extends AppCompatActivity implements View.OnClickListener, SpenTouchListener {
 
-    private static final int PENSIZE = 3;
+    private static final int PENSIZE = 3; //笔画的宽度
+    private float scale; //图片缩放的倍数
 
     private String TAG = "MarkingActivity";
     private Context context;
@@ -158,6 +160,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     private CheckBox titleNo; //折合开关
     private RecyclerView mRecyclerView; //小题号列表
+    private LinearLayoutManager linearLayoutManager;
     private TextView progressTips;//阅卷进度提示
     private QuestionNumAdapter questionNumAdapter; //题号选择适配器
     private List<String> strings; //合并题号列表
@@ -251,26 +254,26 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         @Override
                         public void onSuccess(Object model) {
                             response = (GetMarkDataResponse) model;
-                            if (response.getTeacherTask().getMarkCount() != 0) { //不是自由阅卷
-                                if (response.getTeacherTask().getMarkNumber() < response.getTeacherTask().getMarkCount()) { //继续阅卷
-                                    normalMOde();
-                                } else {
-                                    if (style == 1) { //单评模式下自己的任务完成后可以继续批阅任务
-                                        if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) {
-                                            normalMOde(); //正常批阅
+                            if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //当前任务是否全部完成
+                                if (response.getTeacherTask().getMarkCount() != 0) { //不是自由阅卷
+                                    if (response.getTeacherTask().getMarkNumber() < response.getTeacherTask().getMarkCount()) { //继续阅卷
+                                        normalMOde();
+                                    } else {
+                                        if (style == 1) { //单评模式下自己的任务完成后可以继续批阅任务
+                                            if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) {
+                                                normalMOde(); //正常批阅
+                                            } else {
+                                                goBackMode(); //回评
+                                            }
                                         } else {
                                             goBackMode(); //回评
                                         }
-                                    } else {
-                                        goBackMode(); //回评
                                     }
-                                }
-                            } else { //自由阅卷
-                                if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //继续阅卷
+                                } else { //自由阅卷
                                     normalMOde();
-                                } else { //回评
-                                    goBackMode();
                                 }
+                            } else { //任务已完成
+                                goBackMode(); //回评
                             }
                         }
 
@@ -305,6 +308,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 minLocation = 0;
                 collectRequest = new CollectRequest();
                 getMarkNextStudentResponse = (GetMarkNextStudentResponse) model;
+                for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
+                    Log.e(TAG, "1111111111111111111111: " + getMarkNextStudentResponse.getData().getImageArr().get(i).getWidth());
+                    Log.e(TAG, "1111111111111111111111: " + getMarkNextStudentResponse.getData().getImageArr().get(i).getHeigth());
+                }
                 cachePool.add(getMarkNextStudentResponse);
                 if (response.getTeacherTask().getMarkCount() == 0) { //自由阅卷
                     if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //当前任务没有阅完
@@ -355,6 +362,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //回评模式
     private void goBackMode() {
+        Log.e("222222", "goBackMode: 回评阅卷");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -936,7 +944,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //学生数据获取成功
     public void showSueecssPage(final GetMarkNextStudentResponse nextStudentResponse) {
-        final long start = System.currentTimeMillis();
+        imageDataList = new ArrayList<>();
+        for (int i = 0; i < nextStudentResponse.getData().getImageArr().size(); i++) {
+            ImageData imageData1 = new ImageData(nextStudentResponse.getData().getImageArr().get(i).getWidth(),
+                    nextStudentResponse.getData().getImageArr().get(i).getHeigth());
+            imageDataList.add(imageData1);
+        }
         Tool.base64ToBitmap(nextStudentResponse.getData().getImageArr(), nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId(), new MyCallBack() {
             @Override
             public void onSuccess(Object model) {
@@ -963,6 +976,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 } else { //图片没有屏幕大
                     initSpenNoteDoc(bitmap.getWidth(), bitmap.getHeight());
                 }
+                //scale = mSpenPageDoc.getWidth() * 10 * 0.1f / bitmap.getWidth();
+                scale = bitmap.getWidth() * 10 * 0.1f / mSpenPageDoc.getWidth();
 
                 //设置背景图片
                 mSpenPageDoc.setBackgroundImage(localImageData.getPath());
@@ -1011,6 +1026,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             comments.setTextColor(getResources().getColor(R.color.colorBlue));
             stepScore.setChecked(false);
             stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
+            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
             if (reviewMode) {
                 if (childLocations != null) {
                     childLocations.clear();
@@ -1025,6 +1041,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
             stepScore.setChecked(true);
             stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
+            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
             if (reviewMode) {
                 mSpenSimpleSurfaceView.setTouchListener(this);
             }
@@ -1068,9 +1085,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
                 //初始化题号选择列表
                 questionNumAdapter = new QuestionNumAdapter(context, strings, scores);
-                LinearLayoutManager manager = new LinearLayoutManager(context);
-                manager.setOrientation(LinearLayoutManager.HORIZONTAL);
-                mRecyclerView.setLayoutManager(manager);
+                linearLayoutManager = new LinearLayoutManager(context);
+                linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+                mRecyclerView.setLayoutManager(linearLayoutManager);
                 questionNumAdapter.setmOnclickListener(new QuestionNumAdapter.MOnclickListener() {
                     @Override
                     public void OnClickLener(int positon) {
@@ -1340,6 +1357,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             mSpenPageDoc.removeAllObject();
             mSpenSimpleSurfaceView.update();
 
+            moveToPosition(linearLayoutManager, minLocation);
+
             //更新题号列表和分数
             questionNum.setText(strings.get(minLocation));
             if ("-1".equals(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())) {
@@ -1420,7 +1439,14 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 yali[j] = 0.3f;
                 time[j] = (int) System.currentTimeMillis();
             }
-            base.setPoints(list.get(i).getPointS(), yali, time);
+            PointF[] pointS = list.get(i).getPointS();
+            PointF[] pointFS = new PointF[pointS.length];
+            for (int j = 0; j < pointS.length; j++) {
+                PointF pointF = new PointF();
+                pointF.set(pointS[j].x / scale, pointS[j].y / scale);
+                pointFS[j] = pointF;
+            }
+            base.setPoints(pointFS, yali, time);
             baseList.add(base);
         }
         mSpenPageDoc.appendObjectList(baseList);
@@ -1614,6 +1640,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     tableStepScore = null;
                     isStepScore = false;
                     PreferencesService.getInstance(context).saveAutoSubmit(true);
+                    submiss.setVisibility(View.GONE);
                     mSpenSimpleSurfaceView.setMaxZoomRatio(3);
                     mSpenSimpleSurfaceView.setMinZoomRatio(0.5f);
                     tableParent.setVisibility(View.GONE);
@@ -1625,6 +1652,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     tableParent.removeAllViews();
                     comments.setEnabled(true);
                     stepScore.setChecked(false);
+                    saveMarkDataBean.getQuestions().get(minLocation).setStepScore("");
                     stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
                     if (reviewMode) {
@@ -1764,8 +1792,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         topSocre_0_5.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     }
                 } else {
-                    topSocre_0_5.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                    topSocre_0_5.setChecked(false);
+                    if (PreferencesService.getInstance(context).getPointFive()) {
+                        topSocre_0_5.setChecked(true);
+                        topSocre_0_5.setTextColor(getResources().getColor(R.color.colorWhite));
+                    } else {
+                        topSocre_0_5.setChecked(false);
+                        topSocre_0_5.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    }
                 }
                 break;
             case R.id.topSocre_0_5: //自定义分数0.5开关
@@ -1994,13 +2027,35 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //获取当前画布上的笔记数据
     private void getPageDocObject() {
+        //坐标点要按照原图的大小坐标来计算
         ArrayList<SpenObjectBase> objectList = mSpenPageDoc.getObjectList();
         if (objectList != null || objectList.size() > 0) {
             List<SpenStroke> spenStrokes = new ArrayList<>();
+            Log.e(TAG, "当前的缩放率是：" + scale);
             for (int i = 0; i < objectList.size(); i++) {
                 SpenObjectStroke spenObjectStroke = (SpenObjectStroke) objectList.get(i);
                 SpenStroke stroke = new SpenStroke();
-                stroke.setPointS(spenObjectStroke.getPoints());
+                stroke.setSize(PENSIZE);
+                //Color.RED = 0xFFFF0000
+                stroke.setColor("#FF0000");
+                PointF[] points = spenObjectStroke.getPoints();
+                for (int j = 0; j < imageDataList.size(); j++) {
+                    ImageData imageData = imageDataList.get(j);
+                    if (points[0].y < imageData.getHeight() * scale) {
+                        stroke.setPageName("A");
+                        break;
+                    } else {
+                        stroke.setPageName("B");
+                        break;
+                    }
+                }
+                PointF[] pointF = new PointF[spenObjectStroke.getPoints().length];
+                for (int j = 0; j < points.length; j++) {
+                    PointF pointF1 = new PointF();
+                    pointF1.set(points[j].x * scale, points[j].y * scale);
+                    pointF[j] = pointF1;
+                }
+                stroke.setPointS(pointF);
                 spenStrokes.add(stroke);
             }
             saveMarkDataBean.getQuestions().get(minLocation).setCoordinate(new Gson().toJson(spenStrokes));
@@ -2266,6 +2321,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //获取一个新学生缓存数据
     private void getNextStudentCache() {
+        if (true) {
+            //临时去除缓存功能
+            return;
+        }
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -2321,6 +2380,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //获取一个已阅学生的缓存数据
     private void getReviewStudentCache(GetStudentMarkDataRequest reviewStudent) {
+        if (true) {
+            //临时去除缓存功能
+            return;
+        }
         Log.e(TAG, "getReviewStudentCache: 缓存已批阅学生的数据");
         myModel.getStudentMarkData(context, reviewStudent, new MyCallBack() {
             @Override
@@ -2509,6 +2572,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                             //getNewStudent();
                                         }
                                     } else {
+                                        if (saveResponse.getMyNumber() == saveResponse.getMyCount()) {
+                                            myTaskOverDialog();
+                                            return;
+                                        }
                                         if (style == 1) {
                                             if (saveResponse.getTaskNumber() < saveResponse.getTaskCount()) {
                                                 if (cachePool.size() > 0) {
@@ -2591,6 +2658,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         Log.e(TAG, "加载缓存图片：" + imgPath);
         mSpenPageDoc.removeAllObject();
         Bitmap bitmap = BitmapFactory.decodeFile(imgPath);
+        if (bitmap == null) {
+            ToastUtils.showToast(context, "获取图片异常");
+            Log.e(TAG, "loadCacheImg: 获取图片异常");
+            return;
+        }
         imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
         Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
 
@@ -2816,6 +2888,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    //RecyclerView使item移动到指定的位置
+    public static void moveToPosition(LinearLayoutManager manager, int pos) {
+        manager.scrollToPositionWithOffset(pos, 0);
+        manager.setStackFromEnd(true);
     }
 
     @Override

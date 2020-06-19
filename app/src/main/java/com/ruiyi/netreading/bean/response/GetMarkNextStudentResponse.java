@@ -291,25 +291,55 @@ public class GetMarkNextStudentResponse {
             /**
              * src : data:image/jpeg;base64
              * index : 0
+             * width : 1753
+             * heigth : 1324
+             * pageName : A
              */
 
             private String src;
-            private int index;
+            private int index; //图片位置
+            private int width; //图片宽
+            private int height; //图片高
+            private String pageName; //图片A、B面
 
             public String getSrc() {
                 return src;
-            }
-
-            public void setSrc(String src) {
-                this.src = src;
             }
 
             public int getIndex() {
                 return index;
             }
 
+            public int getWidth() {
+                return width;
+            }
+
+            public int getHeigth() {
+                return height;
+            }
+
+            public String getPageName() {
+                return pageName;
+            }
+
+            public void setSrc(String src) {
+                this.src = src;
+            }
+
             public void setIndex(int index) {
                 this.index = index;
+            }
+
+            public void setWidth(int width) {
+                this.width = width;
+            }
+
+            public void setHeigth(int heigth) {
+                this.height = heigth;
+            }
+
+            public void setPageName(String pageName) {
+                this.pageName = pageName;
             }
 
             @Override

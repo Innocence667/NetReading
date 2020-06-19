@@ -114,7 +114,6 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
             } else {
                 chileViewHolder.percentage.setText("0%");
             }
-
             if (childs.get(childPosition).getTaskCount() == childs.get(childPosition).getMarkNumber()) { //当前任务已经完成
                 if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() == 0) { //自己没有任务
                     chileViewHolder.startTask.setText("已阅完");
@@ -126,7 +125,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                 chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_enable_style));
                 chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorProgress));
             } else { //任务没完成
-                if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() == 0) { //自由阅卷模式
+                if (childs.get(childPosition).getTeacherData().get(0).getTeacherCount() == 0) { //自由阅卷模式
                     chileViewHolder.startTask.setText("开始阅卷");
                 } else { //有自己的任务
                     if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() == 0) {
@@ -135,11 +134,10 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                         if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() != childs.get(childPosition).getTeacherData().get(0).getTeacherCount()) {
                             chileViewHolder.startTask.setText("继续阅卷");
                         } else {
-                            //单评模式下，自己的任务全部阅完了就可以帮阅别人的任务
-                            if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() == childs.get(childPosition).getTeacherData().get(0).getTeacherCount()
-                                    && childs.get(childPosition).getMarkNumber() != childs.get(childPosition).getTaskCount()) {
+                            //阅卷类型(1单评，3按班)，单评阅完自己的可以帮阅，按班只能批阅自己的任务，不可帮阅
+                            if (childs.get(childPosition).getStyle() == 1) {
                                 chileViewHolder.startTask.setText("继续阅卷");
-                            } else {
+                            } else if (childs.get(childPosition).getStyle() == 3) {
                                 chileViewHolder.startTask.setText("回 评");
                             }
                         }
