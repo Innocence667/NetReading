@@ -30,4 +30,13 @@
 
     </com.scwang.smartrefresh.layout.SmartRefreshLayout>
 
+    <TextView
+        android:id="@+id/taskHint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="暂无任务"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
 </LinearLayout>

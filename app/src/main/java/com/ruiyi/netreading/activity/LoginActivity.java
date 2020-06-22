@@ -235,7 +235,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                                 @Override
                                 public void onFailed(String str) {
-                                    showFailedPage("用户名或密码错误");
+                                    if (str.contains("该教师下没有任何菜单访问权限~")) {
+                                        showFailedPage("该教师下没有任何菜单访问权限~");
+                                    } else {
+                                        showFailedPage("用户名或密码错误");
+                                    }
                                 }
 
                             });

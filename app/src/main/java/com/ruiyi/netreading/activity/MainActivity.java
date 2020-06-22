@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private TextView main_setting; //设置
     private SmartRefreshLayout refreshLayou;//只能刷新控件
+    private TextView taskHint; //没有任务提示
     private ExpandableListView listView;//二级listView
     private TaskListAdapter taskListAdapter;//适配器
     private int status; //当前考试的状态(2可以阅卷、3统计完成不可修改)
@@ -77,84 +78,97 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSuccess(Object object) {
                 getExamListResponse = (GetExamListResponse) object;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        LoadingUtil.closeDialog();
-                        taskListAdapter = new TaskListAdapter(context, getExamListResponse.getExamList());
-                        taskListAdapter.setMyClickListener(new TaskListAdapter.OnclickListener() {
-                            @Override
-                            public void myOnclickListenet(int position) {
-                                if (!TextUtils.isEmpty(teacherGuid) && !TextUtils.isEmpty(getExamContextResponse.getTaskList().get(position).getTaskGuid())) {
-                                    //TODO 临时处理数据
-                                    List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                                    for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                        if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                            data.add(getExamContextResponse.getTaskList().get(i));
+                if (getExamListResponse != null && getExamListResponse.getExamList() != null && getExamListResponse.getExamList().size() > 0) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            LoadingUtil.closeDialog();
+                            taskHint.setVisibility(View.GONE);
+                            refreshLayou.setVisibility(View.VISIBLE);
+                            taskListAdapter = new TaskListAdapter(context, getExamListResponse.getExamList());
+                            taskListAdapter.setMyClickListener(new TaskListAdapter.OnclickListener() {
+                                @Override
+                                public void myOnclickListenet(int position) {
+                                    if (!TextUtils.isEmpty(teacherGuid) && !TextUtils.isEmpty(getExamContextResponse.getTaskList().get(position).getTaskGuid())) {
+                                        //TODO 临时处理数据
+                                        List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                                        for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                            if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                                data.add(getExamContextResponse.getTaskList().get(i));
+                                            }
                                         }
-                                    }
 
-                                    Intent marking = new Intent(MainActivity.this, MarkingActivity.class);
-                                    marking.putExtra("teacherGuid", teacherGuid);
-                                    marking.putExtra("taskGuid", data.get(position).getTaskGuid());
-                                    marking.putExtra("status", status);
-                                    marking.putExtra("style", getExamContextResponse.getTaskList().get(position).getStyle());
-                                    startActivity(marking);
-                                } else {
-                                    ToastUtils.showToast(context, "参数异常");
-                                    if (TextUtils.isEmpty(teacherGuid)) {
-                                        Log.e(TAG, "myOnclickListenet: 参数teacherGuid为null");
+                                        Intent marking = new Intent(MainActivity.this, MarkingActivity.class);
+                                        marking.putExtra("teacherGuid", teacherGuid);
+                                        marking.putExtra("taskGuid", data.get(position).getTaskGuid());
+                                        marking.putExtra("status", status);
+                                        marking.putExtra("style", getExamContextResponse.getTaskList().get(position).getStyle());
+                                        startActivity(marking);
                                     } else {
-                                        Log.e(TAG, "myOnclickListenet: 参数taskGuid为null");
+                                        ToastUtils.showToast(context, "参数异常");
+                                        if (TextUtils.isEmpty(teacherGuid)) {
+                                            Log.e(TAG, "myOnclickListenet: 参数teacherGuid为null");
+                                        } else {
+                                            Log.e(TAG, "myOnclickListenet: 参数taskGuid为null");
+                                        }
                                     }
                                 }
-                            }
-                        });
-                        listView.setAdapter(taskListAdapter);
-                        status = getExamListResponse.getExamList().get(0).getStatus();
-                        //默认展开第一个step
-                        listView.expandGroup(0);
-                        getExamContextRequest = new GetExamContextRequest();
-                        getExamContextRequest.setTeacherGuid(teacherGuid);
-                        PaperGuid = getExamListResponse.getExamList().get(0).getPaperGuid();
-                        getExamContextRequest.setPaperGuid(PaperGuid);
-                        myModel.getTaskContext(context, getExamContextRequest, new MyCallBack() {
+                            });
+                            listView.setAdapter(taskListAdapter);
+                            status = getExamListResponse.getExamList().get(0).getStatus();
+                            //默认展开第一个step
+                            listView.expandGroup(0);
+                            getExamContextRequest = new GetExamContextRequest();
+                            getExamContextRequest.setTeacherGuid(teacherGuid);
+                            PaperGuid = getExamListResponse.getExamList().get(0).getPaperGuid();
+                            getExamContextRequest.setPaperGuid(PaperGuid);
+                            myModel.getTaskContext(context, getExamContextRequest, new MyCallBack() {
 
-                            @Override
-                            public void onSuccess(Object object) {
-                                getExamContextResponse = (GetExamContextResponse) object;
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
-                                            //TODO 临时处理数据
-                                            List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                                            for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                                if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                                    data.add(getExamContextResponse.getTaskList().get(i));
+                                @Override
+                                public void onSuccess(Object object) {
+                                    getExamContextResponse = (GetExamContextResponse) object;
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
+                                                //TODO 临时处理数据
+                                                List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                                                for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                                    if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                                        data.add(getExamContextResponse.getTaskList().get(i));
+                                                    }
                                                 }
+                                                taskListAdapter.setChilds(data);
+                                                taskListAdapter.notifyDataSetChanged();
                                             }
-                                            taskListAdapter.setChilds(data);
-                                            taskListAdapter.notifyDataSetChanged();
                                         }
-                                    }
-                                });
-                            }
+                                    });
+                                }
 
-                            @Override
-                            public void onFailed(final String str) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        //failed to connect to riyun.lexuewang.cn/116.62.133.77 (port 8002) after 3000ms
-                                        showFailedPage(str);
-                                        Log.e(TAG, "获取任务详情请求失败," + str);
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+                                @Override
+                                public void onFailed(final String str) {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            //failed to connect to riyun.lexuewang.cn/116.62.133.77 (port 8002) after 3000ms
+                                            showFailedPage(str);
+                                            Log.e(TAG, "获取任务详情请求失败," + str);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            taskHint.setVisibility(View.VISIBLE);
+                            refreshLayou.setVisibility(View.GONE);
+                            LoadingUtil.closeDialog();
+                        }
+                    });
+                }
             }
 
             @Override
@@ -168,6 +182,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         main_setting = findViewById(R.id.main_setting);
         main_setting.setOnClickListener(this);
         refreshLayou = findViewById(R.id.refreshLayou);
+        taskHint = findViewById(R.id.taskHint);
         //设置 Header 为 贝塞尔雷达 样式
         //refreshLayou.setRefreshHeader(new BezierRadarHeader(this).setEnableHorizontalDrag(true));
         //弹出圆圈
@@ -355,9 +370,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                                 taskListAdapter.setChilds(data);
                                 taskListAdapter.notifyDataSetChanged();
+                                taskHint.setVisibility(View.GONE);
+                                refreshLayou.setVisibility(View.VISIBLE);
                             } else {
                                 taskListAdapter.clearChilds();
                                 taskListAdapter.notifyDataSetChanged();
+                                taskHint.setVisibility(View.VISIBLE);
+                                refreshLayou.setVisibility(View.GONE);
                                 ToastUtils.showToast(context, "暂无数据");
                             }
                         }
@@ -369,7 +388,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            showFailedPage(str);
+                            showFailedPage("获取任务失败");
                             Log.e(TAG, "获取任务详情请求失败," + str);
                         }
                     });

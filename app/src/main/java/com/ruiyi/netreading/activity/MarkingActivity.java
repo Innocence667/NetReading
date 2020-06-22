@@ -2035,7 +2035,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             for (int i = 0; i < objectList.size(); i++) {
                 SpenObjectStroke spenObjectStroke = (SpenObjectStroke) objectList.get(i);
                 SpenStroke stroke = new SpenStroke();
-                stroke.setSize(PENSIZE);
+                stroke.setPenSize(PENSIZE);
                 //Color.RED = 0xFFFF0000
                 stroke.setColor("#FF0000");
                 PointF[] points = spenObjectStroke.getPoints();
