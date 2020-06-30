@@ -13,10 +13,11 @@ public class StepScore {
 
     private int id; //序号
     private int index;
-    private String field;
+    private String field; //类型(对号 tick、半对号 halfTick、错号 cross、文本  text、步骤分 stepPoints )
     private double params; //得分
-    private int x; //x坐标
-    private int y; //y坐标
+    private float x; //x坐标
+    private float y; //y坐标
+    private String pageName;
 
     public int getId() {
         return id;
@@ -50,19 +51,19 @@ public class StepScore {
         this.params = params;
     }
 
-    public int getX() {
+    public float getX() {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(float x) {
         this.x = x;
     }
 
-    public int getY() {
+    public float getY() {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(float y) {
         this.y = y;
     }
 }

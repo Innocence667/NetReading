@@ -308,10 +308,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 minLocation = 0;
                 collectRequest = new CollectRequest();
                 getMarkNextStudentResponse = (GetMarkNextStudentResponse) model;
-                for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
-                    Log.e(TAG, "1111111111111111111111: " + getMarkNextStudentResponse.getData().getImageArr().get(i).getWidth());
-                    Log.e(TAG, "1111111111111111111111: " + getMarkNextStudentResponse.getData().getImageArr().get(i).getHeigth());
-                }
                 cachePool.add(getMarkNextStudentResponse);
                 if (response.getTeacherTask().getMarkCount() == 0) { //自由阅卷
                     if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //当前任务没有阅完
@@ -688,10 +684,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         if (stepScoreModeScore == (int) stepScoreModeScore) {
                             questionScore.setText(String.valueOf((int) stepScoreModeScore));
                             saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf((int) stepScoreModeScore));
+                            questionNumAdapter.updateScore(minLocation, String.valueOf((int) stepScoreModeScore));
                         } else {
                             questionScore.setText(String.valueOf(stepScoreModeScore));
                             saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
+                            questionNumAdapter.updateScore(minLocation, String.valueOf(stepScoreModeScore));
                         }
+                        questionNumAdapter.notifyDataSetChanged();
                     }
                     return true;
                 }
@@ -703,6 +702,20 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         }
         if (tableParent.getChildCount() > 0) {
             submiss.setVisibility(View.VISIBLE);
+            stepScoreModeScore = 0;
+            for (int j = 0; j < childLocations.size(); j++) {
+                stepScoreModeScore += Double.valueOf(childLocations.get(j).getTv());
+            }
+            if (stepScoreModeScore == (int) stepScoreModeScore) {
+                questionScore.setText(String.valueOf((int) stepScoreModeScore));
+                saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf((int) stepScoreModeScore));
+                questionNumAdapter.updateScore(minLocation, String.valueOf((int) stepScoreModeScore));
+            } else {
+                questionScore.setText(String.valueOf(stepScoreModeScore));
+                saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
+                questionNumAdapter.updateScore(minLocation, String.valueOf(stepScoreModeScore));
+            }
+            questionNumAdapter.notifyDataSetChanged();
         } else {
             submiss.setVisibility(View.GONE);
         }
@@ -1023,6 +1036,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             addStroke(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate());
             isStepScore = false;
             comments.setChecked(true);
+            comments.setEnabled(true);
             comments.setTextColor(getResources().getColor(R.color.colorBlue));
             stepScore.setChecked(false);
             stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
@@ -1033,6 +1047,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 mSpenSimpleSurfaceView.setTouchListener(null);
             }
+            PreferencesService.getInstance(context).saveAutoSubmit(true);
         } else if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore())
                 && nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore().length() > 10) {
             addStepScore(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore());
@@ -1040,11 +1055,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             comments.setChecked(false);
             comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
             stepScore.setChecked(true);
+            stepScore.setEnabled(true);
             stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
             mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
             if (reviewMode) {
                 mSpenSimpleSurfaceView.setTouchListener(this);
             }
+            PreferencesService.getInstance(context).saveAutoSubmit(false);
         }
         initUI(nextStudentResponse);
     }
@@ -1103,6 +1120,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         saveNowPageData(loc);
                         mSpenPageDoc.removeAllObject();
                         mSpenSimpleSurfaceView.update();
+                        tableParent.removeAllViews();
+                        if (childLocations != null) {
+                            childLocations.clear();
+                        }
 
                         // 小题切换
                         minLocation = positon;
@@ -1145,13 +1166,36 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     break;
                                 }
                             }
-
                             //添加笔记、步骤分
                             if (!TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate())) {
-                                addStroke(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate());
+                                addStroke(saveMarkDataBean.getQuestions().get(minLocation).getStepScore());
+                                comments.setChecked(true);
+                                comments.setTextColor(getResources().getColor(R.color.colorBlue));
+                                stepScore.setChecked(false);
+                                stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                isStepScore = false;
+                            } else if (!TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getStepScore())) {
+                                //步骤分
+                                addStepScore(saveMarkDataBean.getQuestions().get(minLocation).getStepScore());
+                                if (tableParent.getChildCount() > 0) {
+                                    isStepScore = true;
+                                    comments.setChecked(false);
+                                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                    stepScore.setChecked(true);
+                                    stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
+                                } else {
+                                    isStepScore = false;
+                                    comments.setChecked(false);
+                                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                    stepScore.setChecked(false);
+                                    stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                }
                             } else {
-                                //步骤分未开启
-                                //addStepScore(saveMarkDataBean.getQuestions().get(minLocation).getStepScore());
+                                isStepScore = false;
+                                comments.setChecked(false);
+                                comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                stepScore.setChecked(false);
+                                stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
                             }
                             scoreAdapter.updataData(getScoreList(Double.valueOf(saveMarkDataBean.getQuestions().get(positon).getMarkScore()),
                                     getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(positon).getFullScore()));
@@ -1159,8 +1203,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(positon).getScore(),
                                     getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(positon).getFullScore()));
                         }
+                        scoreAdapter.setStepScore(isStepScore);
                         scoreAdapter.notifyDataSetChanged();
-
                     }
                 });
                 mRecyclerView.setAdapter(questionNumAdapter);
@@ -1304,6 +1348,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         Log.e(TAG, "addStepScore: 设置步骤分数据");
         List<StepScore> stepScores = new Gson().fromJson(stepScore, new TypeToken<List<StepScore>>() {
         }.getType());
+        if (stepScores == null || stepScores.size() == 0) {
+            return;
+        }
         //选择步骤分的第一个标签的数据为默认显示选中的标签选项
         double d = stepScores.get(0).getParams();
         if (d != (int) d) {
@@ -1313,23 +1360,34 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         }
         childLocations = new ArrayList<>();
         for (int i = 0; i < stepScores.size(); i++) {
-            ChildLocation location = new ChildLocation();
+            /**
+             * 对号 tick、
+             * 半对号 halfTick、
+             * 错号 cross、
+             * 文本  text、
+             * 步骤分 stepPoints
+             */
+            if ("stepPoints".equals(stepScores.get(i).getField())) {
+                ChildLocation location = new ChildLocation();
 
-            int locaX = mSpenPageDoc.getWidth() * stepScores.get(i).getX() / imageData.getWidth();
-            int locaY = mSpenPageDoc.getHeight() * stepScores.get(i).getY() / imageData.getHeight();
+                float locaX = mSpenPageDoc.getWidth() * stepScores.get(i).getX() / imageData.getWidth();
+                float locaY = mSpenPageDoc.getHeight() * stepScores.get(i).getY() / imageData.getHeight();
 
-            int padImgX = locaX + (mSpenSimpleSurfaceView.getWidth() - mSpenPageDoc.getWidth()) / 2;
-            int padImgY = locaY + (mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2;
+                float padImgX = locaX + (mSpenSimpleSurfaceView.getWidth() - mSpenPageDoc.getWidth()) / 2;
+                float padImgY = locaY + (mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2;
 
-            location.setX(padImgX);
-            location.setY(padImgY);
-            double v = stepScores.get(i).getParams();
-            if (v == (int) v) {
-                location.setTv(String.valueOf((int) v));
+                location.setX(padImgX);
+                location.setY(padImgY);
+                double v = stepScores.get(i).getParams();
+                if (v == (int) v) {
+                    location.setTv(String.valueOf((int) v));
+                } else {
+                    location.setTv(String.valueOf(v));
+                }
+                childLocations.add(location);
             } else {
-                location.setTv(String.valueOf(v));
+                Log.e(TAG, "addStepScore:不支持的格式类型");
             }
-            childLocations.add(location);
         }
         addViewOrLinstener();
     }
@@ -1356,8 +1414,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             submiss.setVisibility(View.GONE);
             mSpenPageDoc.removeAllObject();
             mSpenSimpleSurfaceView.update();
-
-            moveToPosition(linearLayoutManager, minLocation);
+            mRecyclerView.scrollToPosition(minLocation);
+            //moveToPosition(linearLayoutManager, minLocation);
 
             //更新题号列表和分数
             questionNum.setText(strings.get(minLocation));
@@ -1410,12 +1468,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     private void saveNowPageData(int loc) {
         if (!"-1".equals(saveMarkDataBean.getQuestions().get(loc).getMarkScore())) {
-            if (mSpenPageDoc.getObjectList().size() != 0) {
+            if (comments.isChecked() && mSpenPageDoc.getObjectList().size() != 0) {
                 getPageDocObject();
                 /*mSpenPageDoc.removeAllObject();
                 mSpenSimpleSurfaceView.update();*/
             } else {
-                //saveMarkDataBean.getQuestions().get(loc).setStepScore();
+                getStepScoreData();
             }
         } else {
             // TODO 当前分数为-1，不对笔迹和步骤分数据进行保存
@@ -1427,6 +1485,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         Log.e(TAG, "addStroke: 设置笔迹数据");
         List<SpenStroke> list = new Gson().fromJson(s, new TypeToken<List<SpenStroke>>() {
         }.getType());
+        if (list == null || list.size() == 0) {
+            return;
+        }
         ArrayList<SpenObjectBase> baseList = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             SpenObjectStroke base = new SpenObjectStroke();
@@ -1590,11 +1651,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     stepScore.setChecked(false);
                     return;
                 }
-                if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().size() > 1) {
+                /*if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().size() > 1) {
                     ToastUtils.showToast(context, "该题目不支持步骤分");
                     stepScore.setChecked(false);
                     return;
-                }
+                }*/
+                questionNumAdapter.updateScore(minLocation, String.valueOf(-1));
+                questionNumAdapter.notifyDataSetChanged();
                 if (stepScore.isChecked()) {
                     mSpenSimpleSurfaceView.setTouchListener(this);
                     stepScoreModeScore = 0;
@@ -1639,7 +1702,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     childLocations.clear();
                     tableStepScore = null;
                     isStepScore = false;
-                    PreferencesService.getInstance(context).saveAutoSubmit(true);
+                    if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().size() == 1) {
+                        PreferencesService.getInstance(context).saveAutoSubmit(true);
+                    } else {
+                        PreferencesService.getInstance(context).saveAutoSubmit(false);
+                    }
                     submiss.setVisibility(View.GONE);
                     mSpenSimpleSurfaceView.setMaxZoomRatio(3);
                     mSpenSimpleSurfaceView.setMinZoomRatio(0.5f);
@@ -1655,15 +1722,18 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     saveMarkDataBean.getQuestions().get(minLocation).setStepScore("");
                     stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    if (reviewMode) {
+                    saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(-1));
+                    scoreAdapter.updataData(getScoreList(-1, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
+                    /*if (reviewMode) {
                         scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
                                 getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
                     } else {
                         scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
                                 getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
-                    }
+                    }*/
                     scoreAdapter.setStepScore(false);
                     scoreAdapter.setScoreCheck(-1);
+                    questionScore.setText(String.valueOf(0));
                 }
                 scoreAdapter.notifyDataSetChanged();
                 break;
@@ -1998,31 +2068,34 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //获取步骤分数据
     private void getStepScoreData() {
-        List<StepScore> stepScores = new ArrayList<>();
-        for (int i = 0; i < childLocations.size(); i++) {
-            StepScore stepScore1 = new StepScore();
-            stepScore1.setId(i);
-            stepScore1.setId(0);
-            stepScore1.setField("stepPoints");
-            double d = Double.valueOf(childLocations.get(i).getTv());
-            if (d == (int) d) {
-                stepScore1.setParams((int) d);
-            } else {
-                stepScore1.setParams(d);
+        Log.e(TAG, "当前的缩放率是：" + scale);
+        if (childLocations != null && childLocations.size() > 0) {
+            List<StepScore> stepScores = new ArrayList<>();
+            for (int i = 0; i < childLocations.size(); i++) {
+                StepScore stepScore1 = new StepScore();
+                stepScore1.setId(i);
+                stepScore1.setId(0);
+                stepScore1.setField("stepPoints");
+                double d = Double.valueOf(childLocations.get(i).getTv());
+                if (d == (int) d) {
+                    stepScore1.setParams((int) d);
+                } else {
+                    stepScore1.setParams(d);
+                }
+
+                //针对pad上显示的相对于图片的坐标
+                int padImgX = (int) (childLocations.get(i).getX() - (mSpenSimpleSurfaceView.getWidth() - mSpenPageDoc.getWidth()) / 2);
+                int padImgY = (int) (childLocations.get(i).getY() - (mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2);
+
+                int locaX = padImgX * imageData.getWidth() / mSpenPageDoc.getWidth();
+                int locaY = imageData.getHeight() * padImgY / mSpenPageDoc.getHeight();
+
+                stepScore1.setX(locaX);
+                stepScore1.setY(locaY);
+                stepScores.add(stepScore1);
             }
-
-            //针对pad上显示的相对于图片的坐标
-            int padImgX = (int) (childLocations.get(i).getX() - (mSpenSimpleSurfaceView.getWidth() - mSpenPageDoc.getWidth()) / 2);
-            int padImgY = (int) (childLocations.get(i).getY() - (mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2);
-
-            int locaX = padImgX * imageData.getWidth() / mSpenPageDoc.getWidth();
-            int locaY = imageData.getHeight() * padImgY / mSpenPageDoc.getHeight();
-
-            stepScore1.setX(locaX);
-            stepScore1.setY(locaY);
-            stepScores.add(stepScore1);
+            saveMarkDataBean.getQuestions().get(minLocation).setStepScore(new Gson().toJson(stepScores));
         }
-        saveMarkDataBean.getQuestions().get(minLocation).setStepScore(new Gson().toJson(stepScores));
     }
 
     //获取当前画布上的笔记数据
@@ -2430,6 +2503,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             }
         }
         LogUtils.logE(TAG, "提交的数据是: " + new GsonBuilder().serializeNulls().create().toJson(saveMarkDataBean));
+        if (true) {
+            //return;
+        }
         if (reviewMode) {
             Log.e(TAG, "onClick: 回评模式");
             //回评模式
@@ -2447,6 +2523,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             if (childLocations != null) {
                                 childLocations.clear();
                             }
+                            stepScoreModeScore = 0;
                             tableParent.removeAllViews();
                             doubleScore = "0";
                             if (doubleMode) {
@@ -2758,7 +2835,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     scoreAdapter.updataData(getScoreList(Double.valueOf(SCORE), Double.valueOf(SCORE) - Double.valueOf(doubleScore)));
                                 }
                             } else {
-                                scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(),
+                                scoreAdapter.updataData(getScoreList(Double.valueOf(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore()),
                                         getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
                             }
                         } else {
@@ -2893,6 +2970,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     //RecyclerView使item移动到指定的位置
     public static void moveToPosition(LinearLayoutManager manager, int pos) {
         manager.scrollToPositionWithOffset(pos, 0);
+        //manager.scrollToPosition(pos);
         manager.setStackFromEnd(true);
     }
 
