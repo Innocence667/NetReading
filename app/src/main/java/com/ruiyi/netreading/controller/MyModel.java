@@ -48,7 +48,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("testUrl:" + e.getMessage());
             }
 
             @Override
@@ -58,7 +58,7 @@ public class MyModel {
                     Log.e("testUrl", response.code() + "   返回结果：" + json);
                     callBack.onSuccess(response.code());
                 } else {
-                    callBack.onFailed(json);
+                    callBack.onFailed("testUrl:" + json);
                 }
             }
         });
@@ -72,7 +72,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callback.onFailed(e.getMessage());
+                callback.onFailed("getUser:" + e.getMessage());
             }
 
             @Override
@@ -83,7 +83,7 @@ public class MyModel {
                         LogUtils.logE("getUser", "登录返回结果" + json);
                         callback.onSuccess(gson.fromJson(json, LoginResponse.class));
                     } else {
-                        callback.onFailed(json);
+                        callback.onFailed("getUser:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     callback.onFailed(e.getMessage());
@@ -99,7 +99,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callback.onFailed(e.getMessage());
+                callback.onFailed("getTaskList:" + e.getMessage());
             }
 
             @Override
@@ -110,7 +110,7 @@ public class MyModel {
                         LogUtils.logE("getTaskList", "获取考试列表：" + json);
                         callback.onSuccess(gson.fromJson(json, GetExamListResponse.class));
                     } else {
-                        callback.onFailed(json);
+                        callback.onFailed("getTaskList:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     callback.onFailed(e.getMessage());
@@ -126,7 +126,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                childCallback.onFailed(e.getMessage());
+                childCallback.onFailed("getTaskContext:" + e.getMessage());
             }
 
             @Override
@@ -137,7 +137,7 @@ public class MyModel {
                         LogUtils.logE("getTaskContext", "获取考试题目列表：" + json);
                         childCallback.onSuccess(gson.fromJson(json, GetExamContextResponse.class));
                     } else {
-                        childCallback.onFailed(json);
+                        childCallback.onFailed("getTaskContext:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     childCallback.onFailed(e.getMessage());
@@ -153,7 +153,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("OtherTask:" + e.getMessage());
             }
 
             @Override
@@ -163,7 +163,7 @@ public class MyModel {
                     LogUtils.logE("OtherTask", json);
                     callBack.onSuccess(json);
                 } else {
-                    callBack.onFailed(json);
+                    callBack.onFailed("OtherTask:" + json);
                 }
             }
         });
@@ -176,7 +176,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("getMarkData:" + e.getMessage());
             }
 
             @Override
@@ -184,10 +184,10 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("getMarkData", "获取阅卷数据：" + json);
+                        //LogUtils.logE("getMarkData", "获取阅卷数据：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkDataResponse.class));
                     } else {
-                        callBack.onFailed(json);
+                        callBack.onFailed("getMarkData:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     callBack.onFailed(e.getMessage());
@@ -203,7 +203,11 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                if ("timeout".equals(e.getMessage())) {
+                    callBack.onFailed("网络请求超时");
+                } else {
+                    callBack.onFailed("getMarkNextStudent:" + e.getMessage());
+                }
             }
 
             @Override
@@ -214,7 +218,7 @@ public class MyModel {
                         //LogUtils.logE("getMarkNextStudent", "获取新数据结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
                     } else {
-                        callBack.onFailed(json);
+                        callBack.onFailed("getMarkNextStudent:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     callBack.onFailed(e.getMessage());
@@ -230,7 +234,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("getStudentMarkData:" + e.getMessage());
             }
 
             @Override
@@ -241,7 +245,7 @@ public class MyModel {
                         LogUtils.logE("getStudentMarkData", "获取已批阅数据：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
                     } else {
-                        callBack.onFailed(json);
+                        callBack.onFailed("getStudentMarkData:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     callBack.onFailed(e.getMessage());
@@ -257,7 +261,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("reviewStudents:" + e.getMessage());
             }
 
             @Override
@@ -268,7 +272,7 @@ public class MyModel {
                         LogUtils.logE("reviewStudents", "回评列表接口:" + json);
                         callBack.onSuccess(gson.fromJson(json, ReviewStudentsResponse.class));
                     } else {
-                        callBack.onFailed(json);
+                        callBack.onFailed("reviewStudents:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     callBack.onFailed(e.getMessage());
@@ -284,7 +288,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("saveMarkData:" + e.getMessage());
             }
 
             @Override
@@ -295,7 +299,11 @@ public class MyModel {
                         LogUtils.logE("saveMarkData", "新数据提交返回结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
                     } else {
-                        callBack.onFailed(json);
+                        if(json.contains("当前教师或任务不存在！")){
+                            callBack.onFailed("当前教师或任务不存在！");
+                        }else{
+                            callBack.onFailed("saveMarkData:" + json);
+                        }
                     }
                 } catch (JsonSyntaxException e) {
                     callBack.onFailed(e.getMessage());
@@ -311,7 +319,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("upDateMarkData:" + e.getMessage());
             }
 
             @Override
@@ -322,7 +330,7 @@ public class MyModel {
                         LogUtils.logE("upDateMarkData", "回评数据提交返回结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
                     } else {
-                        callBack.onFailed(json);
+                        callBack.onFailed("upDateMarkData:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     callBack.onFailed(e.getMessage());
@@ -338,7 +346,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("collectQuestion:" + e.getMessage());
             }
 
             @Override
@@ -349,7 +357,7 @@ public class MyModel {
                         LogUtils.logE("collectQuestion", "收藏、取消题目结果：" + json);
                         callBack.onSuccess(null);
                     } else {
-                        callBack.onFailed(json);
+                        callBack.onFailed("collectQuestion:" + json);
                     }
                 } catch (Exception e) {
                     callBack.onFailed(e.getMessage());
@@ -365,7 +373,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("getMarkAvgScore:" + e.getMessage());
             }
 
             @Override
@@ -383,7 +391,7 @@ public class MyModel {
                         }.getType());
                         callBack.onSuccess(avgScoreResponseList);
                     } else {
-                        callBack.onFailed(json);
+                        callBack.onFailed("getMarkAvgScore:" + json);
                     }
                 } catch (JsonSyntaxException e) {
                     callBack.onFailed(e.getMessage());
@@ -398,7 +406,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("Authenticate:" + e.getMessage());
             }
 
             @Override
@@ -409,7 +417,7 @@ public class MyModel {
                         Log.e("Authenticate", "获取版本信息: " + json);
                         callBack.onSuccess(json);
                     } else {
-                        callBack.onFailed(json);
+                        callBack.onFailed("Authenticate:" + json);
                     }
                 } catch (Exception e) {
                     callBack.onFailed(e.getMessage());
@@ -424,7 +432,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                callBack.onFailed(e.getMessage());
+                callBack.onFailed("Download:" + e.getMessage());
             }
 
             @Override
@@ -433,7 +441,7 @@ public class MyModel {
                 if (response.body().contentLength() <= 0) {
                     callBack.onFailed("文件下载失败:" + response.body().contentLength());
                 } else {
-                    callBack.onSuccess(response);
+                    callBack.onSuccess("Download:" + response);
                 }
             }
         });
