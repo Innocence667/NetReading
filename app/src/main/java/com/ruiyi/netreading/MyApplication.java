@@ -33,7 +33,10 @@ public class MyApplication extends Application {
             download.mkdirs();
         }
         //设置默认：自动提交、小数赋分、置顶分数
-        PreferencesService.getInstance(context).saveAutoSubmit(true).savePointFive(false);
+        PreferencesService.getInstance(context).saveAutoSubmit(true).savePointFive(false).saveDeviceBrand(Tool.getDeviceBrand());
+        Log.e("MyApplication", "设备厂商: " + Tool.getDeviceBrand());
+        Log.e("MyApplication", "设备型号: " + Tool.getSystemModel());
+        Log.e("MyApplication", "设备android版本: " + Tool.getSystemVersion());
     }
 
     public static Context getContext() {

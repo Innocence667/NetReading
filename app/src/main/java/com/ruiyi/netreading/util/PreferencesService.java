@@ -92,6 +92,27 @@ public class PreferencesService {
         editor.commit();
     }
 
+    /**
+     * 保存设备厂商
+     *
+     * @param brand
+     * @return
+     */
+    public PreferencesService saveDeviceBrand(String brand) {
+        editor.putString("Brand", brand);
+        editor.commit();
+        return this;
+    }
+
+    /**
+     * 获取设备厂商
+     *
+     * @return
+     */
+    public String getDeviceBrand() {
+        return sharedPreferences.getString("Brand", "");
+    }
+
 
     /**
      * 设置自动提交

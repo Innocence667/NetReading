@@ -10,6 +10,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,8 +24,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +43,7 @@ import com.ruiyi.netreading.controller.MyModel;
 import com.ruiyi.netreading.util.LogUtils;
 import com.ruiyi.netreading.util.PreferencesService;
 import com.ruiyi.netreading.util.ToastUtils;
+import com.ruiyi.netreading.util.Tool;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -52,6 +56,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private static int REQUEST_PERMISSION_CODE = 1;
     private Context context;
 
+    private RelativeLayout login_main;
+    private ImageView loginBg;
     private Spinner spinner; //地址选择器
     private TextView servicePathTv; //服务器地址
     private TextView modifyServicePath; //切换地址
@@ -101,7 +107,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void initView() {
+        login_main = findViewById(R.id.login_main);
         paths = getResources().getStringArray(R.array.services);
+        loginBg = findViewById(R.id.loginBg);
+        loginBg.setBackgroundResource(R.drawable.login_bg2);
         spinner = findViewById(R.id.login_servicePath);
         servicePathTv = findViewById(R.id.servicePath);
         modifyServicePath = findViewById(R.id.modifyServicePath);
@@ -199,6 +208,31 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         testProgress = view.findViewById(R.id.testProgress);
         urlHint.setText(Html.fromHtml("格式:https://<font color = '#FF0000'>xxxx</font>.lexuewang.cn:<font color = '#FF0000'>1234</font>"));
         testUrlBtnCancel.setVisibility(View.GONE);
+
+        //动态设置控件宽高
+        Rect rect = Tool.getScreenparameters(this);
+        Log.e(TAG, "屏幕的宽高是：" + rect.width() + " - " + rect.height());
+        Log.e(TAG, "状态栏的高度是： " + Tool.getStatusBarHeight(this));
+        if (rect.width() == 1024 && rect.height() == 768) { //三星p350
+            login_main.setBackgroundResource(R.drawable.login_bg0);
+            loginBg.setVisibility(View.GONE);
+        } else if (rect.width() == 1920 && rect.height() == 1200) { //华为C5
+            login_main.setBackgroundResource(R.drawable.login_bg);
+            loginBg.setVisibility(View.VISIBLE);
+            //获取背景图片缩放率
+            float wZoom = 2048 * 1f / rect.width();
+            float hZoom = 1536 * 1f / (rect.height() - Tool.getStatusBarHeight(this));
+            //计算登录白框的大小
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int) (1386 / wZoom), (int) (922 / hZoom) + 200);
+            Log.e(TAG, "initView: paramsW-" + (1386 / wZoom));
+            Log.e(TAG, "initView: paramsH-" + (922 / hZoom));
+            //计算距离顶部padding
+            int topPadding = (int) ((rect.height() - Tool.getStatusBarHeight(this) - 63 - (922 / hZoom)) / 2);
+            Log.e(TAG, "topPadding: " + topPadding);
+            params.setMargins(0, topPadding, 0, 0);
+            params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            loginBg.setLayoutParams(params);
+        }
     }
 
     @Override

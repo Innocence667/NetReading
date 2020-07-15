@@ -697,8 +697,14 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     return true;
                 }
             });
-            lp.height = 40;
-            lp.width = 60;
+            //适配只有三星p350(samsung)和华为C5(HUAWEI)
+            if ("samsung".equals(Tool.getDeviceBrand())) {
+                lp.height = 40;
+                lp.width = 60;
+            } else if ("HUAWEI".equals(Tool.getDeviceBrand())) {
+                lp.height = 70;
+                lp.width = 130;
+            }
             tv.setLayoutParams(lp);
             tableParent.addView(tv);
         }
@@ -976,6 +982,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 Log.e(TAG, "图片保存到本地：" + localImageData.getPath());
 
                 Rect rect = Tool.getScreenparameters(MarkingActivity.this);
+                Log.e(TAG, "当前屏幕的宽高是:" + rect.width() + "_" + rect.height());
                 if (bitmap.getHeight() > rect.height() - Tool.getStatusBarHeight(context) || bitmap.getWidth() > rect.width() - 80) { //图片比屏幕大
                     if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
                         initSpenNoteDoc(rect.width() - 80, bitmap.getHeight() * (rect.width() - 80) / bitmap.getWidth());
@@ -989,7 +996,17 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         //可能存在方图，暂时不处理
                     }
                 } else { //图片没有屏幕大
+                    Log.e(TAG, "图片没有屏幕大 ");
+                    //TODO 下面注释代码勿删
                     initSpenNoteDoc(bitmap.getWidth(), bitmap.getHeight());
+                    //自动填充屏幕大小
+                    if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
+                        mSpenSimpleSurfaceView.setZoom(0, 0, (rect.width() - 80) * 1f / bitmap.getWidth());
+                        Log.e(TAG, "onSuccess1: " + (rect.width() / bitmap.getWidth()));
+                    } else { //高图
+                        mSpenSimpleSurfaceView.setZoom(0, 0, rect.height() * 1f / bitmap.getHeight());
+                        Log.e(TAG, "onSuccess2: " + rect.height() / bitmap.getHeight());
+                    }
                 }
                 //scale = mSpenPageDoc.getWidth() * 10 * 0.1f / bitmap.getWidth();
                 scale = bitmap.getWidth() * 10 * 0.1f / mSpenPageDoc.getWidth();
@@ -3120,15 +3137,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 return true;
                             }
                             float zoomRatio = mSpenSimpleSurfaceView.getZoomRatio(); //当前缩放率
-                            Log.e("onTouch", "zoomRatio: " + zoomRatio);
-                            Log.e("onTouch", "event.getRawX(): " + event.getRawX());
-                            Log.e("onTouch", "event.getRawY(): " + event.getRawY());
-                            Log.e("onTouch", "event.getX(): " + event.getX());
-                            Log.e("onTouch", "event.getY(): " + event.getY());
-                            Log.e("onTouch", "mSpenPageDoc.getHeight(): " + mSpenPageDoc.getHeight());
-                            Log.e("onTouch", "mSpenPageDoc.getWidth(): " + mSpenPageDoc.getWidth());
-                            Log.e("onTouch", "mSpenSimpleSurfaceView.getHeight(): " + mSpenSimpleSurfaceView.getHeight());
-                            Log.e("onTouch", "mSpenSimpleSurfaceView.getWidth(): " + mSpenSimpleSurfaceView.getWidth());
                             //判断是否在有效范围内
                             if (event.getRawX() >= (event.getRawX() - event.getX())
                                     && event.getRawX() <= ((event.getRawX() - event.getX()) + mSpenPageDoc.getWidth() * zoomRatio)

@@ -50,6 +50,33 @@ public class Tool {
     }
 
     /**
+     * 获取手机厂商
+     *
+     * @return
+     */
+    public static String getDeviceBrand() {
+        return android.os.Build.BRAND;
+    }
+
+    /**
+     * 获取手机型号
+     *
+     * @return
+     */
+    public static String getSystemModel() {
+        return android.os.Build.MODEL;
+    }
+
+    /**
+     * 获取手机android版本
+     *
+     * @return
+     */
+    public static String getSystemVersion() {
+        return android.os.Build.VERSION.RELEASE;
+    }
+
+    /**
      * 解析base64数据
      *
      * @param imageArrBeanList 图片base64数据集合

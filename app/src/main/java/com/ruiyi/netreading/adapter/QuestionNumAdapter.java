@@ -57,7 +57,7 @@ public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.
         }
         if (pos == position) {
             holder.questionNo.setChecked(true);
-            holder.questionNo.setTextColor(ContextCompat.getColor(mContext, R.color.colorBlue));
+            holder.questionNo.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
         } else {
             holder.questionNo.setChecked(false);
             holder.questionNo.setTextColor(ContextCompat.getColor(mContext, R.color.colorBlack));
