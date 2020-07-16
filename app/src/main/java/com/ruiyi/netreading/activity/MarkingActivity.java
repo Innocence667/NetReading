@@ -1167,13 +1167,15 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         questionNumAdapter.setPos(positon);
                         questionNumAdapter.notifyDataSetChanged();
 
-                        double fullScore = getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFullScore();
-                        if (fullScore == (int) fullScore) {
-                            TOTAL = String.valueOf((int) fullScore);
-                            PreferencesService.getInstance(context).savePointFive(false);
-                        } else {
-                            TOTAL = String.valueOf(fullScore);
-                            PreferencesService.getInstance(context).savePointFive(true);
+                        double fullScore = getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(0).getFullScore();
+                        if(!PreferencesService.getInstance(context).getPointFive()){
+                            if (fullScore == (int) fullScore) {
+                                TOTAL = String.valueOf((int) fullScore);
+                                PreferencesService.getInstance(context).savePointFive(false);
+                            } else {
+                                TOTAL = String.valueOf(fullScore);
+                                PreferencesService.getInstance(context).savePointFive(true);
+                            }
                         }
 
                         doubleMode = false;
@@ -1238,13 +1240,15 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 });
                 mRecyclerView.setAdapter(questionNumAdapter);
-                double fullScore = getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(0).getFullScore();
-                if (fullScore == (int) fullScore) {
-                    TOTAL = String.valueOf((int) fullScore);
-                    PreferencesService.getInstance(context).savePointFive(false);
-                } else {
-                    TOTAL = String.valueOf(fullScore);
-                    PreferencesService.getInstance(context).savePointFive(true);
+                if(!PreferencesService.getInstance(context).getPointFive()){
+                    double fullScore = getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(0).getFullScore();
+                    if (fullScore == (int) fullScore) {
+                        TOTAL = String.valueOf((int) fullScore);
+                        PreferencesService.getInstance(context).savePointFive(false);
+                    } else {
+                        TOTAL = String.valueOf(fullScore);
+                        PreferencesService.getInstance(context).savePointFive(true);
+                    }
                 }
 
                 //当前小题的得分，初始化分数显示
