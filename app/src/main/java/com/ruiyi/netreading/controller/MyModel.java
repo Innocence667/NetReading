@@ -441,7 +441,7 @@ public class MyModel {
                 if (response.body().contentLength() <= 0) {
                     callBack.onFailed("文件下载失败:" + response.body().contentLength());
                 } else {
-                    callBack.onSuccess("Download:" + response);
+                    callBack.onSuccess(response);
                 }
             }
         });
