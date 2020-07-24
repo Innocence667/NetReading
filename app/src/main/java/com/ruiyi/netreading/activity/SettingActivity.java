@@ -242,12 +242,14 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                             update_progress.setVisibility(View.GONE);
                             update_msg.setText("发现新版本" + version.split(":")[1].split("-")[1].replace("\"}", ""));
                             update_determine.setVisibility(View.VISIBLE);
-                            update_cancel.setVisibility(View.GONE);
+                            update_cancel.setVisibility(View.VISIBLE);
+                            update_cancel.setText("取消");
                         } else {
                             update_progress.setVisibility(View.GONE);
                             update_msg.setText("已是最新版本");
                             update_determine.setVisibility(View.GONE);
                             update_cancel.setVisibility(View.VISIBLE);
+                            update_cancel.setText("确定");
                         }
                     }
                 });

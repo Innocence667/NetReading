@@ -15,6 +15,7 @@ import com.ruiyi.netreading.bean.CustomBean;
 
 import java.util.Map;
 
+//置顶分数适配器
 public class TopScoreAdapter extends BaseAdapter {
 
     private Context mContext;

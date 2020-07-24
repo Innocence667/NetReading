@@ -167,6 +167,62 @@
             android:button="@null"
             android:padding="10dp" />
 
+        <LinearLayout
+            android:id="@+id/spenLayoutShow"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_above="@+id/function"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/sideslip"
+            android:background="@drawable/pen_layout_show_style"
+            android:elevation="5dp"
+            android:gravity="center_vertical"
+            android:padding="5dp"
+            android:visibility="gone">
+
+            <CheckBox
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/pen_check_style"
+                android:button="@null" />
+
+            <Button
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/eraser" />
+
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/icon_correct"
+                    android:button="@null" />
+
+                <RadioButton
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/icon_bandui"
+                    android:button="@null" />
+
+                <RadioButton
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/icon_error"
+                    android:button="@null" />
+            </RadioGroup>
+
+        </LinearLayout>
+
         <!--功能区-->
         <HorizontalScrollView
             android:id="@+id/function"
@@ -430,26 +486,44 @@
                 android:layout_height="30dp"
                 android:background="@color/colorGrey2" />
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/time"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:text="时间" />
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/gobackTimeIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableRight="@drawable/order"
+                    android:gravity="center"
+                    android:text="时间" />
+            </LinearLayout>
 
             <View
                 android:layout_width="2dp"
                 android:layout_height="30dp"
                 android:background="@color/colorGrey2" />
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/score"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:text="分数" />
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/gobackScoreIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableRight="@drawable/order"
+                    android:gravity="center"
+                    android:text="分数" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
         <View

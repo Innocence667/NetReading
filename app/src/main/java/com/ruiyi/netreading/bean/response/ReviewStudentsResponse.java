@@ -28,7 +28,7 @@ public class ReviewStudentsResponse {
         this.data = data;
     }
 
-    public static class DataBean {
+    public static class DataBean implements Comparable<DataBean> {
         /**
          * studentGuid : 4b5cbe599e9b4bcfa77228c912d2d2f6
          * testCode : 10014
@@ -91,6 +91,19 @@ public class ReviewStudentsResponse {
 
         public void setScore(double score) {
             this.score = score;
+        }
+
+        //负整数、零或正整数对应小于、等于或大于
+        @Override
+        public int compareTo(DataBean o) {
+            if (o.score == this.score) {
+                return 0;
+            } else if (o.score > this.score) {
+                return 1;
+            } else if (o.score < this.score) {
+                return -1;
+            }
+            return 0;
         }
     }
 }

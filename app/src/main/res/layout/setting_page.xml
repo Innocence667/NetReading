@@ -127,6 +127,36 @@
             android:background="@color/colorGrey" />
 
         <LinearLayout
+            android:id="@+id/penSetView"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="手写笔设置" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/right" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:background="@color/colorGrey" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:gravity="center_vertical"
@@ -279,5 +309,10 @@
         </LinearLayout>
 
     </RelativeLayout>
+
+    <include
+        android:id="@+id/penSetting"
+        layout="@layout/pen_setting_layout"
+        android:visibility="gone" />
 
 </LinearLayout>

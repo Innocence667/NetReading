@@ -160,4 +160,36 @@ public class PreferencesService {
     public String getTopScore() {
         return sharedPreferences.getString("topScore", "");
     }
+
+    /**
+     * 设置spen颜色
+     *
+     * @param string
+     * @return
+     */
+    public PreferencesService saveSpenColor(String string) {
+        editor.putString("spenColor", string);
+        editor.commit();
+        return this;
+    }
+
+    public String getSpenColor() {
+        return sharedPreferences.getString("spenColor", "#CF2257");
+    }
+
+    /**
+     * 设置spen的宽度
+     *
+     * @param size
+     * @return
+     */
+    public PreferencesService saveSpenSize(int size) {
+        editor.putInt("spenSize", size);
+        editor.commit();
+        return this;
+    }
+
+    public int getSpenSize() {
+        return sharedPreferences.getInt("spenSize", 3);
+    }
 }

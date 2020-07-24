@@ -12,7 +12,7 @@ public class StepScore {
      */
 
     private int id; //序号
-    private int index;
+    private int index; //第几个小题的数据
     private String field; //类型(对号 tick、半对号 halfTick、错号 cross、文本  text、步骤分 stepPoints )
     private double params; //得分
     private float x; //x坐标

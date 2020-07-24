@@ -3,6 +3,7 @@ package com.ruiyi.netreading.bean.response;
 import java.util.List;
 
 public class GetExamContextResponse {
+    //TODO 线上考试图片使用url，线下使用base64数据
 
     /**
      * success : 200
@@ -40,6 +41,7 @@ public class GetExamContextResponse {
          * teacherData : [{"teacherCount":0,"teacherNumber":1}]
          * canMark : true //是否是自己的任务
          * style : 1
+         * isonline : false
          */
 
         private String taskGuid;
@@ -52,6 +54,7 @@ public class GetExamContextResponse {
         private List<QuestionsBean> questions;
         private List<AvgListBean> avgList;
         private List<TeacherDataBean> teacherData;// 如果是空的，表示是帮阅，如果有数据，表示是自己的任务
+        private int isonline; //0线下、1线上、2导入
 
         public String getTaskGuid() {
             return taskGuid;
@@ -131,6 +134,14 @@ public class GetExamContextResponse {
 
         public void setTeacherData(List<TeacherDataBean> teacherData) {
             this.teacherData = teacherData;
+        }
+
+        public int getIsonline() {
+            return isonline;
+        }
+
+        public void setIsonline(int isonline) {
+            this.isonline = isonline;
         }
 
         public static class QuestionsBean {
