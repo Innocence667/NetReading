@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Environment;
 import android.util.Base64;
@@ -37,6 +38,14 @@ public class Tool {
         Rect rect = new Rect();
         display.getRectSize(rect);
         return rect;
+    }
+
+    //获取屏幕宽高
+    public static Point getDefaultDisplay(Activity activity) {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        Point point = new Point();
+        display.getSize(point);
+        return point;
     }
 
     //获取状态栏的高度

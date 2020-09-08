@@ -229,15 +229,16 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                         String[] serviceVersion = version.split(":")[1].split("-")[1].split("\\.");
                         String[] locationVersion = packageInfo.versionName.split("\\.");
                         boolean isNew = false;//是否有新版本
-                        if (Integer.valueOf(serviceVersion[0].replace("\"}", "")) > Integer.valueOf(locationVersion[0])) {
-                            isNew = true;
-                        } else {
-                            if (Integer.valueOf(serviceVersion[1].replace("\"}", "")) > Integer.valueOf(locationVersion[1])) {
+                        for (int i = 0; i < serviceVersion.length; i++) {
+                            int s = Integer.valueOf(serviceVersion[i].replace("\"}", ""));
+                            int l = Integer.valueOf(locationVersion[i]);
+                            if (s > l) {
                                 isNew = true;
-                            } else {
-                                if (Integer.valueOf(serviceVersion[2].replace("\"}", "")) > Integer.valueOf(locationVersion[2])) {
-                                    isNew = true;
-                                }
+                                break;
+                            }
+                            if (l > s) {
+                                isNew = false;
+                                break;
                             }
                         }
                         if (isNew) {

@@ -55,12 +55,14 @@ public class SaveMarkDataBean {
          * markScore :
          * stepScore :
          * coordinate :
+         * gradeData :
          */
 
         private String id; //题目id
         private String markScore; //题目得分
         private String stepScore; //题目步骤分
         private String coordinate; //笔迹数据
+        private String gradeData;// {"gradeMode":3,"stepModeAdd":true,"stepLength":"+1.5"}
 
         public String getId() {
             return id;
@@ -92,6 +94,14 @@ public class SaveMarkDataBean {
 
         public void setCoordinate(String coordinate) {
             this.coordinate = coordinate;
+        }
+
+        public String getGradeData() {
+            return gradeData;
+        }
+
+        public void setGradeData(String gradeDate) {
+            this.gradeData = gradeDate;
         }
     }
 }

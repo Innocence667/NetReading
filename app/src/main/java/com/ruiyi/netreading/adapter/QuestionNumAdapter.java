@@ -1,6 +1,7 @@
 package com.ruiyi.netreading.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,5 +100,6 @@ public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.
     //更新指定位置的分数
     public void updateScore(int pos, String score) {
         scores.set(pos, score);
+        Log.e("QuestionNumAdapter", "updateScore: " + pos + "-" + score);
     }
 }

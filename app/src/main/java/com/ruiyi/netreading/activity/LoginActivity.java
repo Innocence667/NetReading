@@ -104,6 +104,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 servicePathTv.setText(PreferencesService.getInstance(context).getServicePath());
             }
         }
+        Log.e(TAG, "屏幕分辨率: " + Tool.getDefaultDisplay(LoginActivity.this).x + "-" + Tool.getDefaultDisplay(LoginActivity.this).y);
     }
 
     private void initView() {
@@ -255,7 +256,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 final UserBean userBean = getUserInput();
                 if (userBean != null) {
                     userBean.setIsmemory(false);
-                    userBean.setTerminal(2);
+                    userBean.setTerminal(1);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -285,11 +286,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 /*if (TextUtils.isEmpty(location.getText().toString().trim())) {
                     ToastUtils.showToast(context, "请输入地址");
                     return;
-                }*/
+                }
                 if (TextUtils.isEmpty(port.getText().toString().trim())) {
                     ToastUtils.showToast(context, "请输入端口");
                     return;
-                }
+                }*/
                 testUrlBtn.setEnabled(false);
                 testProgress.setVisibility(View.VISIBLE);
                 testUrlBtnCancel.setVisibility(View.GONE);
@@ -308,6 +309,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if (TextUtils.isEmpty(location.getText().toString().trim())) {
             url = "https://riyun.lexuewang.cn:" + port.getText().toString().trim() + "/login/home/index";
         }
+        //测试服务器没端口
+        if (TextUtils.isEmpty(location.getText().toString().trim()) && "8008".equals(port.getText().toString().trim())) {
+            url = "https://riyun.lexuewang.cn/login/home/index";
+        }
+
         loginModel.testUrl(context, url, new MyCallBack() {
             @Override
             public void onSuccess(Object model) {
@@ -319,7 +325,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         if (TextUtils.isEmpty(location.getText().toString().trim())) {
                             servicePath = "https://riyun.lexuewang.cn:" + port.getText().toString().trim();
                         }
-                        PreferencesService.getInstance(context).saveServicePath(servicePath);
+                        if ("https://riyun.lexuewang.cn:8008".equals(servicePath)) {
+                            PreferencesService.getInstance(context).saveServicePath("https://riyun.lexuewang.cn");
+                        } else {
+                            PreferencesService.getInstance(context).saveServicePath(servicePath);
+                        }
                         servicePathTv.setText(servicePath);
                         dialog.cancel();
                     }

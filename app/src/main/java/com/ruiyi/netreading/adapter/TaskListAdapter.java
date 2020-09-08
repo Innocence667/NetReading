@@ -102,20 +102,34 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
         }
 
         chileViewHolder.questionName.setText(childs.get(childPosition).getTaskName());
-        if (childs.get(childPosition).getTeacherData() != null && childs.get(childPosition).getTeacherData().size() > 0) {
-            chileViewHolder.myMission.setText(Html.fromHtml("我的任务：<font color = '#245AD3'>" + childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() + "</font>/" + childs.get(childPosition).getTeacherData().get(0).getTeacherCount()));
-            chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNumber() + "/" + childs.get(childPosition).getTaskCount());
+        if (childs.get(childPosition).getTeacherData() != null) {
+            chileViewHolder.myMission.setText(Html.fromHtml("我的任务：<font color = '#245AD3'>" + childs.get(childPosition).getTeacherData().getTeacherNumber()
+                    + "</font>/" + childs.get(childPosition).getTeacherData().getTeacherCount()));
+            if (childs.get(childPosition).getStyle() != 2) { //不是双评
+                chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNumber() + "/" + childs.get(childPosition).getTaskCount());
+                chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNumber());
+            } else {
+                chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNum() + "/" + childs.get(childPosition).getTaskCount());
+                chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNum());
+            }
             chileViewHolder.progress.setMax(childs.get(childPosition).getTaskCount());
-            chileViewHolder.progress.setProgress(childs.get(childPosition).getTeacherData().get(0).getTeacherNumber());
-            chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNumber());
+            chileViewHolder.progress.setProgress(childs.get(childPosition).getTeacherData().getTeacherNumber());
             if (childs.get(childPosition).getMarkNumber() != 0) {
                 //TODO 保留一位小数
                 chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getMarkNumber() * 100 / childs.get(childPosition).getTaskCount())) + "%");
             } else {
-                chileViewHolder.percentage.setText("0%");
+                if (childs.get(childPosition).getStyle() != 2) {
+                    chileViewHolder.percentage.setText("0%");
+                } else {
+                    if (childs.get(childPosition).getMarkNum() != 0) {
+                        chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getMarkNum() * 100 / childs.get(childPosition).getTaskCount())) + "%");
+                    } else {
+                        chileViewHolder.percentage.setText("0%");
+                    }
+                }
             }
             if (childs.get(childPosition).getTaskCount() == childs.get(childPosition).getMarkNumber()) { //当前任务已经完成
-                if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() == 0) { //自己没有任务
+                if (childs.get(childPosition).getTeacherData().getTeacherNumber() == 0) { //自己没有任务
                     chileViewHolder.startTask.setText("已阅完");
                     chileViewHolder.startTask.setEnabled(false);
                 } else {
@@ -125,14 +139,14 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                 chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_enable_style));
                 chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorProgress));
             } else { //任务没完成
-                if (childs.get(childPosition).getTeacherData().get(0).getTeacherCount() == 0) { //自由阅卷模式
-                    if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() == 0) {
-                        if(childs.get(childPosition).getStyle()==3){
+                if (childs.get(childPosition).getTeacherData().getTeacherCount() == 0) { //自由阅卷模式
+                    if (childs.get(childPosition).getTeacherData().getTeacherNumber() == 0) {
+                        if (childs.get(childPosition).getStyle() == 3) {
                             chileViewHolder.startTask.setText("无阅卷任务");
                             chileViewHolder.startTask.setEnabled(false);
                             chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_enable_style));
                             chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorProgress));
-                        }else{
+                        } else {
                             chileViewHolder.startTask.setText("开始阅卷");
                             chileViewHolder.startTask.setEnabled(true);
                             chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
@@ -145,51 +159,99 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                         chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
                     }
                 } else { //有自己的任务
-                    if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() == 0) {
+                    if (childs.get(childPosition).getTeacherData().getTeacherNumber() == 0) {
                         chileViewHolder.startTask.setText("开始阅卷");
                         chileViewHolder.startTask.setEnabled(true);
                         chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
                         chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
                     } else {
-                        if (childs.get(childPosition).getTeacherData().get(0).getTeacherNumber() != childs.get(childPosition).getTeacherData().get(0).getTeacherCount()) {
-                            chileViewHolder.startTask.setText("继续阅卷");
-                            chileViewHolder.startTask.setEnabled(true);
-                            chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
-                            chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
-                        } else {
-                            //阅卷类型(1单评，3按班)，单评阅完自己的可以帮阅，按班只能批阅自己的任务，不可帮阅
-                            if (childs.get(childPosition).getStyle() == 1) {
+                        if (childs.get(childPosition).getStyle() != 2) {
+                            if (childs.get(childPosition).getTeacherData().getTeacherNumber() != childs.get(childPosition).getTeacherData().getTeacherCount()) {
+                                chileViewHolder.startTask.setText("继续阅卷");
+                                chileViewHolder.startTask.setEnabled(true);
+                                chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
+                                chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
+                            } else {
+                                //阅卷类型(1单评，3按班)，单评阅完自己的可以帮阅，按班只能批阅自己的任务，不可帮阅
+                            /*if (childs.get(childPosition).getStyle() == 1) {
                                 chileViewHolder.startTask.setText("继续阅卷");
                             } else if (childs.get(childPosition).getStyle() == 3) {
                                 chileViewHolder.startTask.setText("回 评");
+                            }*/
+                                if (isOver) {
+                                    chileViewHolder.startTask.setText("继续阅卷");
+                                } else {
+                                    chileViewHolder.startTask.setText("回 评");
+                                }
+                                chileViewHolder.startTask.setEnabled(true);
+                                chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
+                                chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
                             }
-                            chileViewHolder.startTask.setEnabled(true);
-                            chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
-                            chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
+                        } else {
+                            if (childs.get(childPosition).getTeacherData().getTeacherNumber() != childs.get(childPosition).getTeacherData().getTeacherCount()) {
+                                chileViewHolder.startTask.setText("继续阅卷");
+                                chileViewHolder.startTask.setEnabled(true);
+                                chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
+                                chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
+                            } else {
+                                    chileViewHolder.startTask.setText("回 评");
+                                chileViewHolder.startTask.setEnabled(true);
+                                chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
+                                chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
+                            }
                         }
                     }
                 }
             }
         } else {
-            chileViewHolder.myMission.setText(Html.fromHtml("我的任务：<font color = '#245AD3'>" + (0) + "</font>/" + 0));
-            chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNumber() + "/" + childs.get(childPosition).getTaskCount());
+            chileViewHolder.myMission.setText(Html.fromHtml("我的任务：<font color = '#245AD3'>" + (0) + "</font>"));
+            if (childs.get(childPosition).getStyle() != 2) { //不是双评
+                chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNumber() + "/" + childs.get(childPosition).getTaskCount());
+                chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNumber());
+            } else {
+                chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNum() + "/" + childs.get(childPosition).getTaskCount());
+                chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNum());
+            }
             chileViewHolder.progress.setProgress(0);
-            chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNumber());
             if (childs.get(childPosition).getMarkNumber() != 0) {
                 chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getMarkNumber() * 100 / childs.get(childPosition).getTaskCount())) + "%");
             } else {
-                chileViewHolder.percentage.setText("0%");
+                if (childs.get(childPosition).getStyle() != 2) {
+                    chileViewHolder.percentage.setText("0%");
+                } else {
+                    if (childs.get(childPosition).getMarkNum() != 0) {
+                        chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getMarkNum() * 100 / childs.get(childPosition).getTaskCount())) + "%");
+                    } else {
+                        chileViewHolder.percentage.setText("0%");
+                    }
+                }
             }
-            if (childs.get(childPosition).getMarkNumber() == childs.get(childPosition).getTaskCount()) {
-                chileViewHolder.startTask.setText("已阅完");
-                chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_enable_style));
-                chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorProgress));
-                chileViewHolder.startTask.setEnabled(false);
+            if (childs.get(childPosition).getIdentity() != 3) {
+                if (childs.get(childPosition).getMarkNumber() == childs.get(childPosition).getTaskCount()) {
+                    chileViewHolder.startTask.setText("已阅完");
+                    chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_enable_style));
+                    chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorProgress));
+                    chileViewHolder.startTask.setEnabled(false);
+                } else {
+                    chileViewHolder.startTask.setText("开始阅卷");
+                    chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
+                    chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
+                    chileViewHolder.startTask.setEnabled(true);
+                }
             } else {
-                chileViewHolder.startTask.setText("开始阅卷");
-                chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
-                chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
-                chileViewHolder.startTask.setEnabled(true);
+                if (childs.get(childPosition).getArbCount() == 0) {
+                    chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNumber() + "/" + childs.get(childPosition).getArbCount());
+                    chileViewHolder.startTask.setText("无阅卷任务");
+                    chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_enable_style));
+                    chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorProgress));
+                    chileViewHolder.startTask.setEnabled(false);
+                } else {
+                    chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getTeacherData() + "/" + childs.get(childPosition).getArbCount());
+                    chileViewHolder.startTask.setText("开始阅卷");
+                    chileViewHolder.startTask.setBackground(ContextCompat.getDrawable(mContext, R.drawable.begin_btn_style));
+                    chileViewHolder.startTask.setTextColor(ContextCompat.getColor(mContext, R.color.colorWhite));
+                    chileViewHolder.startTask.setEnabled(true);
+                }
             }
         }
 
@@ -259,22 +321,26 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
         this.childs.clear();
     }
 
-    //设置子据源
+    //设置子数据源
     public void setChilds(List<GetExamContextResponse.TaskListBean> childs1) {
         this.childs = childs1;
-
         //判断自己的任务是否全部阅完
         isOver = true;
         for (int i = 0; i < childs.size(); i++) {
             if (childs.get(i).isCanMark()) { //是自己的任务
-                if (childs.get(i).getTaskCount() != childs.get(i).getMarkNumber()) {
+                if (childs.get(i).getTeacherData() != null) {
+                    if (childs.get(i).getTeacherData().getTeacherCount() != childs.get(i).getTeacherData().getTeacherNumber()) {
+                        isOver = false;
+                        break;
+                    }
+                } else {
                     isOver = false;
                     break;
                 }
             }
         }
 
-        if (isOver) {
+        /*if (isOver) {
             boolean isOv = true;//任务是否完成
             //调用mymodel.getTaskContext()方法
             for (int i = 0; i < childs.size(); i++) {
@@ -286,7 +352,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
             if (!isOv) {
                 mContext.updataChildData();
             }
-        }
+        }*/
     }
 
     public void clearChilds() {

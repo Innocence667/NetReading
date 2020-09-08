@@ -67,6 +67,7 @@ public class MyModel {
     //登录账号
     public void getUser(Context context, UserBean userBean, final MyCallBack callback) {
         Log.e("getUser", gson.toJson(userBean));
+        Log.e("getUser", "getUser: " + Interfaces.getInstance(context).LOGIN);
         Call call = HttpUtil.getInstance().Login(Interfaces.getInstance(context).LOGIN,
                 gson.toJson(userBean));
         call.enqueue(new Callback() {
@@ -184,7 +185,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        //LogUtils.logE("getMarkData", "获取阅卷数据：" + json);
+                        LogUtils.logE("getMarkData", "获取阅卷数据：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkDataResponse.class));
                     } else {
                         callBack.onFailed("getMarkData:" + json);
@@ -213,9 +214,10 @@ public class MyModel {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
+                Log.e("getMarkNextStudent", "onResponse: " + json);
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        //LogUtils.logE("getMarkNextStudent", "获取新数据结果：" + json);
+                        LogUtils.logE("getMarkNextStudent", "获取新数据结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
                     } else {
                         callBack.onFailed("getMarkNextStudent:" + json);
@@ -299,9 +301,9 @@ public class MyModel {
                         LogUtils.logE("saveMarkData", "新数据提交返回结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
                     } else {
-                        if(json.contains("当前教师或任务不存在！")){
+                        if (json.contains("当前教师或任务不存在！")) {
                             callBack.onFailed("当前教师或任务不存在！");
-                        }else{
+                        } else {
                             callBack.onFailed("saveMarkData:" + json);
                         }
                     }

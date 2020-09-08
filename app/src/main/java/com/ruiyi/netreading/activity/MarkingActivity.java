@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -59,8 +60,8 @@ import com.ruiyi.netreading.adapter.ScoreAdapter;
 import com.ruiyi.netreading.adapter.ScoreDetailsAdapter;
 import com.ruiyi.netreading.adapter.SpenColorSAdapter;
 import com.ruiyi.netreading.adapter.TopScoreAdapter;
-import com.ruiyi.netreading.bean.ChildLocation;
 import com.ruiyi.netreading.bean.CustomBean;
+import com.ruiyi.netreading.bean.GradeData;
 import com.ruiyi.netreading.bean.ImageData;
 import com.ruiyi.netreading.bean.LocalImageData;
 import com.ruiyi.netreading.bean.SaveMarkDataBean;
@@ -89,12 +90,12 @@ import com.samsung.android.sdk.pen.Spen;
 import com.samsung.android.sdk.pen.SpenSettingPenInfo;
 import com.samsung.android.sdk.pen.document.SpenNoteDoc;
 import com.samsung.android.sdk.pen.document.SpenObjectBase;
+import com.samsung.android.sdk.pen.document.SpenObjectImage;
 import com.samsung.android.sdk.pen.document.SpenObjectStroke;
 import com.samsung.android.sdk.pen.document.SpenPageDoc;
 import com.samsung.android.sdk.pen.engine.SpenSimpleSurfaceView;
 import com.samsung.android.sdk.pen.engine.SpenSurfaceView;
 import com.samsung.android.sdk.pen.engine.SpenTouchListener;
-import com.samsung.android.sdk.pen.engine.SpenZoomListener;
 import com.samsung.android.sdk.pen.pen.SpenPenManager;
 
 import java.io.IOException;
@@ -106,9 +107,21 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MarkingActivity extends AppCompatActivity implements View.OnClickListener, SpenTouchListener {
+public class MarkingActivity extends AppCompatActivity implements View.OnClickListener, DrawerLayout.DrawerListener {
 
     private String TAG = "MarkingActivity";
+    //标签类型
+    private String tabType = TYPE_NONE;
+    private static final String TYPE_NONE = "null"; //无
+    private static final String TYPE_TICK = "tick"; //对
+    private static final String TYPE_HALFTICK = "halfTick"; //半对
+    private static final String TYPE_CROSS = "cross"; //错
+    private static final String TYPE_STEPPOINTS = "stepPoints"; //标签
+    //当前操作类模式
+    private int operationType = TYPE_OPERATION_NONE;
+    private static final int TYPE_OPERATION_NONE = 0; //无操作
+    private static final int TYPE_OPERATION_SPEN = 1; //手写笔模式
+    private static final int TYPE_OPERATION_STEP = 2; //步骤分模式
     private Context context;
     private Handler handler;
     private MyModel myModel;
@@ -120,42 +133,41 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private RelativeLayout main; //主布局
     private LinearLayout reigth; //侧滑布局
 
-    private TextView number, gobackTimeIcon, gobackScoreIcon; //回评列表筛选
+    private TextView gobackTimeIcon, gobackScoreIcon; //回评列表筛选
     private int timeType = 0, scoreType = 0; //记录条件筛选的模式(0默认、1升序、2降序)
-    private LinearLayout time, score;
+    private LinearLayout time, score; //排序
     private ListView reviewListView; //回评列表
     private TextView nodatahint; //没有回评数据提示
 
     private String teacherGuid;//教师guid
     private String taskGuid;//任务guid
     private int status; //当前阅卷状态
-    private int style; //当前阅卷模式(1单评、3按班)
+    private int style; //当前阅卷模式(1单评、2双评、3按班)
+    private int identity;//教师身份(0、单评 1、教师1 2、教师2 3、双评)
 
     private int LOCATION = 0; //当前题目的进度(12/100中的12，回评模式用的到),是集合的下标
     private int minLocation = 0; //当前显示题目的位置(合并题：当前第几个小题；非合并题：当前位置为0)
     private boolean reviewMode; //是否是回评模式
-    private boolean isStepScore; //是否是步骤分模式
     private boolean doubleMode; //双栏模式
     private String doubleScore = "0";//双栏模式选中的分值
     private String SCORE; //当前题目的得分
     private String TOTAL; //当前题目的总分
     private double MaxScore;//当前题目的最高分数(合并题目的最高分数)
     private String tableStepScore; //当前步骤分选中的标签
-    private List<ChildLocation> childLocations; //存放所有步骤分标签
-    private float startY = 0;//用于记录操作标签分加减时，点击的初始Y轴坐标值
-    private float startX = 0;//用于记录删除标签时，点击的初始位置
-    private double stepScoreModeFullScore = -1;//步骤分模式题目总分
     private double stepScoreModeScore = -1;//步骤分模式得分
-    private int index = -1; //当前操作标签的标识
     private long scoreClickTime = 0; //打分点击的时间
+
+    //步骤分模式
+    private Map<Integer, Double> tab = new HashMap<>();//存放标签中的分值
+    private Map<Integer, StepScore> stepDatas = new HashMap<>();//标签数据
 
     private RelativeLayout spenView;
     private SpenNoteDoc mSpenNotDoc;
     private SpenPageDoc mSpenPageDoc;
     private SpenSurfaceView mSpenSimpleSurfaceView;
-    private boolean isSpenFeatureEnable;
+    private boolean next = false;//是否继续执行ACTION_UP操作
+    private boolean isSpenFeatureEnable = false;//是否支持手写笔
     private float scale; //图片缩放的倍数
-    private RelativeLayout tableParent; //显示步骤分标签布局
 
     private TextView questionScore;//题目得分
     private TextView questionNum;//题号
@@ -174,8 +186,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private List<String> scores; //小题得分
 
     //底部功能区
+    private Bitmap bitmap = null; //添加标签时的对象
     private CheckBox sideslip; //功能区折叠按钮
     private LinearLayout spenLayoutShow; //手写笔选中后的界面
+    //对、半对、错、选择
+    private CheckBox identification_dui, identification_bandui, identification_cuo, identification_objSelect;
+    private List<CheckBox> checkBoxes;
     private HorizontalScrollView scrollView; //功能区
     //批注、清除笔迹、步骤分、收藏、回评、继续阅卷、评分详情、设置
     private RelativeLayout commentsP, eliminateP, stepScoreP, collectionP, historyP, goOnParent, scoringDatailsP, settingP;
@@ -256,6 +272,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         taskGuid = intent.getStringExtra("taskGuid");
         status = intent.getIntExtra("status", 2);
         style = intent.getIntExtra("style", 1);
+        identity = intent.getIntExtra("identity", 0);
+        final boolean isOver = intent.getBooleanExtra("isOver", false);
         request = new GetMarkDataRequest();
         request.setTaskGuid(taskGuid);
         request.setTeacherGuid(teacherGuid);
@@ -271,13 +289,17 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         public void onSuccess(Object model) {
                             response = (GetMarkDataResponse) model;
                             if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //当前任务是否全部完成
-                                if (response.getTeacherTask().getMarkCount() != 0) { //不是自由阅卷
+                                if (!response.getTeacherTask().isIsFree()) { //不是自由阅卷
                                     if (response.getTeacherTask().getMarkNumber() < response.getTeacherTask().getMarkCount()) { //继续阅卷
                                         normalMOde();
                                     } else {
                                         if (style == 1) { //单评模式下自己的任务完成后可以继续批阅任务
                                             if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) {
-                                                normalMOde(); //正常批阅
+                                                if (isOver) {
+                                                    normalMOde(); //正常批阅
+                                                } else {
+                                                    goBackMode(); //回评
+                                                }
                                             } else {
                                                 goBackMode(); //回评
                                             }
@@ -374,7 +396,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //回评模式
     private void goBackMode() {
-        Log.e("222222", "goBackMode: 回评阅卷");
+        Log.e("goBackMode", "goBackMode: 回评阅卷");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -502,6 +524,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             }
             bean.setStepScore(questionsBean.getStepScore());
             bean.setCoordinate(questionsBean.getCoordinate());
+            bean.setGradeData(questionsBean.getGradeData());
             questionsBeanList.add(bean);
         }
         saveMarkDataBean.setQuestions(questionsBeanList);
@@ -509,9 +532,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     private void initView() {
         drawerLayout = findViewById(R.id.drawerLayou);
+        drawerLayout.addDrawerListener(this);
+        //禁止侧滑
+        //drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         main = findViewById(R.id.main);
         reigth = findViewById(R.id.reight);
-        number = findViewById(R.id.number);
         gobackTimeIcon = findViewById(R.id.gobackTimeIcon);
         gobackScoreIcon = findViewById(R.id.gobackScoreIcon);
         time = findViewById(R.id.time);
@@ -535,6 +560,20 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         sideslip = findViewById(R.id.sideslip);
         sideslip.setOnClickListener(this);
         spenLayoutShow = findViewById(R.id.spenLayoutShow);
+        identification_dui = findViewById(R.id.identification_dui);
+        identification_bandui = findViewById(R.id.identification_bandui);
+        identification_cuo = findViewById(R.id.identification_cuo);
+        identification_objSelect = findViewById(R.id.objsearch);
+        checkBoxes = new ArrayList<>();
+        checkBoxes.add(identification_dui);
+        checkBoxes.add(identification_bandui);
+        checkBoxes.add(identification_cuo);
+        checkBoxes.add(identification_objSelect);
+        identification_dui.setOnClickListener(this);
+        identification_bandui.setOnClickListener(this);
+        identification_cuo.setOnClickListener(this);
+        identification_objSelect.setOnClickListener(this);
+
         scrollView = findViewById(R.id.function);
 
         commentsP = findViewById(R.id.commentsP);
@@ -578,7 +617,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         doubleListView = findViewById(R.id.doubleListView);
 
         //初始化SpenView
-        isSpenFeatureEnable = false; //是否支持手写笔
         Spen spen = new Spen();
         try {
             spen.initialize(context);
@@ -587,9 +625,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             Toast.makeText(context, "此设备不支持Spen",
                     Toast.LENGTH_LONG).show();
             e.printStackTrace();
-            //return;
         }
-        tableParent = findViewById(R.id.tableParent);
         spenView = findViewById(R.id.spenView);
         mSpenSimpleSurfaceView = new SpenSurfaceView(context);
         if (mSpenSimpleSurfaceView == null) {
@@ -597,11 +633,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     Toast.LENGTH_SHORT).show();
             return;
         }
-
         spenView.addView(mSpenSimpleSurfaceView);
 
         //获取屏幕尺寸
-        Rect rect = Tool.getScreenparameters(this);
+        final Rect rect = Tool.getScreenparameters(this);
         int myCanvasWidth = rect.width() - 80;
         int myCanvasHeigth = rect.height();
         initSpenNoteDoc(myCanvasWidth, myCanvasHeigth);
@@ -613,139 +648,205 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         penInfo.size = PreferencesService.getInstance(context).getSpenSize();
         mSpenSimpleSurfaceView.setPenSettingInfo(penInfo);
 
-        if (isSpenFeatureEnable == false) {
-            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_STROKE);
+        if (!isSpenFeatureEnable) {
+            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_NONE);
             //Toast.makeText(context, "设备不支持Spen. \n 你可以用手指画笔画", Toast.LENGTH_SHORT).show();
         }
         mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-        mSpenSimpleSurfaceView.setZoomListener(new SpenZoomListener() {
+        mSpenSimpleSurfaceView.setTouchListener(new SpenTouchListener() {
             @Override
-            public void onZoom(float v, float v1, float v2) {//x轴坐标 y轴坐标  缩放比例
-                //最大缩放3，最小缩放0.5
-            }
-        });
-    }
-
-    //添加标签并设置监听
-    private void addViewOrLinstener() {
-        tableParent.removeAllViews();
-        for (int i = 0; i < childLocations.size(); i++) {
-            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-                    RelativeLayout.LayoutParams.MATCH_PARENT);
-            //适配只有三星p350(samsung)和华为C5(HUAWEI)
-            if ("samsung".equals(Tool.getDeviceBrand())) {
-                lp.height = 40;
-                lp.width = 60;
-                lp.leftMargin = (int) childLocations.get(i).getX() - 30;
-                lp.topMargin = (int) childLocations.get(i).getY() - 20;
-            } else if ("HUAWEI".equals(Tool.getDeviceBrand())) {
-                lp.height = 70;
-                lp.width = 130;
-                lp.leftMargin = (int) childLocations.get(i).getX() - 75;
-                lp.topMargin = (int) childLocations.get(i).getY() - 35;
-            }
-            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            final TextView tv = new TextView(context);
-            tv.setTag(i);
-            tv.setText("+" + childLocations.get(i).getTv());
-            tv.setTextColor(getResources().getColor(R.color.colorRed));
-            tv.setTextSize(30);
-            tv.setGravity(Gravity.CENTER);
-            tv.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    index = (int) tv.getTag();
-                    if (event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS || event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
+            public boolean onTouch(View view, MotionEvent event) {
+                if (operationType == TYPE_OPERATION_STEP) { //步骤分模式
+                    Log.e(TAG, "onTouch: 步骤分 ");
+                    if (tabType.equals(TYPE_STEPPOINTS)) {
                         switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN:
-                                startY = event.getRawY();
-                                startX = event.getRawX();
-                                stepScoreModeScore = 0;
-                                for (int i = 0; i < tableParent.getChildCount(); i++) {
-                                    TextView textView = (TextView) tableParent.getChildAt(i);
-                                    String str = textView.getText().toString().substring(1);
-                                    stepScoreModeScore += Double.valueOf(str);
+                                next = true;
+                                //第一个触摸是电子笔
+                                if (event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS || event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
+                                    if (TextUtils.isEmpty(tableStepScore)) {
+                                        //没有选择步骤分
+                                        ToastUtils.showToast(context, "请先选择一个非0的标签分数");
+                                        next = false;
+                                    } else {
+                                        if (Double.valueOf(tableStepScore) > Double.valueOf(TOTAL)) {
+                                            ToastUtils.showToast(context, "请选择一个小一点的分值");
+                                            stepScoreModeScore = -1;
+                                            next = false;
+                                        }
+                                        if (stepScoreModeScore + (Double.valueOf(tableStepScore)) > Double.valueOf(TOTAL)) {
+                                            if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) != SpenSimpleSurfaceView.ACTION_SELECTION) {
+                                                ToastUtils.showToast(context, "不能超过题目总分");
+                                            }
+                                            next = false;
+                                        }
+                                        if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) == SpenSimpleSurfaceView.ACTION_SELECTION) {
+                                            next = false;
+                                        }
+                                    }
                                 }
-
                                 break;
                             case MotionEvent.ACTION_UP:
-                                float endY = event.getRawY();
-                                float endX = event.getRawX();
-                                if (startX - endX >= 50 || startX - endX <= -50) {
-                                    stepScoreModeScore = 0;
-                                    tableParent.removeView(tv);
-                                    childLocations.remove(index);
-                                    //删除一个标签后，对标签进行重新添加标识
-                                    for (int j = 0; j < childLocations.size(); j++) {
-                                        tableParent.getChildAt(j).setTag(j);
-                                    }
-                                    break;
-                                } else if (startY - endY >= 50) {//判断Y轴移动的距离
-                                    //+1操作
-                                    if (!"5".equals(childLocations.get(index).getTv()) && !"4.5".equals(childLocations.get(index).getTv())) {
-                                        if (stepScoreModeScore < stepScoreModeFullScore && stepScoreModeScore + 1 <= stepScoreModeFullScore) {
-                                            tv.setText("+" + (Integer.valueOf(childLocations.get(index).getTv()) + 1));
-                                            childLocations.get(index).setTv((Integer.valueOf(childLocations.get(index).getTv()) + 1) + "");
-                                        } else {
-                                            ToastUtils.showToast(context, "操作失败，不能超过题目总分！");
+                                if (next) {
+                                    if (event.getRawX() >= (event.getRawX() - event.getX())
+                                            && event.getRawX() <= ((event.getRawX() - event.getX()) + mSpenPageDoc.getWidth() * mSpenSimpleSurfaceView.getZoomRatio())
+                                            && event.getRawY() >= (mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2
+                                            && event.getRawY() <= (((mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2) + mSpenPageDoc.getHeight() * mSpenSimpleSurfaceView.getZoomRatio())) {
+                                        SpenObjectImage objectImage = new SpenObjectImage();
+                                        switch (String.valueOf(scoreAdapter.getChectValue())) {
+                                            case "0.5":
+                                                Log.e(TAG, "onTouch: 0.5");
+                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus0_5);
+                                                break;
+                                            case "1.0":
+                                                Log.e(TAG, "onTouch: 1.0");
+                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus1);
+                                                break;
+                                            case "1.5":
+                                                Log.e(TAG, "onTouch: 1.5");
+                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus1_5);
+                                                break;
+                                            case "2.0":
+                                                Log.e(TAG, "onTouch: 2.0");
+                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus2);
+                                                break;
+                                            case "3.0":
+                                                Log.e(TAG, "onTouch: 3.0");
+                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus3);
+                                                break;
+                                            case "4.0":
+                                                Log.e(TAG, "onTouch: 4.0");
+                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus4);
+                                                break;
+                                            case "5.0":
+                                                Log.e(TAG, "onTouch: 5.0");
+                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus5);
+                                                break;
+                                            case "6.0":
+                                                Log.e(TAG, "onTouch: 6.0");
+                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus6);
+                                                break;
                                         }
+                                        if (bitmap == null) {
+                                            Log.e(TAG, "onTouch: 标签图片是空的");
+                                            return false;
+                                        }
+                                        objectImage.setImage(bitmap);
+                                        //获取点击位置
+                                        float x = event.getX();
+                                        float y = event.getY();
+                                        //获取画布的位移量
+                                        float panX = mSpenSimpleSurfaceView.getPan().x;
+                                        float panY = mSpenSimpleSurfaceView.getPan().y;
+                                        //获取当前的缩放率
+                                        float zoom = mSpenSimpleSurfaceView.getZoomRatio();
+                                        float imgWidth = bitmap.getWidth() * zoom;
+                                        float imgHeight = bitmap.getHeight() * zoom;
+                                        RectF rectF = new RectF();
+                                        rectF.set((x - imgWidth / 2) / zoom + panX,
+                                                (y - imgHeight / 2) / zoom + panY,
+                                                (x + imgWidth / 2) / zoom + panX,
+                                                (y + imgHeight / 2) / zoom + panY);
+                                        objectImage.setRect(rectF, true);
+                                        objectImage.setResizeOption(SpenObjectBase.RESIZE_OPTION_DISABLE);
+                                        objectImage.setRotatable(false);//不可旋转
+                                        objectImage.setMovable(false);//不可移动
+                                        mSpenPageDoc.appendObject(objectImage);
+                                        mSpenSimpleSurfaceView.update();
+                                        stepScoreModeScore = 0;
+                                        for (Map.Entry<Integer, Double> map : tab.entrySet()) {
+                                            stepScoreModeScore += map.getValue();
+                                        }
+                                        if (stepScoreModeScore == (int) stepScoreModeScore) {
+                                            questionScore.setText(String.valueOf(((int) stepScoreModeScore)));
+                                            saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(((int) stepScoreModeScore)));
+                                            questionNumAdapter.updateScore(minLocation, String.valueOf(((int) stepScoreModeScore)));
+                                        } else {
+                                            questionScore.setText(String.valueOf(stepScoreModeScore));
+                                            saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
+                                            questionNumAdapter.updateScore(minLocation, String.valueOf(stepScoreModeScore));
+                                        }
+                                        questionNumAdapter.notifyDataSetChanged();
+                                        for (Map.Entry<Integer, Double> map : tab.entrySet()) {
+                                            if (map.getValue() > 0) {
+                                                submiss.setVisibility(View.VISIBLE);
+                                                break;
+                                            } else {
+                                                submiss.setVisibility(View.GONE);
+                                            }
+                                        }
+                                        return false;
                                     } else {
-                                        ToastUtils.showToast(context, "标签最高为+5分.");
-                                    }
-                                } else if (startY - endY < -50) {
-                                    //-1操作
-                                    if (!"1".equals(childLocations.get(index).getTv()) && !"1.5".equals(childLocations.get(index).getTv())) {
-                                        tv.setText("+" + (Integer.valueOf(childLocations.get(index).getTv()) - 1));
-                                        childLocations.get(index).setTv((Integer.valueOf(childLocations.get(index).getTv()) - 1) + "");
-                                    } else {
-                                        ToastUtils.showToast(context, "标签最低为+1分.");
+                                        Log.e(TAG, "onTouch: 超出了有效范围");
                                     }
                                 }
-                                startX = 0;
-                                startY = 0;
                                 break;
                         }
-                        stepScoreModeScore = 0;
-                        for (int j = 0; j < childLocations.size(); j++) {
-                            stepScoreModeScore += Double.valueOf(childLocations.get(j).getTv());
+                    } else if (!TYPE_STEPPOINTS.equals(tabType) && !TYPE_NONE.equals(tabType)) {
+                        if (event.getAction() == MotionEvent.ACTION_UP) {
+                            SpenObjectImage objectImage = new SpenObjectImage();
+                            objectImage.setImage(bitmap);
+                            //获取点击位置
+                            float x = event.getX();
+                            float y = event.getY();
+                            //获取画布的位移量
+                            float panX = mSpenSimpleSurfaceView.getPan().x;
+                            float panY = mSpenSimpleSurfaceView.getPan().y;
+                            //获取当前的缩放率
+                            float zoom = mSpenSimpleSurfaceView.getZoomRatio();
+                            float imgWidth = bitmap.getWidth() * zoom;
+                            float imgHeight = bitmap.getHeight() * zoom;
+                            RectF rectF = new RectF();
+                            rectF.set((x - imgWidth / 2) / zoom + panX,
+                                    (y - imgHeight / 2) / zoom + panY,
+                                    (x + imgWidth / 2) / zoom + panX,
+                                    (y + imgHeight / 2) / zoom + panY);
+                            objectImage.setRect(rectF, true);
+                            objectImage.setResizeOption(SpenObjectBase.RESIZE_OPTION_DISABLE);
+                            objectImage.setRotatable(false);//不可旋转
+                            objectImage.setMovable(false);//不可移动
+                            mSpenPageDoc.appendObject(objectImage);
+                            mSpenSimpleSurfaceView.update();
                         }
-                        if (stepScoreModeScore == (int) stepScoreModeScore) {
-                            questionScore.setText(String.valueOf((int) stepScoreModeScore));
-                            saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf((int) stepScoreModeScore));
-                            questionNumAdapter.updateScore(minLocation, String.valueOf((int) stepScoreModeScore));
-                        } else {
-                            questionScore.setText(String.valueOf(stepScoreModeScore));
-                            saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
-                            questionNumAdapter.updateScore(minLocation, String.valueOf(stepScoreModeScore));
-                        }
-                        questionNumAdapter.notifyDataSetChanged();
                     }
-                    return true;
+
+                } else if (operationType == TYPE_OPERATION_SPEN) { //是批注模式
+                    if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
+                        Log.e(TAG, "onTouch: 手指");
+                    }
+                    if (event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS) {
+                        Log.e(TAG, "onTouch: 电子笔");
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_UP && !TYPE_STEPPOINTS.equals(tabType)
+                            && !TYPE_NONE.equals(tabType)) {
+                        SpenObjectImage objectImage = new SpenObjectImage();
+                        objectImage.setImage(bitmap);
+                        //获取点击位置
+                        float x = event.getX();
+                        float y = event.getY();
+                        //获取画布的位移量
+                        float panX = mSpenSimpleSurfaceView.getPan().x;
+                        float panY = mSpenSimpleSurfaceView.getPan().y;
+                        //获取当前的缩放率
+                        float zoom = mSpenSimpleSurfaceView.getZoomRatio();
+                        float imgWidth = bitmap.getWidth() * zoom;
+                        float imgHeight = bitmap.getHeight() * zoom;
+                        RectF rectF = new RectF();
+                        rectF.set((x - imgWidth / 2) / zoom + panX,
+                                (y - imgHeight / 2) / zoom + panY,
+                                (x + imgWidth / 2) / zoom + panX,
+                                (y + imgHeight / 2) / zoom + panY);
+                        objectImage.setRect(rectF, true);
+                        objectImage.setResizeOption(SpenObjectBase.RESIZE_OPTION_DISABLE);
+                        objectImage.setRotatable(false);//不可旋转
+                        objectImage.setMovable(false);//不可移动
+                        mSpenPageDoc.appendObject(objectImage);
+                        mSpenSimpleSurfaceView.update();
+                    }
                 }
-            });
-            tv.setLayoutParams(lp);
-            tableParent.addView(tv);
-        }
-        if (tableParent.getChildCount() > 0) {
-            submiss.setVisibility(View.VISIBLE);
-            stepScoreModeScore = 0;
-            for (int j = 0; j < childLocations.size(); j++) {
-                stepScoreModeScore += Double.valueOf(childLocations.get(j).getTv());
+                return false;
             }
-            if (stepScoreModeScore == (int) stepScoreModeScore) {
-                questionScore.setText(String.valueOf((int) stepScoreModeScore));
-                saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf((int) stepScoreModeScore));
-                questionNumAdapter.updateScore(minLocation, String.valueOf((int) stepScoreModeScore));
-            } else {
-                questionScore.setText(String.valueOf(stepScoreModeScore));
-                saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
-                questionNumAdapter.updateScore(minLocation, String.valueOf(stepScoreModeScore));
-            }
-            questionNumAdapter.notifyDataSetChanged();
-        } else {
-            submiss.setVisibility(View.GONE);
-        }
+        });
     }
 
     //初始化SpenPageView
@@ -763,6 +864,81 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         mSpenPageDoc.setBackgroundImageMode(SpenPageDoc.BACKGROUND_IMAGE_MODE_FIT);
         mSpenPageDoc.setBackgroundColor(ContextCompat.getColor(context, R.color.colorSpenSimpleSurfaceView));
         mSpenPageDoc.clearHistory();
+        mSpenPageDoc.setObjectListener(new SpenPageDoc.ObjectListener() {
+            @Override
+            public void onObjectAdded(SpenPageDoc spenPageDoc, ArrayList<SpenObjectBase> arrayList, int i1) {
+                //type类型1=stroke、3=image
+                for (int i = 0; i < arrayList.size(); i++) {
+                    if (arrayList.get(i).getType() == SpenObjectBase.TYPE_IMAGE) {
+                        if (isAddMode) { //是否是回评添加数据(切换小题)
+                            tab.put(arrayList.get(i).getRuntimeHandle(), objectValue);
+                        } else {
+                            if (TYPE_STEPPOINTS.equals(tabType)) {
+                                tab.put(arrayList.get(i).getRuntimeHandle(),
+                                        scoreAdapter.getChectValue() == (int) scoreAdapter.getChectValue() ? (int) scoreAdapter.getChectValue() : scoreAdapter.getChectValue());
+                            } else {
+                                tab.put(arrayList.get(i).getRuntimeHandle(), 0.0);
+                            }
+                        }
+                        StepScore stepScore = new StepScore();
+                        stepScore.setId(arrayList.get(i).getRuntimeHandle());
+                        stepScore.setIndex(0);
+                        if (isAddMode) {
+                            stepScore.setField(field);
+                            stepScore.setParams(objectValue);
+                        } else {
+                            stepScore.setField(tabType);
+                            if (TYPE_STEPPOINTS.equals(tabType)) {
+                                stepScore.setParams(scoreAdapter.getChectValue());
+                            } else {
+                                stepScore.setParams(0);
+                            }
+                        }
+                        RectF drawnRect = arrayList.get(i).getDrawnRect();
+                        stepScore.setX((drawnRect.left + ((drawnRect.right - drawnRect.left) / 2f)) / scale);
+                        stepScore.setY((drawnRect.top + ((drawnRect.bottom - drawnRect.top) / 2f)) / scale);
+                        stepDatas.put(arrayList.get(i).getRuntimeHandle(), stepScore);
+                        Log.e(TAG, "onObjectAdded-----: " + new Gson().toJson(stepDatas));
+                    }
+                }
+            }
+
+            @Override
+            public void onObjectRemoved(SpenPageDoc spenPageDoc, ArrayList<SpenObjectBase> arrayList, int i) {
+                for (int j = 0; j < arrayList.size(); j++) {
+                    if (arrayList.get(i).getType() == 3) {
+                        if (tab != null && tab.size() > 0) {
+                            tab.remove(arrayList.get(i).getRuntimeHandle());
+                            stepDatas.remove(arrayList.get(i).getRuntimeHandle());
+                        }
+                    }
+                }
+                stepScoreModeScore = 0;
+                if (arrayList.size() > 1) {
+                    tab.clear();
+                    stepDatas.clear();
+                } else {
+                    for (Map.Entry<Integer, Double> map : tab.entrySet()) {
+                        stepScoreModeScore += map.getValue();
+                    }
+                    if (stepScoreModeScore == (int) stepScoreModeScore) {
+                        questionScore.setText(String.valueOf((int) stepScoreModeScore));
+                        saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf((int) stepScoreModeScore));
+                        questionNumAdapter.updateScore(minLocation, String.valueOf((int) stepScoreModeScore));
+                    } else {
+                        questionScore.setText(String.valueOf(stepScoreModeScore));
+                        saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
+                        questionNumAdapter.updateScore(minLocation, String.valueOf(stepScoreModeScore));
+                    }
+                    questionNumAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onObjectChanged(SpenPageDoc spenPageDoc, SpenObjectBase spenObjectBase, int i) {
+
+            }
+        });
         mSpenSimpleSurfaceView.setPageDoc(mSpenPageDoc, true);
     }
 
@@ -793,7 +969,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      * @return
      */
     private ScorePanel getScoreList(double score, double fullScore) {
-        Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score + "   是否是步骤分模式" + isStepScore);
+        Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score + "   是否是步骤分模式operationType:" + operationType);
         //Math.ceil(12.2)//返回13.0
         //Math.ceil(12.7)//返回13.0
         //Math.ceil(12.0)//返回12.0
@@ -804,7 +980,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         scorePanel = new ScorePanel();
         List<String> scores = new ArrayList<>();
         List<Boolean> scoresCheck = new ArrayList<>();
-        if (!isStepScore) { //不是步骤分分模式
+        if (operationType != TYPE_OPERATION_STEP) { //不是步骤分分模式
             if (!doubleMode) { //不是双栏模式
                 if (PreferencesService.getInstance(context).getPointFive()) { //0.5模式
                     if (!TextUtils.isEmpty(PreferencesService.getInstance(context).getTopScore())) {
@@ -1003,9 +1179,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 Rect rect = Tool.getScreenparameters(MarkingActivity.this);
                 Log.e(TAG, "当前屏幕的宽高是:" + rect.width() + "_" + rect.height());
                 if (bitmap.getHeight() > rect.height() - Tool.getStatusBarHeight(context) || bitmap.getWidth() > rect.width() - 80) { //图片比屏幕大
+                    scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
                     if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
                         initSpenNoteDoc(rect.width() - 80, bitmap.getHeight() * (rect.width() - 80) / bitmap.getWidth());
                     } else if (bitmap.getWidth() < bitmap.getHeight()) { //长图
+                        scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
                         if ("语文".equals(response.getTestpaper().getPaperName()) && bitmap.getHeight() > 2000) {
                             initSpenNoteDoc(1024 - 80, bitmap.getHeight() * (1024 - 80) / bitmap.getWidth());
                         } else {
@@ -1016,19 +1194,15 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 } else { //图片没有屏幕大
                     Log.e(TAG, "图片没有屏幕大 ");
-                    //TODO 下面注释代码勿删
                     initSpenNoteDoc(bitmap.getWidth(), bitmap.getHeight());
                     //自动填充屏幕大小
                     if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
                         mSpenSimpleSurfaceView.setZoom(0, 0, (rect.width() - 80) * 1f / bitmap.getWidth());
-                        Log.e(TAG, "onSuccess1: " + (rect.width() / bitmap.getWidth()));
                     } else { //高图
                         mSpenSimpleSurfaceView.setZoom(0, 0, rect.height() * 1f / bitmap.getHeight());
-                        Log.e(TAG, "onSuccess2: " + rect.height() / bitmap.getHeight());
                     }
+                    scale = bitmap.getWidth() * 1f / mSpenPageDoc.getWidth();
                 }
-                //scale = mSpenPageDoc.getWidth() * 10 * 0.1f / bitmap.getWidth();
-                scale = bitmap.getWidth() * 10 * 0.1f / mSpenPageDoc.getWidth();
 
                 //设置背景图片
                 mSpenPageDoc.setBackgroundImage(localImageData.getPath());
@@ -1041,48 +1215,42 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 showFailedPage(str);
             }
         });
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                tableParent.removeAllViews();
-                if (childLocations != null) {
-                    childLocations.clear();
-                }
-            }
-        });
-        initUI(nextStudentResponse);
         //先判断是否有笔迹，再判断是否有步骤分
         if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate())
                 && nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate().length() > 10) {
             addStroke(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate());
-            isStepScore = false;
-            comments.setChecked(true);
-            comments.setTextColor(getResources().getColor(R.color.colorBlue));
-            stepScore.setChecked(false);
-            stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
-            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
-            if (reviewMode) {
-                if (childLocations != null) {
-                    childLocations.clear();
-                }
-                mSpenSimpleSurfaceView.setTouchListener(null);
-            }
-            PreferencesService.getInstance(context).saveAutoSubmit(true);
-        }
-        if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore())
-                && nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore().length() > 10) {
-            addStepScore(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore());
-            isStepScore = true;
+            operationType = TYPE_OPERATION_NONE;
             comments.setChecked(false);
             comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
-            stepScore.setChecked(true);
-            stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
+            stepScore.setChecked(false);
+            spenLayoutShow.setVisibility(View.GONE);
+            stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
             mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-            if (reviewMode) {
-                mSpenSimpleSurfaceView.setTouchListener(this);
-            }
-            PreferencesService.getInstance(context).saveAutoSubmit(false);
+            PreferencesService.getInstance(context).saveAutoSubmit(true);
         }
+        if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore())) {
+            comments.setChecked(false);
+            comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+            if (nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getGradeData().contains("\"gradeMode\":3")) {
+                tabType = TYPE_STEPPOINTS;
+                operationType = TYPE_OPERATION_STEP;
+                spenLayoutShow.setVisibility(View.VISIBLE);
+                stepScore.setChecked(true);
+                stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
+                PreferencesService.getInstance(context).saveAutoSubmit(false);
+            } else {
+                tabType = TYPE_NONE;
+                operationType = TYPE_OPERATION_NONE;
+                spenLayoutShow.setVisibility(View.GONE);
+                stepScore.setChecked(false);
+                stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                PreferencesService.getInstance(context).saveAutoSubmit(true);
+            }
+            addStepScore(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore(),
+                    nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getGradeData());
+            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+        }
+        initUI(nextStudentResponse);
     }
 
     //初始化当前页面UI
@@ -1099,7 +1267,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
                             stepScore.setChecked(false);
                             stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                            isStepScore = false;
+                            operationType = TYPE_OPERATION_NONE;
+                            tabType = TYPE_NONE;
                         }
                     } else {
                         goOnParent.setVisibility(View.GONE);
@@ -1107,11 +1276,18 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 } else {
                     goOnParent.setVisibility(View.GONE);
                 }
+
+                identification_dui.setChecked(false);
+                identification_bandui.setChecked(false);
+                identification_cuo.setChecked(false);
+                identification_objSelect.setChecked(false);
+
+                //题号数据源
                 strings = getQuestions(getMarkNextStudentResponse1.getData().getStudentData().getQuestions());
                 doubleMode = false;
                 //双栏模式开关是否开启
                 if (getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFullScore() >= 10) {
-                    if (!isStepScore) {
+                    if (operationType != TYPE_OPERATION_STEP) {
                         soubleLayout.setVisibility(View.VISIBLE);
                         douleScoreCheckBox.setChecked(false);
                         doubleScoreLayout.setVisibility(View.GONE);
@@ -1141,21 +1317,16 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             //只有一个题号不需要进行操作
                             return;
                         }
-
                         int loc = minLocation;
                         saveNowPageData(loc);
+                        tab.clear();
+                        stepDatas.clear();
                         mSpenPageDoc.removeAllObject();
                         mSpenSimpleSurfaceView.update();
-                        tableParent.removeAllViews();
-                        if (childLocations != null) {
-                            childLocations.clear();
-                        }
                         stepScoreModeScore = -1;
-
                         // 小题切换
                         minLocation = positon;
                         questionNum.setText(strings.get(positon));
-
                         if ("-1".equals(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())) {
                             questionScore.setText(String.valueOf(0));
                         } else {
@@ -1168,7 +1339,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         }
                         questionNumAdapter.setPos(positon);
                         questionNumAdapter.notifyDataSetChanged();
-
                         double fullScore = getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(0).getFullScore();
                         if (!PreferencesService.getInstance(context).getPointFive()) {
                             if (fullScore == (int) fullScore) {
@@ -1179,7 +1349,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 PreferencesService.getInstance(context).savePointFive(true);
                             }
                         }
-
                         doubleMode = false;
                         douleScoreCheckBox.setChecked(false);
                         if (fullScore > 9.5) {
@@ -1189,7 +1358,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             soubleLayout.setVisibility(View.GONE);
                             doubleScoreLayout.setVisibility(View.GONE);
                         }
-
                         if (!"-1".equals(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())) {
                             for (int i = 0; i < scorePanel.getScores().size(); i++) {
                                 if (saveMarkDataBean.getQuestions().get(minLocation).getMarkScore().equals(scorePanel.getScores().get(i))) {
@@ -1197,39 +1365,32 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     break;
                                 }
                             }
-                            //添加笔记、步骤分
-                            if (!TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate())) {
-                                addStroke(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate());
-                                comments.setChecked(true);
-                                comments.setTextColor(getResources().getColor(R.color.colorBlue));
-                                stepScore.setChecked(false);
-                                stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                                isStepScore = false;
-                                mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
-                            } else if (!TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getStepScore())) {
-                                //步骤分
-                                addStepScore(saveMarkDataBean.getQuestions().get(minLocation).getStepScore());
-                                mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                                if (tableParent.getChildCount() > 0) {
-                                    isStepScore = true;
-                                    comments.setChecked(false);
-                                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                                    stepScore.setChecked(true);
-                                    stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
-                                } else {
-                                    isStepScore = false;
-                                    comments.setChecked(false);
-                                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                                    stepScore.setChecked(false);
-                                    stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                                }
-                            } else {
-                                isStepScore = false;
+                            if (TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate())
+                                    && TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getStepScore())) {
+                                operationType = TYPE_OPERATION_NONE;
                                 mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
                                 comments.setChecked(false);
                                 comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
                                 stepScore.setChecked(false);
                                 stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                            } else {
+                                //添加笔记、步骤分
+                                if (!TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate())) {
+                                    addStroke(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate());
+                                    comments.setChecked(true);
+                                    comments.setTextColor(getResources().getColor(R.color.colorBlue));
+                                    stepScore.setChecked(false);
+                                    stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                    operationType = TYPE_OPERATION_NONE;
+                                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
+                                }
+                                if (!TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getStepScore())) {
+                                    //步骤分
+                                    addStepScore(saveMarkDataBean.getQuestions().get(minLocation).getStepScore(),
+                                            saveMarkDataBean.getQuestions().get(minLocation).getGradeData());
+                                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                                    operationType = TYPE_OPERATION_STEP;
+                                }
                             }
                             scoreAdapter.updataData(getScoreList(Double.valueOf(saveMarkDataBean.getQuestions().get(positon).getMarkScore()),
                                     getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(positon).getFullScore()));
@@ -1237,7 +1398,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(positon).getScore(),
                                     getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(positon).getFullScore()));
                         }
-                        scoreAdapter.setStepScore(isStepScore);
+                        if (operationType != TYPE_OPERATION_STEP) {
+                            scoreAdapter.setStepScore(false);
+                        } else {
+                            scoreAdapter.setStepScore(true);
+                        }
                         scoreAdapter.notifyDataSetChanged();
                     }
                 });
@@ -1252,7 +1417,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         PreferencesService.getInstance(context).savePointFive(true);
                     }
                 }
-
                 //当前小题的得分，初始化分数显示
                 if ("-1.0".equals(String.valueOf(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getScore()))) {
                     SCORE = "-1";
@@ -1284,21 +1448,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         questionScore.setText(SCORE);
                     }
                 }
-
+                //初始化题号
                 if ("0".equals(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getSubNumber())) {
                     questionNum.setText(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getNumber() + "题");
                 } else {
                     questionNum.setText(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getNumber() + "-"
                             + getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getSubNumber() + "题");
                 }
-
+                //初始化打分面板
                 scorePanel = getScoreList(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getScore(),
                         getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFullScore());
-
                 scoreAdapter = new ScoreAdapter(context, scorePanel);
-                scoreAdapter.setStepScore(isStepScore);
+                if (operationType != TYPE_OPERATION_STEP) {
+                    scoreAdapter.setStepScore(false);
+                } else {
+                    scoreAdapter.setStepScore(true);
+                }
 
-                if (!"-1".equals(SCORE) && !isStepScore) {
+                if (!"-1".equals(SCORE) && operationType != TYPE_OPERATION_STEP) {
                     for (int i = 0; i < scorePanel.getScores().size(); i++) {
                         if (scorePanel.getScores().get(i).equals(SCORE)) {
                             scoreAdapter.setScoreCheck(i);
@@ -1318,7 +1485,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         questionScore.post(new Runnable() {
                             @Override
                             public void run() {
-                                if (!isStepScore) {
+                                if (operationType != TYPE_OPERATION_STEP) {
                                     if (doubleMode) {
                                         if (position == 0) {
                                             doubleScoreTableAdapter.setPos(-1);
@@ -1338,11 +1505,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     } else {
                                         questionScore.setText(scorePanel.getScores().get(position));
                                         saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(scorePanel.getScores().get(position)));
+                                        Log.e(TAG, "run---: " + scorePanel.getScores().get(position));
                                         questionNumAdapter.updateScore(minLocation, scorePanel.getScores().get(position));
                                     }
-
                                     questionNumAdapter.notifyDataSetChanged();
                                     saveNowPageData(minLocation);
+                                    tab.clear();
+                                    stepDatas.clear();
 
                                     new Thread(new Runnable() {
                                         @Override
@@ -1369,8 +1538,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         questionNumAdapter.updateScore(minLocation, "0");
                                         questionNumAdapter.notifyDataSetChanged();
                                         saveMarkDataBean.getQuestions().get(minLocation).setStepScore("");
-                                        tableParent.removeAllViews();
-                                        childLocations.clear();
                                         stepScoreModeScore = 0;
                                     } else {
                                         tableStepScore = scorePanel.getScores().get(position);
@@ -1387,54 +1554,153 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-    //添加步骤分数据
-    private void addStepScore(String stepScore) {
-        tableParent.setVisibility(View.VISIBLE);
+    //只有在回评或者修改小题时才会调用addStepScore方法，如果是true则不执行mSpenPageDoc的添加对象监听
+    private boolean isAddMode = false;
+    //当前标签上的分值(对勾类型默认为0分)
+    private double objectValue = 0.0;
+    //当前标签类型(对、半对、错、标签)
+    private String field;
+
+    /**
+     * 添加步骤分数据
+     *
+     * @param stepScore 步骤分数据
+     * @param gradeData 当前题目的操作模式
+     */
+    private void addStepScore(String stepScore, String gradeData) {
         Log.e(TAG, "addStepScore: 设置步骤分数据");
+        Log.e(TAG, "stepScore: " + stepScore);
+        Log.e(TAG, "gradeData: " + gradeData);
         List<StepScore> stepScores = new Gson().fromJson(stepScore, new TypeToken<List<StepScore>>() {
         }.getType());
         if (stepScores == null || stepScores.size() == 0) {
             return;
         }
-        //选择步骤分的第一个标签的数据为默认显示选中的标签选项
-        double d = stepScores.get(0).getParams();
+        //选择步骤分提交时的标签为默认显示选中的标签选项
+        GradeData gradeData1 = new Gson().fromJson(gradeData, GradeData.class);
+        double d = Double.parseDouble(gradeData1.getStepLength().substring(1));
         if (d != (int) d) {
             tableStepScore = String.valueOf(d);
         } else {
             tableStepScore = String.valueOf((int) d);
         }
-        childLocations = new ArrayList<>();
+        isAddMode = true;
         for (int i = 0; i < stepScores.size(); i++) {
-            /**
-             * 对号 tick、
-             * 半对号 halfTick、
-             * 错号 cross、
-             * 文本  text、
-             * 步骤分 stepPoints
-             */
+            //对号 tick、半对号 halfTick、错号 cross、文本  text、步骤分 stepPoints
+            SpenObjectImage objectImage = new SpenObjectImage();
+            Bitmap bitmap1 = null;
             if ("stepPoints".equals(stepScores.get(i).getField())) {
-                ChildLocation location = new ChildLocation();
-
-                float locaX = mSpenPageDoc.getWidth() * stepScores.get(i).getX() / imageData.getWidth();
-                float locaY = mSpenPageDoc.getHeight() * stepScores.get(i).getY() / imageData.getHeight();
-
-                float padImgX = locaX + (mSpenSimpleSurfaceView.getWidth() - mSpenPageDoc.getWidth()) / 2;
-                float padImgY = locaY + (mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2;
-
-                location.setX(padImgX);
-                location.setY(padImgY);
-                double v = stepScores.get(i).getParams();
-                if (v == (int) v) {
-                    location.setTv(String.valueOf((int) v));
+                if (gradeData.contains("true")) {
+                    switch (String.valueOf(stepScores.get(i).getParams())) {
+                        case "0.5":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus0_5);
+                            break;
+                        case "1":
+                        case "1.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus1);
+                            break;
+                        case "1.5":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus1_5);
+                            break;
+                        case "2":
+                        case "2.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus2);
+                            break;
+                        case "3":
+                        case "3.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus3);
+                            break;
+                        case "4":
+                        case "4.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus4);
+                            break;
+                        case "5":
+                        case "5.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus5);
+                            break;
+                        case "6":
+                        case "6.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus6);
+                            break;
+                        default:
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.correct);
+                            break;
+                    }
                 } else {
-                    location.setTv(String.valueOf(v));
+                    switch (String.valueOf(stepScores.get(i).getParams())) {
+                        case "0.5":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce0_5);
+                            break;
+                        case "1":
+                        case "1.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce1);
+                            break;
+                        case "1.5":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce1_5);
+                            break;
+                        case "2":
+                        case "2.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce2);
+                            break;
+                        case "3":
+                        case "3.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce3);
+                            break;
+                        case "4":
+                        case "4.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce4);
+                            break;
+                        case "5":
+                        case "5.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce5);
+                            break;
+                        case "6":
+                        case "6.0":
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce6);
+                            break;
+                        default:
+                            bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.correct);
+                            break;
+                    }
                 }
-                childLocations.add(location);
-            } else {
-                Log.e(TAG, "addStepScore:不支持的格式类型");
+            } else { //添加对、半对、错标签
+                switch (stepScores.get(i).getField()) {
+                    case "tick": //对
+                        bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.correct);
+                        break;
+                    case "halfTick": //半对
+                        bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.bandui);
+                        break;
+                    case "cross": //错
+                        bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.erroe);
+                        break;
+                    case "": //文本
+                        Log.e(TAG, "步骤分暂不支持文本格式");
+                        break;
+                }
             }
+            objectValue = stepScores.get(i).getParams();
+            //tab.put(stepScores.get(i).getId(), stepScores.get(i).getParams());
+            //stepDatas.put(stepScores.get(i).getId(), stepScores.get(i));
+            objectImage.setImage(bitmap1);
+            float x = stepScores.get(i).getX() * scale;
+            float y = stepScores.get(i).getY() * scale;
+            float imgWidth = bitmap1.getWidth();
+            float imgHeight = bitmap1.getHeight();
+            RectF rectF = new RectF();
+            rectF.set((x - imgWidth / 2f),
+                    (y - imgHeight / 2f),
+                    (x + imgWidth / 2f),
+                    (y + imgHeight / 2f));
+            objectImage.setRect(rectF, true);
+            objectImage.setResizeOption(SpenObjectBase.RESIZE_OPTION_DISABLE);
+            objectImage.setRotatable(false);//不可旋转
+            objectImage.setMovable(false);//不可移动
+            field = stepScores.get(i).getField();
+            mSpenPageDoc.appendObject(objectImage);
+            mSpenSimpleSurfaceView.update();
         }
-        addViewOrLinstener();
+        isAddMode = false;
     }
 
     //是否可以自动提交
@@ -1453,7 +1719,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             if (PreferencesService.getInstance(context).getAutoSubmit()) {
                 submitData();
             } else {
-                submiss.setVisibility(View.VISIBLE);
+                if (doubleMode && (scoreAdapter.getChectValue() == 0 || Double.parseDouble(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())
+                        == getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore())) {
+                    submitData();
+                } else {
+                    submiss.setVisibility(View.VISIBLE);
+                }
             }
         } else {
             submiss.setVisibility(View.GONE);
@@ -1514,15 +1785,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private void saveNowPageData(int loc) {
         if (!"-1".equals(saveMarkDataBean.getQuestions().get(loc).getMarkScore())) {
             if (mSpenPageDoc.getObjectList().size() != 0) {
-                getPageDocObject();
-                /*mSpenPageDoc.removeAllObject();
-                mSpenSimpleSurfaceView.update();*/
+                getPageDocObject(loc);
             } else {
-                if (tableParent.getChildCount() > 0) {
+                /*if (tableParent.getChildCount() > 0) {
                     getStepScoreData();
                 } else {
                     saveMarkDataBean.getQuestions().get(loc).setStepScore("");
-                }
+                }*/
             }
         } else {
             // TODO 当前分数为-1，不对笔迹和步骤分数据进行保存
@@ -1643,8 +1912,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             .setDuration(100)
                             .start();
                     scrollView.setVisibility(View.VISIBLE);
-                    if (comments.isChecked()) {
-                        //spenLayoutShow.setVisibility(View.VISIBLE);
+                    if (comments.isChecked() || stepScore.isChecked()) {
+                        spenLayoutShow.setVisibility(View.VISIBLE);
                     } else {
                         spenLayoutShow.setVisibility(View.GONE);
                     }
@@ -1721,101 +1990,25 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 reviewAdatper.updateDatas(studentsResponse.getData());
                 reviewAdatper.notifyDataSetChanged();
                 break;
-            //case R.id.commentsP: //批注
-            case R.id.comments: //批注
-                if (stepScore.isChecked()) {
-                    stepScore.setChecked(false);
-                    stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                    tableParent.removeAllViews();
-                    if (childLocations != null) {
-                        childLocations.clear();
-                    }
-                    tableParent.removeAllViews();
-                    doubleScore = "0";
-                    stepScoreModeScore = 0;
-                    saveMarkDataBean.getQuestions().get(minLocation).setMarkScore("0");
-                    questionScore.setText("0");
-                    isStepScore = false;
-                }
-                mSpenSimpleSurfaceView.setTouchListener(null);
-                if (comments.isChecked()) {
-                    ToastUtils.showToast(context, "开启批注");
-                    comments.setChecked(true);
-                    tableParent.removeAllViews();
-                    tableParent.setVisibility(View.GONE);
-                    comments.setTextColor(getResources().getColor(R.color.colorBlue));
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_STROKE);
-                    //spenLayoutShow.setVisibility(View.VISIBLE);
-                } else {
-                    ToastUtils.showToast(context, "关闭批注");
-                    comments.setChecked(false);
-                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_NONE);
-                    spenLayoutShow.setVisibility(View.GONE);
-                }
-                break;
-            case R.id.eliminateP: //清除笔记
-            case R.id.eliminate: //清除笔记
-                if (mSpenPageDoc.getObjectList().size() == 0) {
-                    ToastUtils.showToast(context, "未找到笔记");
-                } else {
-                    mSpenPageDoc.removeAllObject();
-                    mSpenSimpleSurfaceView.update();
-                    ToastUtils.showToast(context, "已清除");
-                    saveMarkDataBean.getQuestions().get(minLocation).setCoordinate("");
-                }
-                break;
-            //case R.id.stepScoreP: //步骤分
             case R.id.stepScore: //步骤分
-                if ("语文".equals(response.getTestpaper().getPaperName())) {
-                    if (reviewMode) {
-                        if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore() >= 50) {
-                            ToastUtils.showToast(context, "该题目不支持步骤分");
-                            stepScore.setChecked(false);
-                            return;
-                        }
-                    } else {
-                        if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore() >= 50) {
-                            ToastUtils.showToast(context, "该题目不支持步骤分");
-                            stepScore.setChecked(false);
-                            return;
-                        }
-                    }
-                }
-                if (comments.isChecked()) {
-                    mSpenPageDoc.removeAllObject();
-                    mSpenSimpleSurfaceView.update();
+                if (operationType == TYPE_OPERATION_SPEN) {
                     comments.setChecked(false);
                     comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
                 }
                 questionNumAdapter.updateScore(minLocation, String.valueOf(-1));
                 questionNumAdapter.notifyDataSetChanged();
+                identification_dui.setChecked(false);
+                identification_bandui.setChecked(false);
+                identification_cuo.setChecked(false);
+                identification_objSelect.setChecked(false);
                 if (stepScore.isChecked()) {
-                    mSpenSimpleSurfaceView.setTouchListener(this);
+                    operationType = TYPE_OPERATION_STEP;
+                    tabType = TYPE_STEPPOINTS;
                     stepScoreModeScore = 0;
+                    spenLayoutShow.setVisibility(View.VISIBLE);
                     ToastUtils.showToast(context, "开启步骤分");
-                    mSpenPageDoc.removeAllObject();
-                    mSpenSimpleSurfaceView.update();
-                    childLocations = new ArrayList<>();
+                    stepScore.setText("步骤分");
                     PreferencesService.getInstance(context).saveAutoSubmit(false);
-                    isStepScore = true;
-                    int bitmapW = 0, bitmapH = 0;//原始图片的宽高
-                    for (int i = 0; i < imageDataList.size(); i++) {
-                        bitmapW += imageDataList.get(i).getWidth();
-                        bitmapH += imageDataList.get(i).getHeight();
-                    }
-                    float scal = 0;
-                    if (bitmapW > bitmapH) { //宽图
-                        scal = (Tool.getScreenparameters(MarkingActivity.this).width() - 80) * 1f / bitmapW;
-                    } else { //高图
-                        scal = Tool.getScreenparameters(MarkingActivity.this).height() * 1f / bitmapH;
-                    }
-                    mSpenSimpleSurfaceView.setMaxZoomRatio(scal);
-                    mSpenSimpleSurfaceView.setMinZoomRatio(scal);
-                    mSpenSimpleSurfaceView.setZoom(0, 0, scal);
-                    tableParent.setVisibility(View.VISIBLE);
                     soubleLayout.setVisibility(View.GONE);
                     submiss.setVisibility(View.GONE);
                     tableStepScore = "";
@@ -1828,11 +2021,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     stepScore.setChecked(true);
                     stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
                     if (reviewMode) {
-                        stepScoreModeFullScore = getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore();
                         scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(), 0));
                     } else {
-                        stepScoreModeFullScore = getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore();
                         scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(), 0));
                     }
                     scoreAdapter.setStepScore(true);
@@ -1841,30 +2033,54 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     saveMarkDataBean.getQuestions().get(minLocation).setCoordinate("");
                     questionScore.setText(String.valueOf(0));
                 } else {
-                    mSpenSimpleSurfaceView.setTouchListener(null);
                     ToastUtils.showToast(context, "关闭步骤分");
-                    childLocations.clear();
+                    stepScore.setText("总分");
+                    if (comments.isChecked()) {
+                        spenLayoutShow.setVisibility(View.VISIBLE);
+                    } else {
+                        spenLayoutShow.setVisibility(View.GONE);
+                    }
+                    stepScore.setChecked(false);
+                    stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    if (comments.isChecked()) {
+                        operationType = TYPE_OPERATION_SPEN;
+                        tabType = TYPE_NONE;
+                    } else {
+                        operationType = TYPE_OPERATION_NONE;
+                        if (identification_dui.isChecked()) {
+                            tabType = TYPE_TICK;
+                        }
+                        if (identification_bandui.isChecked()) {
+                            tabType = TYPE_HALFTICK;
+                        }
+                        if (identification_cuo.isChecked()) {
+                            tabType = TYPE_CROSS;
+                        }
+                        if (identification_objSelect.isChecked()) {
+                            tabType = TYPE_NONE;
+                        }
+                    }
                     tableStepScore = null;
-                    isStepScore = false;
                     if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().size() == 1) {
                         PreferencesService.getInstance(context).saveAutoSubmit(true);
                     } else {
                         PreferencesService.getInstance(context).saveAutoSubmit(false);
                     }
                     submiss.setVisibility(View.GONE);
-                    mSpenSimpleSurfaceView.setMaxZoomRatio(3);
-                    mSpenSimpleSurfaceView.setMinZoomRatio(0.5f);
-                    tableParent.setVisibility(View.GONE);
                     if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore() > 9) {
                         soubleLayout.setVisibility(View.VISIBLE);
                     } else {
                         soubleLayout.setVisibility(View.GONE);
                     }
-                    tableParent.removeAllViews();
-                    stepScore.setChecked(false);
+                    for (int i = 0; i < mSpenPageDoc.getObjectList().size(); i++) {
+                        if (mSpenPageDoc.getObjectList().get(i).getType() == SpenObjectBase.TYPE_IMAGE) {
+                            mSpenPageDoc.removeObject(mSpenPageDoc.getObjectList().get(i));
+                        }
+                    }
+                    mSpenSimpleSurfaceView.update();
                     saveMarkDataBean.getQuestions().get(minLocation).setStepScore("");
-                    stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
                     saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(-1));
                     scoreAdapter.updataData(getScoreList(-1, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
                     scoreAdapter.setStepScore(false);
@@ -1873,10 +2089,179 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 scoreAdapter.notifyDataSetChanged();
                 break;
+            case R.id.comments:
+                if (comments.isChecked()) {
+                    identification_dui.setChecked(false);
+                    identification_bandui.setChecked(false);
+                    identification_cuo.setChecked(false);
+                    identification_objSelect.setChecked(false);
+                    tabType = TYPE_NONE;
+                    comments.setChecked(true);
+                    comments.setTextColor(getResources().getColor(R.color.colorBlue));
+                    spenLayoutShow.setVisibility(View.VISIBLE);
+                    operationType = TYPE_OPERATION_SPEN;
+                    ToastUtils.showToast(context, "开启批注");
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_STROKE);
+                    /*scoreAdapter.setStepScore(false);
+                    scoreAdapter.updataData(getScoreList(-1, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
+                    scoreAdapter.notifyDataSetChanged();*/
+                } else {
+                    if (stepScore.isChecked()) {
+                        spenLayoutShow.setVisibility(View.VISIBLE);
+                        operationType = TYPE_OPERATION_STEP;
+                        tabType = TYPE_STEPPOINTS;
+                    } else {
+                        spenLayoutShow.setVisibility(View.GONE);
+                        operationType = TYPE_OPERATION_NONE;
+                        tabType = TYPE_NONE;
+                    }
+                    ToastUtils.showToast(context, "关闭批注");
+                    comments.setChecked(false);
+                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                }
+                break;
+            case R.id.eliminateP: //清除笔记
+            case R.id.eliminate: //清除笔记
+                if (mSpenPageDoc.getObjectList().size() == 0) {
+                    ToastUtils.showToast(context, "页面没有数据");
+                } else {
+                    if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) == SpenSimpleSurfaceView.ACTION_SELECTION) {
+                        mSpenPageDoc.removeSelectedObject();
+                        mSpenSimpleSurfaceView.closeControl();
+                        mSpenSimpleSurfaceView.update();
+                    } else {
+                        mSpenPageDoc.removeAllObject();
+                        tab.clear();
+                        stepDatas.clear();
+                        stepScoreModeScore = 0;
+                        mSpenSimpleSurfaceView.update();
+                        questionScore.setText("0");
+                        questionNumAdapter.updateScore(minLocation, "0");
+                        questionNumAdapter.notifyDataSetChanged();
+                        ToastUtils.showToast(context, "清除成功");
+                        saveMarkDataBean.getQuestions().get(minLocation).setCoordinate("");
+                        if (stepScore.isChecked()) {
+                            submiss.setVisibility(View.GONE);
+                        }
+                    }
+                }
+                break;
+            case R.id.identification_dui:
+                if (identification_dui.isChecked()) {
+                    identification_dui.setChecked(true);
+                    identification_bandui.setChecked(false);
+                    identification_cuo.setChecked(false);
+                    identification_objSelect.setChecked(false);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.correct);
+                    tabType = TYPE_TICK;
+                } else {
+                    identification_dui.setChecked(false);
+                    bitmap = null;
+                    switch (operationType) {
+                        case TYPE_OPERATION_SPEN:
+                            tabType = TYPE_NONE;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
+                            break;
+                        case TYPE_OPERATION_STEP:
+                            tabType = TYPE_STEPPOINTS;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                            break;
+                    }
+                }
+                break;
+            case R.id.identification_bandui:
+                if (identification_bandui.isChecked()) {
+                    identification_dui.setChecked(false);
+                    identification_bandui.setChecked(true);
+                    identification_cuo.setChecked(false);
+                    identification_objSelect.setChecked(false);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.bandui);
+                    tabType = TYPE_HALFTICK;
+                } else {
+                    identification_bandui.setChecked(false);
+                    bitmap = null;
+                    switch (operationType) {
+                        case TYPE_OPERATION_SPEN:
+                            tabType = TYPE_NONE;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
+                            break;
+                        case TYPE_OPERATION_STEP:
+                            tabType = TYPE_STEPPOINTS;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                            break;
+                    }
+                }
+                break;
+            case R.id.identification_cuo:
+                if (identification_cuo.isChecked()) {
+                    identification_dui.setChecked(false);
+                    identification_bandui.setChecked(false);
+                    identification_cuo.setChecked(true);
+                    identification_objSelect.setChecked(false);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.erroe);
+                    tabType = TYPE_CROSS;
+                } else {
+                    identification_cuo.setChecked(false);
+                    bitmap = null;
+                    switch (operationType) {
+                        case TYPE_OPERATION_SPEN:
+                            tabType = TYPE_NONE;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
+                            break;
+                        case TYPE_OPERATION_STEP:
+                            tabType = TYPE_STEPPOINTS;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                            break;
+                    }
+                }
+
+                break;
+            case R.id.objsearch: //选择对象
+                if (identification_objSelect.isChecked()) {
+                    identification_objSelect.setChecked(true);
+                    bitmap = null;
+                    tabType = TYPE_NONE;
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_SELECTION);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_SELECTION);
+                    identification_dui.setChecked(false);
+                    identification_bandui.setChecked(false);
+                    identification_cuo.setChecked(false);
+                } else {
+                    identification_objSelect.setChecked(false);
+                    bitmap = null;
+                    switch (operationType) {
+                        case TYPE_OPERATION_NONE:
+                            tabType = TYPE_NONE;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
+                            break;
+                        case TYPE_OPERATION_SPEN:
+                            tabType = TYPE_NONE;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_STROKE);
+                            break;
+                        case TYPE_OPERATION_STEP:
+                            tabType = TYPE_STEPPOINTS;
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
+                            break;
+                    }
+                }
+                break;
             case R.id.collectionP: //收藏
             case R.id.collection: //收藏
                 collectRequest.setStudentGuid(getMarkNextStudentResponse.getData().getStudentData().getStudentGuid());
                 collectRequest.setTaskGuid(taskGuid);
+                collectRequest.setIdentity(identity);
                 int type = 0;
                 if ("0".equals(collectRequest.getValue())) {
                     collectRequest.setValue(String.valueOf(1));
@@ -1923,9 +2308,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.goOn: //继续阅卷
                 LoadingUtil.showDialog(context);
-                tableParent.removeAllViews();
-                if (childLocations != null)
-                    childLocations.clear();
                 getNewStudent();
                 break;
             case R.id.settingP: //设置
@@ -1983,7 +2365,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 PreferencesService.getInstance(context).savePointFive(pointFiveSwitch.isChecked());
                 break;
             case R.id.autoSubmitSwitch: //自动提交switch
-                if (isStepScore || doubleMode) {
+                if (operationType == TYPE_OPERATION_STEP || doubleMode) {
                     ToastUtils.showToast(context, "当前模式下不支持自动提交");
                     autoSubmitSwitch.setChecked(false);
                     break;
@@ -2154,12 +2536,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     if (PreferencesService.getInstance(context).getAutoSubmit()) {
                         submiss.setVisibility(View.GONE);
                     } else {
-                        if (isStepScore) {
-                            if (childLocations != null && childLocations.size() > 0) {
-                                submiss.setVisibility(View.VISIBLE);
-                            } else {
-                                submiss.setVisibility(View.GONE);
-                            }
+                        if (operationType == TYPE_OPERATION_STEP) {
+
                         } else {
                             submiss.setVisibility(View.VISIBLE);
                         }
@@ -2182,7 +2560,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     scoreAdapter.updataData(getScoreList(integers.get(integers.size() - 1), Double.valueOf(TOTAL) - Double.valueOf(doubleScore) + 1));
                 }
                 scoreAdapter.notifyDataSetChanged();
-                submiss.setVisibility(View.VISIBLE);
+                //submiss.setVisibility(View.VISIBLE);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(200);
+                            //判断是否可以自动提交了
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    autoSubmitData();
+                                }
+                            });
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
                 break;
         }
     }
@@ -2245,72 +2640,85 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-    //获取步骤分数据
-    private void getStepScoreData() {
-        Log.e(TAG, "当前的缩放率是：" + scale);
-        if (childLocations != null && childLocations.size() > 0) {
-            List<StepScore> stepScores = new ArrayList<>();
-            for (int i = 0; i < childLocations.size(); i++) {
-                StepScore stepScore1 = new StepScore();
-                stepScore1.setId(i);
-                stepScore1.setId(0);
-                stepScore1.setField("stepPoints");
-                double d = Double.valueOf(childLocations.get(i).getTv());
-                if (d == (int) d) {
-                    stepScore1.setParams((int) d);
-                } else {
-                    stepScore1.setParams(d);
-                }
-
-                //针对pad上显示的相对于图片的坐标
-                int padImgX = (int) (childLocations.get(i).getX() - (mSpenSimpleSurfaceView.getWidth() - mSpenPageDoc.getWidth()) / 2);
-                int padImgY = (int) (childLocations.get(i).getY() - (mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2);
-
-                int locaX = padImgX * imageData.getWidth() / mSpenPageDoc.getWidth();
-                int locaY = imageData.getHeight() * padImgY / mSpenPageDoc.getHeight();
-
-                stepScore1.setX(locaX);
-                stepScore1.setY(locaY);
-                stepScores.add(stepScore1);
-            }
-            saveMarkDataBean.getQuestions().get(minLocation).setStepScore(new Gson().toJson(stepScores));
-        }
-    }
-
     //获取当前画布上的笔记数据
-    private void getPageDocObject() {
+    private void getPageDocObject(int loc) {
         //坐标点要按照原图的大小坐标来计算
         ArrayList<SpenObjectBase> objectList = mSpenPageDoc.getObjectList();
         if (objectList != null || objectList.size() > 0) {
             List<SpenStroke> spenStrokes = new ArrayList<>();
-            Log.e(TAG, "当前的缩放率是：" + scale);
+            List<StepScore> stepScores = new ArrayList<>();
+            //添加笔迹
             for (int i = 0; i < objectList.size(); i++) {
-                SpenObjectStroke spenObjectStroke = (SpenObjectStroke) objectList.get(i);
-                SpenStroke stroke = new SpenStroke();
-                stroke.setPenSize(spenObjectStroke.getPenSize());
-                //Color.RED = 0xFFFF0000
-                stroke.setColor("#FF0000");
-                PointF[] points = spenObjectStroke.getPoints();
-                for (int j = 0; j < imageDataList.size(); j++) {
-                    ImageData imageData = imageDataList.get(j);
-                    if (points[0].y < imageData.getHeight() * scale) {
-                        stroke.setPageName("A");
-                        break;
+                if (objectList.get(i).getType() == SpenObjectBase.TYPE_STROKE) {
+                    SpenObjectStroke spenObjectStroke = (SpenObjectStroke) objectList.get(i);
+                    SpenStroke stroke = new SpenStroke();
+                    stroke.setPenSize(spenObjectStroke.getPenSize());
+                    //Color.RED = 0xFFFF0000
+                    stroke.setColor("#FF0000");
+                    PointF[] points = spenObjectStroke.getPoints();
+                    for (int j = 0; j < imageDataList.size(); j++) {
+                        ImageData imageData = imageDataList.get(j);
+                        if (points[0].y < imageData.getHeight() * scale) {
+                            stroke.setPageName("A");
+                            break;
+                        } else {
+                            stroke.setPageName("B");
+                            break;
+                        }
+                    }
+                    PointF[] pointF = new PointF[spenObjectStroke.getPoints().length];
+                    for (int j = 0; j < points.length; j++) {
+                        PointF pointF1 = new PointF();
+                        pointF1.set(points[j].x * scale, points[j].y * scale);
+                        pointF[j] = pointF1;
+                    }
+                    stroke.setPointS(pointF);
+                    spenStrokes.add(stroke);
+                }
+            }
+            if (spenStrokes.size() > 0) {
+                saveMarkDataBean.getQuestions().get(loc).setCoordinate(new Gson().toJson(spenStrokes));
+            }
+
+            //添加标签、步骤分
+            for (Map.Entry<Integer, StepScore> map : stepDatas.entrySet()) {
+                stepScores.add(map.getValue());
+            }
+            for (int i = 0; i < objectList.size(); i++) {
+                if (objectList.get(i).getType() == SpenObjectBase.TYPE_IMAGE) {
+                    //添加标识，对、半对、错误
+                }
+            }
+            Log.e(TAG, "getPageDocObject: " + new Gson().toJson(stepScores));
+            String str = new Gson().toJson(stepScores);
+            saveMarkDataBean.getQuestions().get(loc).setStepScore(str);
+            /*if (stepScores.size() > 0) {
+                saveMarkDataBean.getQuestions().get(loc).setStepScore(str);
+                stepScoreModeScore = 0;
+                for (Map.Entry<Integer, Double> map : tab.entrySet()) {
+                    stepScoreModeScore += map.getValue();
+                }
+                if (str.contains("stepPoints")) {
+                    if (stepScoreModeScore == (int) stepScoreModeScore) {
+                        saveMarkDataBean.getQuestions().get(loc).setMarkScore(String.valueOf(((int) stepScoreModeScore)));
                     } else {
-                        stroke.setPageName("B");
-                        break;
+                        saveMarkDataBean.getQuestions().get(loc).setMarkScore(String.valueOf(stepScoreModeScore));
                     }
                 }
-                PointF[] pointF = new PointF[spenObjectStroke.getPoints().length];
-                for (int j = 0; j < points.length; j++) {
-                    PointF pointF1 = new PointF();
-                    pointF1.set(points[j].x * scale, points[j].y * scale);
-                    pointF[j] = pointF1;
-                }
-                stroke.setPointS(pointF);
-                spenStrokes.add(stroke);
+            }*/
+            GradeData gradeData = new GradeData();
+            if (operationType == TYPE_OPERATION_STEP) {
+                gradeData.setGradeMode(3);
+            } else {
+                gradeData.setGradeMode(1);
             }
-            saveMarkDataBean.getQuestions().get(minLocation).setCoordinate(new Gson().toJson(spenStrokes));
+            gradeData.setStepModeAdd(true);
+            if (scoreAdapter.getChectValue() == (int) scoreAdapter.getChectValue()) {
+                gradeData.setStepLength("+" + (int) scoreAdapter.getChectValue());
+            } else {
+                gradeData.setStepLength("+" + scoreAdapter.getChectValue());
+            }
+            saveMarkDataBean.getQuestions().get(minLocation).setGradeData(new Gson().toJson(gradeData));
         }
     }
 
@@ -2591,12 +2999,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onSuccess(Object model) {
                 GetMarkNextStudentResponse nextStudentResponse = (GetMarkNextStudentResponse) model;
-                /*if (nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId() ==
-                        cachePool.get(0).getData().getStudentData().getQuestions().get(0).getId()) {
-                    Log.e(TAG, cachePool.get(0).getData().getStudentData().getQuestions().get(0).getId() + "   cachePool: 当前缓存数据的id：" + nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId());
-                    getNextStudentCache();
-                    return;
-                }*/
                 cachePool.add(nextStudentResponse);
                 Log.e(TAG, "缓存数据成功，当前的数量是" + cachePool.size());
                 Tool.base64ToBitmap(nextStudentResponse.getData().getImageArr(), nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId(), new MyCallBack() {
@@ -2673,14 +3075,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         LoadingUtil.showDialog(context);
         submiss.setEnabled(false);
         if (mSpenPageDoc.getObjectList().size() != 0) {
-            getPageDocObject();
-        }
-        if (tableParent.getChildCount() > 0) {
-            getStepScoreData();
+            getPageDocObject(minLocation);
         }
 
         LogUtils.logE(TAG, "提交的数据是: " + new GsonBuilder().serializeNulls().create().toJson(saveMarkDataBean));
         if (true) {
+            //LoadingUtil.closeDialog();
             //return;
         }
         if (reviewMode) {
@@ -2690,6 +3090,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 @Override
                 public void onSuccess(Object model) {
                     saveResponse = (SavaDataResponse) model;
+                    tab.clear();
+                    stepDatas.clear();
                     if (cachePool != null && cachePool.size() > 0) {
                         cachePool.remove(0); //清除第一个缓存数据
                     }
@@ -2697,11 +3099,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         @Override
                         public void run() {
                             LOCATION++;
-                            if (childLocations != null) {
-                                childLocations.clear();
-                            }
                             stepScoreModeScore = 0;
-                            tableParent.removeAllViews();
                             doubleScore = "0";
                             if (doubleMode) {
                                 doubleScoreTableAdapter.setPos(-1);
@@ -2788,6 +3186,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             myModel.saveMarkData(context, saveMarkDataBean, new MyCallBack() {
                 @Override
                 public void onSuccess(Object model) {
+                    tab.clear();
+                    stepDatas.clear();
                     if (cachePool != null && cachePool.size() > 0) {
                         cachePool.remove(0); //清除第一个数据
                         Log.e(TAG, "提交数据成功，清除第一个缓存数据后的长度是：" + cachePool.size());
@@ -2796,10 +3196,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (childLocations != null) {
-                                childLocations.clear();
-                            }
-                            tableParent.removeAllViews();
                             doubleScore = "0";
                             stepScoreModeScore = 0;
                             if (doubleMode) {
@@ -2974,11 +3370,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         if (!TextUtils.isEmpty(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate())
                 && getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate().length() > 10) {
             addStroke(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getCoordinate());
-            isStepScore = false;
+            operationType = TYPE_OPERATION_NONE;
         } else if (!TextUtils.isEmpty(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore())
-                && getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore().length() > 10) {
-            addStepScore(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore());
-            isStepScore = true;
+                && getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore().length() > 10
+                && getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getGradeData().contains("\"gradeMode\":3")) {
+            addStepScore(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore(),
+                    getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getGradeData());
+            operationType = TYPE_OPERATION_STEP;
         }
         mSpenSimpleSurfaceView.update();
         LoadingUtil.closeDialog();
@@ -3087,7 +3485,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         if (PreferencesService.getInstance(context).getAutoSubmit()) {
                             submiss.setVisibility(View.GONE);
                         } else {
-                            if (isStepScore) {
+                            if (operationType == TYPE_OPERATION_STEP) {
                                 if ("-1".equals(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())) {
                                     submiss.setVisibility(View.GONE);
                                 } else {
@@ -3235,110 +3633,25 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         manager.setStackFromEnd(true);
     }
 
-    boolean next = false;//是否继续执行ACTION_UP操作
+    @Override //滑动中
+    public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
 
-    @Override
-    public boolean onTouch(View view, MotionEvent event) {
-        if (stepScore.isClickable()) { //不是批注模式
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    Log.e(TAG, "onTouch: 点击了");
-                    next = true;
-                    //第一个触摸是电子笔
-                    if (event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS || event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
-                        if (TextUtils.isEmpty(tableStepScore)) {
-                            //没有选择步骤分
-                            ToastUtils.showToast(context, "请先选择一个非0的标签分数");
-                            next = false;
-                        } else {
-                            if (tableParent.getChildCount() > 0) {
-                                stepScoreModeScore = 0;
-                                for (int i = 0; i < tableParent.getChildCount(); i++) {
-                                    TextView tv = (TextView) tableParent.getChildAt(i);
-                                    stepScoreModeScore += Double.valueOf(tv.getText().toString().substring(1));
-                                }
-                            } else {
-                                if (Double.valueOf(tableStepScore) > Double.valueOf(TOTAL)) {
-                                    ToastUtils.showToast(context, "请选择一个小一点的分值");
-                                    stepScoreModeScore = -1;
-                                    next = false;
-                                }
-                            }
-                            if (stepScoreModeScore + (Double.valueOf(tableStepScore)) > Double.valueOf(TOTAL)) {
-                                Log.e(TAG, "onTouch: 得分" + stepScoreModeScore);
-                                Log.e(TAG, "onTouch: 当前选中的标签" + tableStepScore);
-                                Log.e(TAG, "onTouch: 当前题目总分" + TOTAL);
-                                ToastUtils.showToast(context, "不能超过题目总分");
-                            }
-                        }
-                    }
-                    break;
-                case MotionEvent.ACTION_UP:
-                    if (next) {
-                        if ((event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS || event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER)
-                                && !TextUtils.isEmpty(tableStepScore) && ((stepScoreModeScore + Double.valueOf(tableStepScore)) <= Double.valueOf(TOTAL))) {
-                            if (isStepScore && !TextUtils.isEmpty(tableStepScore) && !"0".equals(tableStepScore)) {
-                                if (childLocations == null) {
-                                    return true;
-                                }
-                                float zoomRatio = mSpenSimpleSurfaceView.getZoomRatio(); //当前缩放率
-                                //判断是否在有效范围内
-                                if (event.getRawX() >= (event.getRawX() - event.getX())
-                                        && event.getRawX() <= ((event.getRawX() - event.getX()) + mSpenPageDoc.getWidth() * zoomRatio)
-                                        && event.getRawY() >= (mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2
-                                        && event.getRawY() <= (((mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2) + mSpenPageDoc.getHeight() * zoomRatio)) {
-                                    ChildLocation location = new ChildLocation();
-                                    //判断添加的标签是否超出了边界(标签的宽高)
-                                    if (event.getRawX() + 60 > ((event.getRawX() - event.getX()) + mSpenPageDoc.getWidth() * zoomRatio)
-                                            || event.getRawY() + 40 > ((event.getRawY() - event.getY()) + mSpenPageDoc.getHeight() * zoomRatio)) {
-                                        float x, y;
-                                        if (event.getRawX() + 60 > ((event.getRawX() - event.getX()) + mSpenPageDoc.getWidth() * zoomRatio)) {
-                                            x = ((event.getRawX() - event.getX()) + mSpenPageDoc.getWidth() * zoomRatio) - 60;
-                                        } else {
-                                            x = event.getRawX();
-                                        }
-                                        if (event.getRawY() + 40 > (((mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2) + mSpenPageDoc.getHeight() * zoomRatio)) {
-                                            y = ((mSpenSimpleSurfaceView.getHeight() - mSpenPageDoc.getHeight()) / 2 + mSpenPageDoc.getHeight() * zoomRatio) - 40;
-                                        } else {
-                                            y = event.getRawY();
-                                        }
-                                        location.setX(x);
-                                        location.setY(y);
-                                    } else {
-                                        location.setX(event.getRawX());
-                                        location.setY(event.getRawY());
-                                    }
-                                    location.setTv(tableStepScore);
-                                    childLocations.add(location);
-                                    stepScoreModeScore = 0;
-                                    for (int i = 0; i < childLocations.size(); i++) {
-                                        stepScoreModeScore += Double.valueOf(childLocations.get(i).getTv());
-                                    }
-                                    if (stepScoreModeScore == (int) stepScoreModeScore) {
-                                        questionScore.setText(String.valueOf((int) stepScoreModeScore));
-                                        saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf((int) stepScoreModeScore));
-                                    } else {
-                                        questionScore.setText(String.valueOf(stepScoreModeScore));
-                                        saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
-                                    }
-                                    submiss.setVisibility(View.VISIBLE);
-                                    addViewOrLinstener();
-                                } else {
-                                    Log.e(TAG, "onTouch: 超出了有效范围");
-                                }
-                            }
-                        }
-                    }
-                    break;
-            }
-        } else if (comments.isChecked()) { //是批注模式
-            if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
-                Log.e(TAG, "onTouch: 手指");
-            }
-            if (event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS) {
-                Log.e(TAG, "onTouch: 电子笔");
-            }
-        }
-        return false;
+    }
+
+    @Override //打开
+    public void onDrawerOpened(@NonNull View drawerView) {
+        gobackScoreIcon.setCompoundDrawablesWithIntrinsicBounds(null, null, getDrawable(R.drawable.order), null);
+        gobackTimeIcon.setCompoundDrawablesWithIntrinsicBounds(null, null, getDrawable(R.drawable.order), null);
+        showReviewList();
+    }
+
+    @Override //关闭
+    public void onDrawerClosed(@NonNull View drawerView) {
+
+    }
+
+    @Override  //状态改变
+    public void onDrawerStateChanged(int newState) {
+
     }
 }

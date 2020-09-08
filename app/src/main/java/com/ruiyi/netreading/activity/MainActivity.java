@@ -26,6 +26,7 @@ import com.ruiyi.netreading.controller.MyCallBack;
 import com.ruiyi.netreading.controller.MyModel;
 import com.ruiyi.netreading.util.LoadingUtil;
 import com.ruiyi.netreading.util.ToastUtils;
+import com.ruiyi.netreading.util.Tool;
 import com.scwang.smartrefresh.header.BezierCircleHeader;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         context = this;
         initView();
+        Log.e(TAG, "屏幕分辨率: " + Tool.getDefaultDisplay(this).x + "-" + Tool.getDefaultDisplay(this).y);
         myModel = new MyModel();
         Intent intent = getIntent();
         teacherGuid = intent.getStringExtra("userid");
@@ -89,20 +91,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             taskListAdapter.setMyClickListener(new TaskListAdapter.OnclickListener() {
                                 @Override
                                 public void myOnclickListenet(int position) {
-                                    if (!TextUtils.isEmpty(teacherGuid) && !TextUtils.isEmpty(getExamContextResponse.getTaskList().get(position).getTaskGuid())) {
-                                        //TODO 临时处理数据
-                                        List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                                        for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                            if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                                data.add(getExamContextResponse.getTaskList().get(i));
-                                            }
+                                    List<GetExamContextResponse.TaskListBean> datas = new ArrayList<>();
+                                    for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                        if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                            datas.add(getExamContextResponse.getTaskList().get(i));
                                         }
-
+                                    }
+                                    for (int i = 0; i < getExamContextResponse.getTaskLists().size(); i++) {
+                                        if (getExamContextResponse.getTaskLists().get(i).isCanMark()) {
+                                            datas.add(getExamContextResponse.getTaskLists().get(i));
+                                        }
+                                    }
+                                    //自己的任务是否全部都完成
+                                    boolean isOver = true;
+                                    for (int i = 0; i < datas.size(); i++) {
+                                        if (datas.get(i).getTeacherData() != null) {
+                                            if (datas.get(i).getTeacherData().getTeacherNumber() != datas.get(i).getTeacherData().getTeacherCount()) {
+                                                isOver = false;
+                                                break;
+                                            }
+                                        } else {
+                                            isOver = false;
+                                            break;
+                                        }
+                                    }
+                                    if (!TextUtils.isEmpty(teacherGuid) && !TextUtils.isEmpty(datas.get(position).getTaskGuid())) {
                                         Intent marking = new Intent(MainActivity.this, MarkingActivity.class);
                                         marking.putExtra("teacherGuid", teacherGuid);
-                                        marking.putExtra("taskGuid", data.get(position).getTaskGuid());
+                                        marking.putExtra("taskGuid", datas.get(position).getTaskGuid());
                                         marking.putExtra("status", status);
-                                        marking.putExtra("style", getExamContextResponse.getTaskList().get(position).getStyle());
+                                        marking.putExtra("style", datas.get(position).getStyle());
+                                        marking.putExtra("identity", datas.get(position).getIdentity());
+                                        marking.putExtra("isOver", isOver);
                                         startActivity(marking);
                                     } else {
                                         ToastUtils.showToast(context, "参数异常");
@@ -130,14 +150,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
+                                            List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
                                             if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
                                                 //TODO 临时处理数据
-                                                List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
                                                 for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
                                                     if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
                                                         data.add(getExamContextResponse.getTaskList().get(i));
                                                     }
                                                 }
+                                            }
+                                            if (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0) {
+                                                for (int i = 0; i < getExamContextResponse.getTaskLists().size(); i++) {
+                                                    if (getExamContextResponse.getTaskLists().get(i).isCanMark()) {
+                                                        data.add(getExamContextResponse.getTaskLists().get(i));
+                                                    }
+                                                }
+                                            }
+                                            if (data.size() > 0) {
                                                 taskListAdapter.setChilds(data);
                                                 taskListAdapter.notifyDataSetChanged();
                                             }
@@ -204,11 +233,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 if (getExamContextResponse == null) {
                                     Log.e(TAG, "run: getExamContextResponse是空的");
                                     return;
-                                } else {
-                                    if (getExamContextResponse.getTaskList() == null) {
-                                        Log.e(TAG, "run: getExamContextResponse.getTaskList()是空的");
-                                        return;
-                                    }
                                 }
                                 //TODO 二级列表全部关闭
                                 for (int i = 0; i < listView.getExpandableListAdapter().getGroupCount(); i++) {
@@ -231,16 +255,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
-                                                    //TODO 临时处理数据
+                                                if ((getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0)
+                                                        || (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0)) {
                                                     List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                                                    for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                                        if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                                            data.add(getExamContextResponse.getTaskList().get(i));
+                                                    if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
+                                                        //TODO 临时处理数据
+                                                        for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                                            if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                                                data.add(getExamContextResponse.getTaskList().get(i));
+                                                            }
                                                         }
                                                     }
-                                                    taskListAdapter.setChilds(data);
-                                                    taskListAdapter.notifyDataSetChanged();
+                                                    if (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0) {
+                                                        for (int i = 0; i < getExamContextResponse.getTaskLists().size(); i++) {
+                                                            if (getExamContextResponse.getTaskLists().get(i).isCanMark()) {
+                                                                data.add(getExamContextResponse.getTaskLists().get(i));
+                                                            }
+                                                        }
+                                                    }
+                                                    if (data.size() > 0) {
+                                                        taskListAdapter.setChilds(data);
+                                                        taskListAdapter.notifyDataSetChanged();
+                                                    }
                                                 } else {
                                                     taskListAdapter.clearChilds();
                                                     taskListAdapter.notifyDataSetChanged();
@@ -291,16 +327,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
-                                        //TODO 临时处理数据
+                                    if ((getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0)
+                                            || (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0)) {
                                         List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                                        for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                            if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                                data.add(getExamContextResponse.getTaskList().get(i));
+                                        if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
+                                            //TODO 临时处理数据
+                                            for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                                if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                                    data.add(getExamContextResponse.getTaskList().get(i));
+                                                }
                                             }
                                         }
-                                        taskListAdapter.setChilds(data);
-                                        taskListAdapter.notifyDataSetChanged();
+                                        if (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0) {
+                                            for (int i = 0; i < getExamContextResponse.getTaskLists().size(); i++) {
+                                                if (getExamContextResponse.getTaskLists().get(i).isCanMark()) {
+                                                    data.add(getExamContextResponse.getTaskLists().get(i));
+                                                }
+                                            }
+                                        }
+                                        if (data.size() > 0) {
+                                            taskListAdapter.setChilds(data);
+                                            taskListAdapter.notifyDataSetChanged();
+                                        }
                                     } else {
                                         taskListAdapter.clearChilds();
                                         taskListAdapter.notifyDataSetChanged();
@@ -360,18 +408,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
-                                //TODO 临时处理数据
+                            if ((getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0)
+                                    || (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0)) {
                                 List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
-                                for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
-                                    if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
-                                        data.add(getExamContextResponse.getTaskList().get(i));
+                                if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
+                                    //TODO 临时处理数据
+                                    for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                        if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                            data.add(getExamContextResponse.getTaskList().get(i));
+                                        }
                                     }
                                 }
-                                taskListAdapter.setChilds(data);
-                                taskListAdapter.notifyDataSetChanged();
-                                taskHint.setVisibility(View.GONE);
-                                refreshLayou.setVisibility(View.VISIBLE);
+                                if (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0) {
+                                    for (int i = 0; i < getExamContextResponse.getTaskLists().size(); i++) {
+                                        if (getExamContextResponse.getTaskLists().get(i).isCanMark()) {
+                                            data.add(getExamContextResponse.getTaskLists().get(i));
+                                        }
+                                    }
+                                }
+                                if (data.size() > 0) {
+                                    taskListAdapter.setChilds(data);
+                                    taskListAdapter.notifyDataSetChanged();
+                                }
                             } else {
                                 taskListAdapter.clearChilds();
                                 taskListAdapter.notifyDataSetChanged();
@@ -447,9 +505,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
-                                    taskListAdapter.setChilds(getExamContextResponse.getTaskList());
-                                    taskListAdapter.notifyDataSetChanged();
+                                if ((getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0)
+                                        || (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0)) {
+                                    List<GetExamContextResponse.TaskListBean> data = new ArrayList<>();
+                                    if (getExamContextResponse.getTaskList() != null && getExamContextResponse.getTaskList().size() > 0) {
+                                        //TODO 临时处理数据
+                                        for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
+                                            if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
+                                                data.add(getExamContextResponse.getTaskList().get(i));
+                                            }
+                                        }
+                                    }
+                                    if (getExamContextResponse.getTaskLists() != null && getExamContextResponse.getTaskLists().size() > 0) {
+                                        for (int i = 0; i < getExamContextResponse.getTaskLists().size(); i++) {
+                                            if (getExamContextResponse.getTaskLists().get(i).isCanMark()) {
+                                                data.add(getExamContextResponse.getTaskLists().get(i));
+                                            }
+                                        }
+                                    }
+                                    if (data.size() > 0) {
+                                        taskListAdapter.setChilds(data);
+                                        taskListAdapter.notifyDataSetChanged();
+                                    }
                                 } else {
                                     taskListAdapter.clearChilds();
                                     taskListAdapter.notifyDataSetChanged();
@@ -470,10 +547,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.main_setting:
-                startActivity(new Intent(context, SettingActivity.class));
-                break;
+        if (v.getId() == R.id.main_setting) {
+            startActivity(new Intent(context, SettingActivity.class));
         }
     }
 

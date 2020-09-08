@@ -181,45 +181,41 @@
             android:visibility="gone">
 
             <CheckBox
+                android:id="@+id/identification_dui"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/pen_check_style"
-                android:button="@null" />
+                android:background="@drawable/checkbox_style_dui"
+                android:button="@null"
+                android:padding="2dp" />
 
-            <Button
+            <CheckBox
+                android:id="@+id/identification_bandui"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/eraser" />
+                android:background="@drawable/checkbox_style_bandui"
+                android:button="@null"
+                android:padding="2dp" />
 
-            <RadioGroup
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+            <CheckBox
+                android:id="@+id/identification_cuo"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/checkbox_style_cuo"
+                android:button="@null"
+                android:padding="2dp" />
 
-                <RadioButton
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_margin="5dp"
-                    android:background="@drawable/icon_correct"
-                    android:button="@null" />
 
-                <RadioButton
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_margin="5dp"
-                    android:background="@drawable/icon_bandui"
-                    android:button="@null" />
-
-                <RadioButton
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_margin="5dp"
-                    android:background="@drawable/icon_error"
-                    android:button="@null" />
-            </RadioGroup>
+            <CheckBox
+                android:id="@+id/objsearch"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/obj_select_style"
+                android:button="@null"
+                android:paddingRight="2dp" />
 
         </LinearLayout>
 
@@ -242,6 +238,33 @@
                 android:background="@color/colorWhite"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:id="@+id/stepScoreP"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <CheckBox
+                        android:id="@+id/stepScore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_centerHorizontal="true"
+                        android:button="@null"
+                        android:drawableLeft="@drawable/stepscore_style"
+                        android:drawablePadding="5dp"
+                        android:gravity="center"
+                        android:text="总分"
+                        android:textColor="@color/colorScoreItem" />
+
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
+
+                </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/commentsP"
@@ -284,35 +307,8 @@
                         android:drawablePadding="5dp"
                         android:duplicateParentState="true"
                         android:gravity="center"
-                        android:text="清除笔记"
+                        android:text="清除"
                         android:textColor="@drawable/text_font_style" />
-
-                    <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:background="@color/colorGrey2" />
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/stepScoreP"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                    <CheckBox
-                        android:id="@+id/stepScore"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_centerInParent="true"
-                        android:button="@null"
-                        android:drawableLeft="@drawable/stepscore_style"
-                        android:drawablePadding="5dp"
-                        android:gravity="center"
-                        android:text="步骤分"
-                        android:textColor="@color/colorScoreItem" />
 
                     <View
                         android:layout_width="2dp"

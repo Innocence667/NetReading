@@ -3,69 +3,6 @@ package com.ruiyi.netreading.bean.response;
 import java.util.List;
 
 public class GetMarkNextStudentResponse {
-
-    /*{ //已批阅数据
-        "success": 200,
-            "data": {
-        "studentData": {
-            "taskGuid": "23360352027a229d27813e3fda93adf6",
-                    "studentGuid": "4b5cbe599e9b4bcfa77228c912d2d2f6",
-                    "collect": false,
-                    "imagePath": "[{\"PageName\":\"A\",\"Path\":\"D:/Scan/20200512144334/01/raw/1206104217750/15_20191206104239\",\"Region\":null}]",
-                    "isAbnormal": false,
-                    "testCode": "10014",
-                    "questions": [
-            {
-                "id": 213470,
-                    "number": 16,
-                    "subNumber": "0",
-                    "fullScore": 20,
-                    "stepScore": "[]",
-                    "score": 12
-            }
-			]
-        },
-        "imageHeight": 440,
-                "imageWidth": 1414,
-                "imageArr": [
-        {
-            "src": "data:image/jpeg;base64",
-                "index": 0
-        }
-		]
-    }
-    }*/
-
-    /*{ //未批阅数据
-        "success": 200,
-            "data": {
-        "studentData": {
-            "taskGuid": "c9be7db297b6a0c4bf6c46cc748ea7f6",
-                    "studentGuid": "8744508d90dc425ebd292cc5e84107bf",
-                    "testCode": "10000",
-                    "collect": false,
-                    "imagePath": "[{\"PageName\":\"A\",\"Path\":\"D:/Scan/20200512144334/01/raw/1206104217750/28_20191206104254\",\"Region\":null}]",
-                    "questions": [
-            {
-                "id": 212916,
-                    "number": 16,
-                    "subNumber": "0",
-                    "score": -1,
-                    "fullScore": 20
-            }
-			]
-        },
-        "imageHeight": 910,
-                "imageWidth": 1426,
-                "imageArr": [
-        {
-            "src": "data:image/jpeg;base64",
-                "index": 0
-        }
-		]
-    }
-    }*/
-
     /**
      * success : 200
      * data : {"studentData":{"taskGuid":"e7d9aa5873b42794ff4ffdcd344b9583","studentGuid":"882e435092d34a3c8e73a8bf24196e22","testCode":"10000","collect":false,"imagePath":"[{\"PageName\":\"A\",\"Path\":\"D:/Scan/20200508092814/41/raw/1206174759856/3_20191206174807\",\"Region\":null}]","questions":[{"id":192992,"number":31,"subNumber":"0","score":-1,"fullScore":0}]},"imageHeight":566,"imageWidth":1361,"imageArr":[{"src":"data:image/jpeg;base64","index":0}]}
@@ -228,6 +165,10 @@ public class GetMarkNextStudentResponse {
                 private double fullScore; //题目总分
                 private String stepScore; //步骤分
                 private String coordinate; //笔迹
+                //gradeData测试数据{"gradeMode":3,"stepModeAdd":true,"stepLength":"+1.5"}
+                //gradeMode 1：总分模式 2：键盘打分 3：步骤分模式
+                private String gradeData; //只考虑gradeMode为3的情况，其他值忽略，stepModeAdd：true加分模式，false减法模式
+                private boolean hasArbitrated; //是否仲裁过(默认false)
 
                 public int getId() {
                     return id;
@@ -283,6 +224,22 @@ public class GetMarkNextStudentResponse {
 
                 public void setCoordinate(String coordinate) {
                     this.coordinate = coordinate;
+                }
+
+                public String getGradeData() {
+                    return gradeData;
+                }
+
+                public boolean isHasArbitrated() {
+                    return hasArbitrated;
+                }
+
+                public void setGradeData(String gradeData) {
+                    this.gradeData = gradeData;
+                }
+
+                public void setHasArbitrated(boolean hasArbitrated) {
+                    this.hasArbitrated = hasArbitrated;
                 }
             }
         }

@@ -10,6 +10,7 @@ public class CollectRequest {
     private String taskGuid;
     private String studentGuid;
     private String value; //0:取消收藏，其余为收藏
+    private int identity;//0、单评 1、教师一 2、教师二 3、双评
 
     public String getTaskGuid() {
         return taskGuid;
@@ -33,5 +34,13 @@ public class CollectRequest {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public int getIdentity() {
+        return identity;
+    }
+
+    public void setIdentity(int identity) {
+        this.identity = identity;
     }
 }

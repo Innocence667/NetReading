@@ -21,4 +21,5 @@
     <color name="colorProgressBackgroud">#F5F5F5</color>
     <color name="colorBtnEnable">#C8D6F2</color>
     <color name="colorTitleBG">#EBEBEB</color>
+    <color name="checkbox">#E5E5E5</color>
 </resources>
