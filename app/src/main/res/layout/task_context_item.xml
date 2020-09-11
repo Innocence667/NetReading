@@ -17,10 +17,24 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:ellipsize="end"
             android:gravity="center"
+            android:maxLines="2"
+            android:padding="2dp"
             android:text="第10(1-99)题"
             android:textColor="@color/colorBlack"
             android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/identity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:background="@color/colorIdentity"
+            android:gravity="center"
+            android:padding="3dp"
+            android:text="单评"
+            android:textColor="@color/colorWhite" />
 
         <TextView
             android:id="@+id/myMission"
@@ -76,10 +90,10 @@
             <Button
                 android:id="@+id/startTask"
                 android:layout_width="90dp"
-                android:background="@drawable/begin_btn_style"
                 android:layout_height="45dp"
-                android:textColor="@color/colorWhite"
+                android:background="@drawable/begin_btn_style"
                 android:text="开始阅卷"
+                android:textColor="@color/colorWhite"
                 android:textSize="16sp" />
         </LinearLayout>
 

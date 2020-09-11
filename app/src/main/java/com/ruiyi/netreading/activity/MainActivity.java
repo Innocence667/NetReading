@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             taskListAdapter.setMyClickListener(new TaskListAdapter.OnclickListener() {
                                 @Override
                                 public void myOnclickListenet(int position) {
+
                                     List<GetExamContextResponse.TaskListBean> datas = new ArrayList<>();
                                     for (int i = 0; i < getExamContextResponse.getTaskList().size(); i++) {
                                         if (getExamContextResponse.getTaskList().get(i).isCanMark()) {
@@ -116,6 +117,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         }
                                     }
                                     if (!TextUtils.isEmpty(teacherGuid) && !TextUtils.isEmpty(datas.get(position).getTaskGuid())) {
+
+
                                         Intent marking = new Intent(MainActivity.this, MarkingActivity.class);
                                         marking.putExtra("teacherGuid", teacherGuid);
                                         marking.putExtra("taskGuid", datas.get(position).getTaskGuid());

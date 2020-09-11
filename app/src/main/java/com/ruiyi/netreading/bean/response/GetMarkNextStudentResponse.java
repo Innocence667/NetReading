@@ -168,8 +168,7 @@ public class GetMarkNextStudentResponse {
                 //gradeData测试数据{"gradeMode":3,"stepModeAdd":true,"stepLength":"+1.5"}
                 //gradeMode 1：总分模式 2：键盘打分 3：步骤分模式
                 private String gradeData; //只考虑gradeMode为3的情况，其他值忽略，stepModeAdd：true加分模式，false减法模式
-                private boolean hasArbitrated; //是否仲裁过(默认false)
-
+                private boolean hasArbitrated; //是否仲裁过(默认false)仲裁过的题目,一二评教师回评无法修改
                 public int getId() {
                     return id;
                 }

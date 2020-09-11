@@ -18,6 +18,7 @@ public class SavaDataResponse {
     private int myNumber; //我的已阅量
     private int taskCount; //任务总量
     private int taskNumber; //任务已阅量
+    private int arbCount; //仲裁教师的任务量
 
     public int getStatus() {
         return status;
@@ -65,5 +66,13 @@ public class SavaDataResponse {
 
     public void setTaskNumber(int taskNumber) {
         this.taskNumber = taskNumber;
+    }
+
+    public int getArbCount() {
+        return arbCount;
+    }
+
+    public void setArbCount(int arbCount) {
+        this.arbCount = arbCount;
     }
 }

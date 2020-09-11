@@ -115,6 +115,11 @@ public class GetMarkDataResponse {
         private int taskCount; ///所有教师任务总量
         private int markSum; //所有教师已阅量
         private boolean isFree; //是否是自由阅卷
+        private int identity; //0单评 1一评 2二评 3仲裁
+        private int style; //1单评 2双评 3按班
+        private int status; //
+        private int markNum; //同身份教师的已阅量(一评教师、二评教师)
+        private int arbCount; //异常数量
 
         public String getTaskGuid() {
             return taskGuid;
@@ -172,12 +177,52 @@ public class GetMarkDataResponse {
             this.markSum = markSum;
         }
 
-        public boolean isIsFree() {
+        public boolean isFree() {
             return isFree;
         }
 
-        public void setIsFree(boolean isFree) {
-            this.isFree = isFree;
+        public int getIdentity() {
+            return identity;
+        }
+
+        public int getStyle() {
+            return style;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        public int getMarkNum() {
+            return markNum;
+        }
+
+        public int getArbCount() {
+            return arbCount;
+        }
+
+        public void setFree(boolean free) {
+            isFree = free;
+        }
+
+        public void setIdentity(int identity) {
+            this.identity = identity;
+        }
+
+        public void setStyle(int style) {
+            this.style = style;
+        }
+
+        public void setStatus(int status) {
+            this.status = status;
+        }
+
+        public void setMarkNum(int markNum) {
+            this.markNum = markNum;
+        }
+
+        public void setArbCount(int arbCount) {
+            this.arbCount = arbCount;
         }
     }
 

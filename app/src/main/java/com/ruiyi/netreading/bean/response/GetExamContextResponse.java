@@ -12,7 +12,7 @@ public class GetExamContextResponse {
 
     private int success;
     private List<TaskListBean> taskList;
-    private List<TaskListBean> taskLists;//双评模式数据
+    private List<TaskListBean> taskLists;//存放所有的双评任务，不一定都是这个教师的任务
 
     public int getSuccess() {
         return success;
@@ -61,13 +61,13 @@ public class GetExamContextResponse {
         private int order; //顺序
         private int style; //阅卷类型(1单评、2双评、3按班)
         private boolean canMark; //是否可以阅卷
-        private int markNum;//双评模式下当前任务所有教师的已阅量，代替markNumber
+        private int markNum;//双评模式下当前任务所有教师的已阅量，代替markNumber(所有一评教师的已阅量)
         private List<QuestionsBean> questions;
         private List<AvgListBean> avgList;
         private TeacherDataBean teacherData;// 如果是空的，表示是帮阅，如果有数据，表示是自己的任务
         private int isonline; //0线下、1线上、2导入
-        private int identity;//身份(3双评)
-        private int arbCount; //数量(异常数量)
+        private int identity;//身份(0,1、2、教师1-2 3、仲裁)
+        private int arbCount; //数量(异常数量-仲裁数量)
         private boolean IsPublish;
 
         public String getTaskGuid() {
