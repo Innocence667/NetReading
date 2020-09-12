@@ -41,6 +41,8 @@ public class Interfaces {
     public String GETSTUDENTMARKDATA;
     //收藏、取消题目
     public String COLLECTQUEXTION;
+    //正常、异常试卷
+    public String ABNORMALQUESTION;
     //获取评分详情
     public String GETMARKAVGSCORE;
     //获取最新版本接口
@@ -81,6 +83,7 @@ public class Interfaces {
         REVIEWSTUDENTS = RUIYI + "ReviewStudents";
         GETSTUDENTMARKDATA = RUIYI + "GetStudentMarkData";
         COLLECTQUEXTION = RUIYI + "CollectQuestion";
+        ABNORMALQUESTION = RUIYI + "AbnormalQuestion";
         GETMARKAVGSCORE = RUIYI + "GetMarkAvgScore";
         AUTHENTICATE = RUIYI + "Authenticate";
         DOWNLOAD = RUIYI + "Download";

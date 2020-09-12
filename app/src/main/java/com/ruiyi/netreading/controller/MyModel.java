@@ -341,10 +341,22 @@ public class MyModel {
         });
     }
 
-    //收藏、取消题目
-    public void collectQuestion(Context context, final CollectRequest request, final MyCallBack callBack) {
-        Log.e("collectQuestion", gson.toJson(request));
-        Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).COLLECTQUEXTION, gson.toJson(request));
+    /**
+     * 收藏、取消题目(试卷正常、异常)
+     *
+     * @param context
+     * @param request
+     * @param type     1收藏/取消收藏请求、2试卷正常/试卷异常请求
+     * @param callBack
+     */
+    public void collectQuestion(Context context, final CollectRequest request, int type, final MyCallBack callBack) {
+        Log.e("collectQuestion   type-" + type, gson.toJson(request));
+        Call call;
+        if (type == 1) {
+            call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).COLLECTQUEXTION, gson.toJson(request));
+        } else {
+            call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).ABNORMALQUESTION, gson.toJson(request));
+        }
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {

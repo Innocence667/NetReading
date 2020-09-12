@@ -85,10 +85,10 @@ public class GetMarkNextStudentResponse {
             private String taskGuid;
             private String studentGuid;
             private String testCode;
-            private boolean collect;
+            private boolean collect; //是否收藏
             private String imagePath;
             private List<QuestionsBean> questions;
-            private boolean isAbnormal;
+            private boolean isAbnormal; //是否是异常
 
             public String getTaskGuid() {
                 return taskGuid;
@@ -169,6 +169,7 @@ public class GetMarkNextStudentResponse {
                 //gradeMode 1：总分模式 2：键盘打分 3：步骤分模式
                 private String gradeData; //只考虑gradeMode为3的情况，其他值忽略，stepModeAdd：true加分模式，false减法模式
                 private boolean hasArbitrated; //是否仲裁过(默认false)仲裁过的题目,一二评教师回评无法修改
+
                 public int getId() {
                     return id;
                 }

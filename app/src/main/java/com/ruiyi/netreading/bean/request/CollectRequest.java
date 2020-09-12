@@ -9,7 +9,7 @@ public class CollectRequest {
 
     private String taskGuid;
     private String studentGuid;
-    private String value; //0:取消收藏，其余为收藏
+    private String value; //0:取消收藏，其余为收藏  异常卷状态(0正常、1异常)
     private int identity;//0、单评 1、教师一 2、教师二 3、双评
 
     public String getTaskGuid() {

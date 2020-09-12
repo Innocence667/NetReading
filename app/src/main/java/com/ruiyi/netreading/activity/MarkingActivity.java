@@ -35,6 +35,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -107,7 +109,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MarkingActivity extends AppCompatActivity implements View.OnClickListener, DrawerLayout.DrawerListener {
+public class MarkingActivity extends AppCompatActivity implements View.OnClickListener, DrawerLayout.DrawerListener, RadioGroup.OnCheckedChangeListener {
 
     private String TAG = "MarkingActivity";
     //标签类型
@@ -184,16 +186,28 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private Bitmap bitmap = null; //添加标签时的对象
     private CheckBox sideslip; //功能区折叠按钮
     private LinearLayout spenLayoutShow; //手写笔选中后的界面
+    private RadioGroup radioGroup; //标识功能组
+    private RadioButton spenRadio; //批注
     //对、半对、错、选择
-    private CheckBox identification_dui, identification_bandui, identification_cuo, identification_objSelect;
-    private List<CheckBox> checkBoxes;
-    private HorizontalScrollView scrollView; //功能区
-    //批注、清除笔迹、步骤分、收藏、回评、继续阅卷、评分详情、设置
-    private RelativeLayout commentsP, eliminateP, stepScoreP, collectionP, historyP, goOnParent, scoringDatailsP, settingP;
-    private CheckBox comments; //批注
-    private TextView eliminate;//清除笔记
-    private CheckBox stepScore; //步骤分
+    private RadioButton identification_dui, identification_bandui, identification_cuo;
+
+    private LinearLayout clearParent;//清除父布局
+    private CheckBox identification_objSelect; //选择
+    private TextView clearAll;//清空全部
+
+    private LinearLayout labelParent;//收藏异常父布局
     private CheckBox collection; //收藏
+    private CheckBox abnormal; //异常
+    private ImageView collectionImg;
+    private TextView abnormalTv;
+
+    private HorizontalScrollView scrollView; //功能区
+    //步骤分、批注、清除笔迹、收藏、回评、继续阅卷、评分详情、设置
+    private RelativeLayout commentsP, eliminateP, stepScoreP, collectionP, historyP, goOnParent, scoringDatailsP, settingP;
+    private CheckBox stepScore; //步骤分
+    private CheckBox comments; //批注
+    private CheckBox eliminate;//清除笔记
+    private CheckBox labe;//标签
     private TextView history; //回评
     private TextView goOn; //继续阅卷
     private TextView scoringDatails; //评分详情
@@ -215,6 +229,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private ReviewAdatper reviewAdatper; //回评列表适配器
 
     private CollectRequest collectRequest;//收藏(取消收藏)请求模型
+    private CollectRequest AbnormalRequest;//试卷异常(取消异常)请求模型
 
     //设置布局控件
     private LinearLayout seting_main;
@@ -320,8 +335,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             public void run() {
                 LoadingUtil.showDialog(context);
                 if (response.getTeacherTask().getMarkCount() == 0 || response.getTeacherTask().getIdentity() == 3) {
-                    progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (response.getTeacherTask().getMarkNumber() + 1)
-                            + "</font>"));
+                    progressTips.setText(Html.fromHtml("<font color = '#245AD3'>第" + (response.getTeacherTask().getMarkNumber() + 1)
+                            + "份</font>"));
                 } else {
                     progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (response.getTeacherTask().getMarkNumber() + 1)
                             + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -333,6 +348,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             public void onSuccess(Object model) {
                 minLocation = 0;
                 collectRequest = new CollectRequest();
+                AbnormalRequest = new CollectRequest();
                 getMarkNextStudentResponse = (GetMarkNextStudentResponse) model;
                 cachePool.add(getMarkNextStudentResponse);
                 if (response.getTeacherTask().getMarkCount() == 0) { //自由阅卷
@@ -368,6 +384,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         } else {
                             collectRequest.setValue(String.valueOf(0));
                             collection.setChecked(false);
+                        }
+                        if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
+                            AbnormalRequest.setValue(String.valueOf(1));
+                            abnormal.setChecked(true);
+                        } else {
+                            AbnormalRequest.setValue(String.valueOf(0));
+                            abnormal.setChecked(false);
                         }
                     }
                 });
@@ -421,6 +444,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             public void run() {
                                 minLocation = 0;
                                 collectRequest = new CollectRequest();
+                                AbnormalRequest = new CollectRequest();
                                 getMarkNextStudentResponse = (GetMarkNextStudentResponse) model;
                                 if (getMarkNextStudentResponse.getData() == null || getMarkNextStudentResponse.getData().getStudentData() == null
                                         || getMarkNextStudentResponse.getData().getStudentData().getQuestions() == null) {
@@ -438,12 +462,19 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     collectRequest.setValue(String.valueOf(0));
                                     collection.setChecked(false);
                                 }
+                                if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
+                                    AbnormalRequest.setValue(String.valueOf(1));
+                                    abnormal.setChecked(true);
+                                } else {
+                                    AbnormalRequest.setValue(String.valueOf(0));
+                                    abnormal.setChecked(false);
+                                }
                                 initUpDateData(getMarkNextStudentResponse);
                                 showSueecssPage(getMarkNextStudentResponse);
                                 submiss.setEnabled(true);
                                 if (response.getTeacherTask().getMarkCount() == 0 || response.getTeacherTask().getIdentity() == 3) {
-                                    progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + dataBeanList.size()
-                                            + "</font>"));
+                                    progressTips.setText(Html.fromHtml("<font color = '#245AD3'>第" + dataBeanList.size()
+                                            + "份</font>"));
                                 } else {
                                     progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + dataBeanList.size()
                                             + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -553,19 +584,23 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         sideslip = findViewById(R.id.sideslip);
         sideslip.setOnClickListener(this);
         spenLayoutShow = findViewById(R.id.spenLayoutShow);
+        radioGroup = findViewById(R.id.radioGroup);
+        radioGroup.setOnCheckedChangeListener(this);
+        spenRadio = findViewById(R.id.spenRadio);
         identification_dui = findViewById(R.id.identification_dui);
         identification_bandui = findViewById(R.id.identification_bandui);
         identification_cuo = findViewById(R.id.identification_cuo);
         identification_objSelect = findViewById(R.id.objsearch);
-        checkBoxes = new ArrayList<>();
-        checkBoxes.add(identification_dui);
-        checkBoxes.add(identification_bandui);
-        checkBoxes.add(identification_cuo);
-        checkBoxes.add(identification_objSelect);
-        identification_dui.setOnClickListener(this);
-        identification_bandui.setOnClickListener(this);
-        identification_cuo.setOnClickListener(this);
+        clearParent = findViewById(R.id.clearParent);
+        clearAll = findViewById(R.id.clear_all);
         identification_objSelect.setOnClickListener(this);
+        clearAll.setOnClickListener(this);
+
+        labelParent = findViewById(R.id.labelParent);
+        abnormal = findViewById(R.id.abnormal);
+        abnormal.setOnClickListener(this);
+        collectionImg = findViewById(R.id.collectionImg);
+        abnormalTv = findViewById(R.id.abnormalTv);
 
         scrollView = findViewById(R.id.function);
 
@@ -577,6 +612,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         eliminateP.setOnClickListener(this);
         eliminate = findViewById(R.id.eliminate);
         eliminate.setOnClickListener(this);
+        labe = findViewById(R.id.label);
+        labe.setOnClickListener(this);
         stepScoreP = findViewById(R.id.stepScoreP);
         stepScoreP.setOnClickListener(this);
         stepScore = findViewById(R.id.stepScore);
@@ -1107,7 +1144,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         scorePanel.setScores(scores);
                         scorePanel.setScoresCheck(scoresCheck);
                     } else {
-                        for (int i = 0; i < d + 1; i++) {
+                        for (int i = 0; i < d + 0.5; i++) {
                             scores.add(String.valueOf(i));
                             if (d == i) {
                                 if (Double.valueOf(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore()) - score == i) {
@@ -1277,7 +1314,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     goOnParent.setVisibility(View.GONE);
                 }
 
-                identification_dui.setChecked(false);
+                /*identification_dui.setChecked(false);
                 identification_bandui.setChecked(false);
                 identification_cuo.setChecked(false);
                 identification_objSelect.setChecked(false);
@@ -1285,7 +1322,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     tabType = TYPE_STEPPOINTS;
                 } else {
                     tabType = TYPE_NONE;
-                }
+                }*/
 
                 //题号数据源
                 strings = getQuestions(getMarkNextStudentResponse1.getData().getStudentData().getQuestions());
@@ -1923,7 +1960,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             .setDuration(100)
                             .start();
                     scrollView.setVisibility(View.VISIBLE);
-                    if (comments.isChecked() || stepScore.isChecked()) {
+                    if (spenRadio.isChecked() || stepScore.isChecked()) {
                         spenLayoutShow.setVisibility(View.VISIBLE);
                     } else {
                         spenLayoutShow.setVisibility(View.GONE);
@@ -1931,6 +1968,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 break;
             case R.id.time: //时间排序
+                if (reviewAdatper == null) {
+                    return;
+                }
                 scoreType = 0;
                 gobackScoreIcon.setCompoundDrawablesWithIntrinsicBounds(null, null, getDrawable(R.drawable.order), null);
                 if (timeType == 0) {
@@ -1982,6 +2022,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 reviewAdatper.notifyDataSetChanged();
                 break;
             case R.id.score: //分数排序
+                if (reviewAdatper == null) {
+                    return;
+                }
                 timeType = 0;
                 gobackTimeIcon.setCompoundDrawablesWithIntrinsicBounds(null, null, getDrawable(R.drawable.order), null);
                 if (scoreType == 0) {
@@ -2004,14 +2047,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.stepScore: //步骤分
                 questionNumAdapter.updateScore(minLocation, String.valueOf(-1));
                 questionNumAdapter.notifyDataSetChanged();
-                identification_dui.setChecked(false);
-                identification_bandui.setChecked(false);
-                identification_cuo.setChecked(false);
-                identification_objSelect.setChecked(false);
                 if (stepScore.isChecked()) {
                     tabType = TYPE_STEPPOINTS;
                     stepScoreModeScore = 0;
-                    spenLayoutShow.setVisibility(View.VISIBLE);
                     ToastUtils.showToast(context, "开启步骤分");
                     stepScore.setText("步骤分");
                     PreferencesService.getInstance(context).saveAutoSubmit(false);
@@ -2027,12 +2065,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     stepScore.setChecked(true);
                     stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
-                    if (reviewMode) {
-                        scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(), 0));
-                    } else {
-                        scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(), 0));
-                    }
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_NONE);
+                    scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(), 0));
                     scoreAdapter.setStepScore(true);
                     scoreAdapter.setScoreCheck(-1);
                     saveMarkDataBean.getQuestions().get(minLocation).setMarkScore("-1");
@@ -2040,15 +2074,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     questionScore.setText(String.valueOf(0));
                 } else {
                     ToastUtils.showToast(context, "关闭步骤分");
-                    if (comments.isChecked()) {
-                        spenLayoutShow.setVisibility(View.VISIBLE);
-                    } else {
-                        spenLayoutShow.setVisibility(View.GONE);
-                    }
                     stepScore.setChecked(false);
                     stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                    stepScore.setText("总分");
-                    if (comments.isChecked()) {
+                    stepScore.setText("总 分");
+                    if (spenRadio.isChecked()) {
                         tabType = TYPE_NONE;
                     } else {
                         if (identification_dui.isChecked()) {
@@ -2059,9 +2088,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         }
                         if (identification_cuo.isChecked()) {
                             tabType = TYPE_CROSS;
-                        }
-                        if (identification_objSelect.isChecked()) {
-                            tabType = TYPE_NONE;
                         }
                     }
                     tableStepScore = null;
@@ -2076,11 +2102,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     } else {
                         soubleLayout.setVisibility(View.GONE);
                     }
-                    /*for (int i = 0; i < mSpenPageDoc.getObjectList().size(); i++) {
-                        if (mSpenPageDoc.getObjectList().get(i).getType() == SpenObjectBase.TYPE_IMAGE) {
-                            mSpenPageDoc.removeObject(mSpenPageDoc.getObjectList().get(i));
-                        }
-                    }*/
                     tab.clear();
                     stepDatas.clear();
                     strokeColor.clear();
@@ -2088,7 +2109,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     mSpenSimpleSurfaceView.update();
                     saveMarkDataBean.getQuestions().get(minLocation).setStepScore("");
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_NONE);
                     saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(-1));
                     scoreAdapter.updataData(getScoreList(-1, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
                     scoreAdapter.setStepScore(false);
@@ -2097,39 +2118,82 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 scoreAdapter.notifyDataSetChanged();
                 break;
-            case R.id.comments:
+            case R.id.comments: //批注
                 if (comments.isChecked()) {
-                    identification_dui.setChecked(false);
-                    identification_bandui.setChecked(false);
-                    identification_cuo.setChecked(false);
-                    identification_objSelect.setChecked(false);
-                    tabType = TYPE_NONE;
                     comments.setChecked(true);
                     comments.setTextColor(getResources().getColor(R.color.colorBlue));
+                    eliminate.setChecked(false);
+                    eliminate.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    labe.setChecked(false);
+                    labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     spenLayoutShow.setVisibility(View.VISIBLE);
-                    ToastUtils.showToast(context, "开启批注");
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_STROKE);
-                    /*scoreAdapter.setStepScore(false);
-                    scoreAdapter.updataData(getScoreList(-1, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
-                    scoreAdapter.notifyDataSetChanged();*/
+                    radioGroup.setVisibility(View.VISIBLE);
+                    clearParent.setVisibility(View.GONE);
+                    labelParent.setVisibility(View.GONE);
+                    identification_objSelect.setChecked(false);
+                    spenRadio.setChecked(true);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_STROKE);
                 } else {
-                    if (stepScore.isChecked()) {
-                        spenLayoutShow.setVisibility(View.VISIBLE);
-                        tabType = TYPE_STEPPOINTS;
-                    } else {
-                        spenLayoutShow.setVisibility(View.GONE);
-                        tabType = TYPE_NONE;
-                    }
-                    ToastUtils.showToast(context, "关闭批注");
                     comments.setChecked(false);
                     comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    spenLayoutShow.setVisibility(View.GONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
                 }
                 break;
-            case R.id.eliminateP: //清除笔记
-            case R.id.eliminate: //清除笔记
+            case R.id.eliminateP:
+            case R.id.eliminate:
+                if (eliminate.isChecked()) {
+                    comments.setChecked(false);
+                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    eliminate.setChecked(true);
+                    eliminate.setTextColor(getResources().getColor(R.color.colorBlue));
+                    labe.setChecked(false);
+                    identification_objSelect.setChecked(false);
+                    identification_objSelect.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    clearAll.setText("清除所有");
+                    labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    spenLayoutShow.setVisibility(View.VISIBLE);
+                    radioGroup.setVisibility(View.GONE);
+                    clearParent.setVisibility(View.VISIBLE);
+                    labelParent.setVisibility(View.GONE);
+                    identification_objSelect.setChecked(false);
+                    //spenRadio.setChecked(false);
+                    tabType = TYPE_NONE;
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
+                } else {
+                    eliminate.setChecked(false);
+                    eliminate.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    spenLayoutShow.setVisibility(View.GONE);
+                }
+                break;
+            case R.id.collectionP:
+            case R.id.label:
+                if (labe.isChecked()) {
+                    comments.setChecked(false);
+                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    eliminate.setChecked(false);
+                    eliminate.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    labe.setChecked(true);
+                    labe.setTextColor(getResources().getColor(R.color.colorBlue));
+                    spenLayoutShow.setVisibility(View.VISIBLE);
+                    radioGroup.setVisibility(View.GONE);
+                    clearParent.setVisibility(View.GONE);
+                    labelParent.setVisibility(View.VISIBLE);
+                    identification_objSelect.setChecked(false);
+                    //spenRadio.setChecked(false);
+                    tabType = TYPE_NONE;
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
+                } else {
+                    labe.setChecked(false);
+                    labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    spenLayoutShow.setVisibility(View.GONE);
+                }
+                break;
+            case R.id.clear_all: //清除笔记
                 if (mSpenPageDoc.getObjectList().size() == 0) {
                     ToastUtils.showToast(context, "页面没有数据");
                 } else {
@@ -2156,79 +2220,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 }
                 break;
-            case R.id.identification_dui:
-                if (identification_dui.isChecked()) {
-                    identification_dui.setChecked(true);
-                    identification_bandui.setChecked(false);
-                    identification_cuo.setChecked(false);
-                    identification_objSelect.setChecked(false);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
-                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.correct);
-                    tabType = TYPE_TICK;
-                } else {
-                    identification_dui.setChecked(false);
-                    bitmap = null;
-                    if (comments.isChecked()) {
-                        tabType = TYPE_NONE;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
-                    }
-                    if (stepScore.isChecked()) {
-                        tabType = TYPE_STEPPOINTS;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
-                    }
-                }
-                break;
-            case R.id.identification_bandui:
-                if (identification_bandui.isChecked()) {
-                    identification_dui.setChecked(false);
-                    identification_bandui.setChecked(true);
-                    identification_cuo.setChecked(false);
-                    identification_objSelect.setChecked(false);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
-                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.bandui);
-                    tabType = TYPE_HALFTICK;
-                } else {
-                    identification_bandui.setChecked(false);
-                    bitmap = null;
-                    if (comments.isChecked()) {
-                        tabType = TYPE_NONE;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
-                    }
-                    if (stepScore.isChecked()) {
-                        tabType = TYPE_STEPPOINTS;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
-                    }
-                }
-                break;
-            case R.id.identification_cuo:
-                if (identification_cuo.isChecked()) {
-                    identification_dui.setChecked(false);
-                    identification_bandui.setChecked(false);
-                    identification_cuo.setChecked(true);
-                    identification_objSelect.setChecked(false);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
-                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.erroe);
-                    tabType = TYPE_CROSS;
-                } else {
-                    identification_cuo.setChecked(false);
-                    bitmap = null;
-                    if (comments.isChecked()) {
-                        tabType = TYPE_NONE;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
-                    }
-                    if (stepScore.isChecked()) {
-                        tabType = TYPE_STEPPOINTS;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
-                    }
-                }
-
-                break;
             case R.id.objsearch: //选择对象
                 if (identification_objSelect.isChecked()) {
                     identification_objSelect.setChecked(true);
+                    identification_objSelect.setTextColor(getResources().getColor(R.color.colorBlue));
+                    clearAll.setText("删 除");
                     bitmap = null;
                     tabType = TYPE_NONE;
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_SELECTION);
@@ -2238,8 +2234,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     identification_cuo.setChecked(false);
                 } else {
                     identification_objSelect.setChecked(false);
+                    identification_objSelect.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    clearAll.setText("清除所有");
                     bitmap = null;
-                    if (comments.isChecked()) {
+                    if (spenRadio.isChecked()) {
                         tabType = TYPE_NONE;
                         mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
                         mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_STROKE);
@@ -2254,7 +2252,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 }
                 break;
-            case R.id.collectionP: //收藏
             case R.id.collection: //收藏
                 collectRequest.setStudentGuid(getMarkNextStudentResponse.getData().getStudentData().getStudentGuid());
                 collectRequest.setTaskGuid(taskGuid);
@@ -2269,7 +2266,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
 
                 final int finalType = type;
-                myModel.collectQuestion(context, collectRequest, new MyCallBack() {
+                myModel.collectQuestion(context, collectRequest, 1, new MyCallBack() {
                     @Override
                     public void onSuccess(Object model) {
                         runOnUiThread(new Runnable() {
@@ -2277,10 +2274,55 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             public void run() {
                                 if (finalType == 0) {
                                     ToastUtils.showToast(context, "取消收藏");
+                                    collectionImg.setVisibility(View.GONE);
                                     collection.setChecked(false);
+                                    collection.setTextColor(getResources().getColor(R.color.colorScoreItem));
                                 } else {
                                     ToastUtils.showToast(context, "收藏成功");
+                                    collectionImg.setVisibility(View.VISIBLE);
                                     collection.setChecked(true);
+                                    collection.setTextColor(getResources().getColor(R.color.colorBlue));
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailed(String str) {
+                        showFailedPage(str);
+                    }
+                });
+                break;
+            case R.id.abnormal: //异常
+                AbnormalRequest.setStudentGuid(getMarkNextStudentResponse.getData().getStudentData().getStudentGuid());
+                AbnormalRequest.setTaskGuid(taskGuid);
+                AbnormalRequest.setIdentity(response.getTeacherTask().getIdentity());
+                int type1 = 0;
+                if ("0".equals(AbnormalRequest.getValue())) {
+                    AbnormalRequest.setValue(String.valueOf(1));
+                    type1 = 1;
+                } else {
+                    AbnormalRequest.setValue(String.valueOf(0));
+                    type1 = 0;
+                }
+
+                final int finalType1 = type1;
+                myModel.collectQuestion(context, AbnormalRequest, 2, new MyCallBack() {
+                    @Override
+                    public void onSuccess(Object model) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (finalType1 == 0) {
+                                    ToastUtils.showToast(context, "取消异常");
+                                    abnormalTv.setVisibility(View.GONE);
+                                    abnormal.setChecked(false);
+                                    abnormal.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                } else {
+                                    ToastUtils.showToast(context, "试卷异常");
+                                    abnormalTv.setVisibility(View.VISIBLE);
+                                    abnormal.setChecked(true);
+                                    abnormal.setTextColor(getResources().getColor(R.color.colorBlue));
                                 }
                             }
                         });
@@ -2620,6 +2662,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     collectRequest.setValue(String.valueOf(0));
                                     collection.setChecked(false);
                                 }
+                                if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
+                                    AbnormalRequest.setValue(String.valueOf(1));
+                                    abnormal.setChecked(true);
+                                } else {
+                                    AbnormalRequest.setValue(String.valueOf(0));
+                                    abnormal.setChecked(false);
+                                }
                             }
                         });
                         initSaveData(getMarkNextStudentResponse);
@@ -2627,8 +2676,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         submiss.setVisibility(View.GONE);
                         submiss.setEnabled(true);
                         if (response.getTeacherTask().getMarkCount() == 0 || response.getTeacherTask().getIdentity() == 3) {
-                            progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (response.getTeacherTask().getMarkNumber() + 1)
-                                    + "</font>"));
+                            progressTips.setText(Html.fromHtml("<font color = '#245AD3'>第" + (response.getTeacherTask().getMarkNumber() + 1)
+                                    + "fe</font>"));
                         } else {
                             progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (response.getTeacherTask().getMarkNumber() + 1)
                                     + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -2930,12 +2979,19 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                         collectRequest.setValue(String.valueOf(0));
                                                         collection.setChecked(false);
                                                     }
+                                                    if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
+                                                        AbnormalRequest.setValue(String.valueOf(1));
+                                                        abnormal.setChecked(true);
+                                                    } else {
+                                                        AbnormalRequest.setValue(String.valueOf(0));
+                                                        abnormal.setChecked(false);
+                                                    }
                                                     initUpDateData(getMarkNextStudentResponse);
                                                     showSueecssPage(getMarkNextStudentResponse);
                                                     submiss.setEnabled(true);
                                                     if (response.getTeacherTask().getMarkCount() == 0 || response.getTeacherTask().getIdentity() == 3) {
-                                                        progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (position + 1)
-                                                                + "</font>"));
+                                                        progressTips.setText(Html.fromHtml("<font color = '#245AD3'>第" + (position + 1)
+                                                                + "份</font>"));
                                                     } else {
                                                         progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (position + 1)
                                                                 + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -3152,12 +3208,19 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                         collectRequest.setValue(String.valueOf(0));
                                                         collection.setChecked(false);
                                                     }
+                                                    if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
+                                                        AbnormalRequest.setValue(String.valueOf(1));
+                                                        abnormal.setChecked(true);
+                                                    } else {
+                                                        AbnormalRequest.setValue(String.valueOf(0));
+                                                        abnormal.setChecked(false);
+                                                    }
                                                     initUpDateData(getMarkNextStudentResponse);
                                                     showSueecssPage(getMarkNextStudentResponse);
                                                     submiss.setEnabled(true);
                                                     if (response.getTeacherTask().getMarkCount() == 0 || response.getTeacherTask().getIdentity() == 3) {
-                                                        progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (LOCATION + 1)
-                                                                + "</font>"));
+                                                        progressTips.setText(Html.fromHtml("<font color = '#245AD3'>第" + (LOCATION + 1)
+                                                                + "份</font>"));
                                                     } else {
                                                         progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (LOCATION + 1)
                                                                 + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -3326,6 +3389,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         Log.e(TAG, "loadCacheData: 加载缓存数据");
         minLocation = 0;
         collectRequest = new CollectRequest();
+        AbnormalRequest = new CollectRequest();
         //加载缓存数据
         getMarkNextStudentResponse = cachePool.get(0); //获取第一个缓存数据
         if (getMarkNextStudentResponse.getData() == null || getMarkNextStudentResponse.getData().getStudentData() == null
@@ -3343,12 +3407,19 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             collectRequest.setValue(String.valueOf(0));
             collection.setChecked(false);
         }
+        if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
+            AbnormalRequest.setValue(String.valueOf(1));
+            abnormal.setChecked(true);
+        } else {
+            AbnormalRequest.setValue(String.valueOf(0));
+            abnormal.setChecked(false);
+        }
         initUpDateData(getMarkNextStudentResponse);
         loadCacheImg(Tool.IMAGEPATH + "/" + getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId() + ".jpeg");
         submiss.setEnabled(true);
         if (response.getTeacherTask().getMarkCount() == 0 || response.getTeacherTask().getIdentity() == 3) {
-            progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (LOCATION + 1)
-                    + "</font>"));
+            progressTips.setText(Html.fromHtml("<font color = '#245AD3'>第" + (LOCATION + 1)
+                    + "份</font>"));
         } else {
             progressTips.setText(Html.fromHtml("<font color = '#245AD3'>" + (LOCATION + 1)
                     + "</font>/" + response.getTeacherTask().getMarkCount()));
@@ -3678,5 +3749,105 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     @Override  //状态改变
     public void onDrawerStateChanged(int newState) {
 
+    }
+
+    @Override
+    public void onCheckedChanged(RadioGroup group, int checkedId) {
+        switch (group.getCheckedRadioButtonId()) {
+            case R.id.spenRadio:
+                if (spenRadio.isChecked()) {
+                    spenRadio.setChecked(true);
+                    identification_dui.setChecked(false);
+                    identification_bandui.setChecked(false);
+                    identification_cuo.setChecked(false);
+                    tabType = TYPE_NONE;
+                    spenLayoutShow.setVisibility(View.VISIBLE);
+                    ToastUtils.showToast(context, "开启批注");
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_STROKE);
+                } else {
+                    spenRadio.setChecked(false);
+                    if (spenRadio.isChecked()) {
+                        spenLayoutShow.setVisibility(View.VISIBLE);
+                        tabType = TYPE_STEPPOINTS;
+                    } else {
+                        spenLayoutShow.setVisibility(View.GONE);
+                        tabType = TYPE_NONE;
+                    }
+                    ToastUtils.showToast(context, "关闭批注");
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                }
+                break;
+            case R.id.identification_dui:
+                if (identification_dui.isChecked()) {
+                    identification_dui.setChecked(true);
+                    identification_bandui.setChecked(false);
+                    identification_cuo.setChecked(false);
+                    identification_objSelect.setChecked(false);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.correct);
+                    tabType = TYPE_TICK;
+                } else {
+                    identification_dui.setChecked(false);
+                    bitmap = null;
+                    if (spenRadio.isChecked()) {
+                        tabType = TYPE_NONE;
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
+                    }
+                    if (stepScore.isChecked()) {
+                        tabType = TYPE_STEPPOINTS;
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    }
+                }
+                break;
+            case R.id.identification_bandui:
+                if (identification_bandui.isChecked()) {
+                    identification_dui.setChecked(false);
+                    identification_bandui.setChecked(true);
+                    identification_cuo.setChecked(false);
+                    identification_objSelect.setChecked(false);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.bandui);
+                    tabType = TYPE_HALFTICK;
+                } else {
+                    identification_bandui.setChecked(false);
+                    bitmap = null;
+                    if (spenRadio.isChecked()) {
+                        tabType = TYPE_NONE;
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
+                    }
+                    if (stepScore.isChecked()) {
+                        tabType = TYPE_STEPPOINTS;
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    }
+                }
+                break;
+            case R.id.identification_cuo:
+                if (identification_cuo.isChecked()) {
+                    identification_dui.setChecked(false);
+                    identification_bandui.setChecked(false);
+                    identification_cuo.setChecked(true);
+                    identification_objSelect.setChecked(false);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.erroe);
+                    tabType = TYPE_CROSS;
+                } else {
+                    identification_cuo.setChecked(false);
+                    bitmap = null;
+                    if (spenRadio.isChecked()) {
+                        tabType = TYPE_NONE;
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
+                    }
+                    if (stepScore.isChecked()) {
+                        tabType = TYPE_STEPPOINTS;
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    }
+                }
+                break;
+        }
     }
 }

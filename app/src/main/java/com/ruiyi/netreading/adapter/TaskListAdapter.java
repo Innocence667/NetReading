@@ -149,8 +149,16 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                 chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNumber() + "/" + childs.get(childPosition).getTaskCount());
                 chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNumber());
             } else {
-                chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNum() + "/" + childs.get(childPosition).getTaskCount());
-                chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNum());
+                if (childs.get(childPosition).getIdentity() == 3) {
+                    chileViewHolder.myMission.setText(Html.fromHtml("我的任务：<font color = '#245AD3'>0</font>"));
+                    chileViewHolder.progress.setMax(100);
+                    chileViewHolder.totalTasks.setText("任务总量：0/0");
+                    chileViewHolder.progress.setSecondaryProgress(0);
+                    chileViewHolder.progress.setProgress(0);
+                } else {
+                    chileViewHolder.totalTasks.setText("任务总量：" + childs.get(childPosition).getMarkNum() + "/" + childs.get(childPosition).getTaskCount());
+                    chileViewHolder.progress.setSecondaryProgress(childs.get(childPosition).getMarkNum());
+                }
             }
             chileViewHolder.progress.setProgress(0);
         }
@@ -158,14 +166,18 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
         if (childs.get(childPosition).getStyle() != 2) {
             chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getMarkNumber() * 100 / childs.get(childPosition).getTaskCount())) + "%");
         } else {
-            if (childs.get(childPosition).getIdentity() == 3) {
-                if (childs.get(childPosition).getTeacherData().getTeacherNumber() != 0) {
-                    chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getTeacherData().getTeacherNumber() * 100 / (childs.get(childPosition).getArbCount() + childs.get(childPosition).getTeacherData().getTeacherNumber()))) + "%");
+            if (childs.get(childPosition).getTeacherData() != null) {
+                if (childs.get(childPosition).getIdentity() == 3) {
+                    if (childs.get(childPosition).getTeacherData().getTeacherNumber() != 0) {
+                        chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getTeacherData().getTeacherNumber() * 100 / (childs.get(childPosition).getArbCount() + childs.get(childPosition).getTeacherData().getTeacherNumber()))) + "%");
+                    } else {
+                        chileViewHolder.percentage.setText("0%");
+                    }
                 } else {
-                    chileViewHolder.percentage.setText("0%");
+                    chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getMarkNum() * 100 / childs.get(childPosition).getTaskCount())) + "%");
                 }
             } else {
-                chileViewHolder.percentage.setText(String.format("%.1f", ((double) childs.get(childPosition).getMarkNum() * 100 / childs.get(childPosition).getTaskCount())) + "%");
+                chileViewHolder.percentage.setText("0%");
             }
         }
 
@@ -238,7 +250,7 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
             public void onClick(View v) {
                 if (childs.get(childPosition).getStyle() == 2 && childs.get(childPosition).getIdentity() == 3
                         && childs.get(childPosition).getArbCount() == 0) {
-                    if (childs.get(childPosition).getTeacherData().getTeacherNumber() == 0) {
+                    if (childs.get(childPosition).getTeacherData() == null || childs.get(childPosition).getTeacherData().getTeacherNumber() == 0) {
                         ToastUtils.showTopToast(mContext, "当前任务不存在需要仲裁的试卷，不能进入阅卷！", R.style.Toast_Animation);
                     } else {
                         myClickListener.myOnclickListenet(childPosition);
