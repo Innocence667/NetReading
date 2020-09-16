@@ -265,11 +265,13 @@
                 <!--android:background="@drawable/obj_select_style"-->
                 <CheckBox
                     android:id="@+id/objsearch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:layout_margin="5dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/checkbox_select_style2"
                     android:button="@null"
                     android:checked="false"
+                    android:gravity="center"
                     android:paddingRight="2dp"
                     android:text="选 择"
                     android:textColor="@color/colorScoreItem" />
@@ -287,8 +289,9 @@
                     android:id="@+id/clear_all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:text="清除所有"
+                    android:layout_margin="10dp"
+                    android:gravity="center"
+                    android:text="全部清除"
                     android:textColor="@color/colorScoreItem" />
 
             </LinearLayout>
@@ -304,10 +307,11 @@
 
                 <CheckBox
                     android:id="@+id/collection"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_centerInParent="true"
-                    android:layout_margin="5dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/checkbox_select_style2"
                     android:button="@null"
                     android:gravity="center"
                     android:text="收 藏"
@@ -324,13 +328,14 @@
 
                 <CheckBox
                     android:id="@+id/abnormal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_centerInParent="true"
-                    android:layout_margin="5dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/checkbox_select_style2"
                     android:button="@null"
                     android:gravity="center"
-                    android:text="异 常"
+                    android:text="试卷异常"
                     android:textColor="@color/colorScoreItem" />
 
             </LinearLayout>
@@ -456,7 +461,7 @@
                         android:drawableLeft="@drawable/label_style"
                         android:drawablePadding="5dp"
                         android:gravity="center"
-                        android:text="标签"
+                        android:text="标 签"
                         android:textColor="@color/colorScoreItem"
                         android:textSize="18sp" />
 
@@ -592,6 +597,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
+            android:background="@color/colorProgress"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="10dp">
@@ -602,12 +608,13 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="试题ID" />
+                android:text="试题ID"
+                android:textColor="@color/colorWhite" />
 
             <View
                 android:layout_width="2dp"
                 android:layout_height="30dp"
-                android:background="@color/colorGrey2" />
+                android:background="@color/colorWhite" />
 
             <LinearLayout
                 android:id="@+id/time"
@@ -622,13 +629,14 @@
                     android:layout_height="wrap_content"
                     android:drawableRight="@drawable/order"
                     android:gravity="center"
-                    android:text="时间" />
+                    android:text="时间"
+                    android:textColor="@color/colorWhite" />
             </LinearLayout>
 
             <View
                 android:layout_width="2dp"
                 android:layout_height="30dp"
-                android:background="@color/colorGrey2" />
+                android:background="@color/colorWhite" />
 
             <LinearLayout
                 android:id="@+id/score"
@@ -643,7 +651,8 @@
                     android:layout_height="wrap_content"
                     android:drawableRight="@drawable/order"
                     android:gravity="center"
-                    android:text="分数" />
+                    android:text="分数"
+                    android:textColor="@color/colorWhite" />
 
             </LinearLayout>
 
@@ -652,7 +661,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:background="@color/colorGrey2" />
+            android:background="@color/colorWhite" />
 
         <ListView
             android:id="@+id/reviewListView"

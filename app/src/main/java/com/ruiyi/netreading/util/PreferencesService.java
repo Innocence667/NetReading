@@ -147,6 +147,21 @@ public class PreferencesService {
     }
 
     /**
+     * 步骤分打分模式(true开启减分模式、false关闭减分模式)默认关闭减分模式
+     *
+     * @param bol
+     */
+    public PreferencesService saveStepMode(Boolean bol) {
+        editor.putBoolean("StepScoreMode", bol);
+        editor.commit();
+        return this;
+    }
+
+    public boolean getStepMode() {
+        return sharedPreferences.getBoolean("StepScoreMode", false);
+    }
+
+    /**
      * 设置置顶分数
      *
      * @param str

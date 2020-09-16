@@ -92,11 +92,6 @@ public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.
         this.pos = pos1;
     }
 
-    //更新数据
-    public void udataeData(List<String> data1) {
-        this.data = data1;
-    }
-
     //更新指定位置的分数
     public void updateScore(int pos, String score) {
         scores.set(pos, score);

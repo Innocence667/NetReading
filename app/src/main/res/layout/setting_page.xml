@@ -15,16 +15,20 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/colorProgress"
             android:gravity="center"
             android:text="设 置"
+            android:textColor="@color/colorWhite"
             android:textSize="20sp" />
 
         <ImageView
             android:id="@+id/setting_back"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
             android:scaleType="fitStart"
-            android:src="@drawable/left"
+            android:src="@drawable/back"
             android:visibility="gone" />
 
     </RelativeLayout>
@@ -53,6 +57,36 @@
 
             <Switch
                 android:id="@+id/pointFiveSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:background="@color/colorGrey" />
+
+        <LinearLayout
+            android:id="@+id/stepModeView"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="步骤分减分模式(切换后需重新批改当前题目)" />
+
+            <Switch
+                android:id="@+id/stepModeSwitch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 

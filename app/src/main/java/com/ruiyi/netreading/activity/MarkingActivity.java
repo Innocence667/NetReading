@@ -163,6 +163,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private SpenPageDoc mSpenPageDoc;
     private SpenSurfaceView mSpenSimpleSurfaceView;
     private boolean next = false;//是否继续执行ACTION_UP操作
+    private boolean isDoubleFinger = false;
     private boolean isSpenFeatureEnable = false;//是否支持手写笔
     private float scale; //图片缩放的倍数
 
@@ -213,6 +214,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private TextView scoringDatails; //评分详情
     private TextView setting; //设置
     private AlertDialog settingDialog; //设置dialog
+    private boolean _stepMode = false;//点击设置之前当前的步骤分模式
 
     private List<ImageData> imageDataList; //存放每张图片的宽高
     private ImageData imageData;
@@ -236,6 +238,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private ImageView setting_back;
     private LinearLayout pointFiveView;
     private Switch pointFiveSwitch;
+    private LinearLayout stepModeView;
+    private Switch stepModeSwitch;
     private LinearLayout autoSubmitView;
     private Switch autoSubmitSwitch;
     private LinearLayout topScoreView, penSetView;
@@ -294,12 +298,16 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         @Override
                         public void onSuccess(Object model) {
                             response = (GetMarkDataResponse) model;
-                            if (response.getTeacherTask().getMarkSum() < response.getTeacherTask().getTaskCount()) { //当前任务是否全部完成
+                            if (response.getTeacherTask().getMarkCount() != response.getTeacherTask().getTaskCount()) { //任务没有完成
                                 if (response.getTeacherTask().getStyle() != 2) { //不是双评
                                     if (response.getTeacherTask().getStyle() == 1) { //单评
                                         normalMOde(); //正常阅卷
                                     } else { //按班
-                                        goBackMode(); //回评
+                                        if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount()) {
+                                            normalMOde(); //正常阅卷
+                                        } else {
+                                            goBackMode(); //回评
+                                        }
                                     }
                                 } else { //双评
                                     if (response.getTeacherTask().getMarkNum() < response.getTeacherTask().getTaskCount()) {
@@ -381,16 +389,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         if (getMarkNextStudentResponse.getData().getStudentData().isCollect()) {
                             collectRequest.setValue(String.valueOf(1));
                             collection.setChecked(true);
+                            collection.setTextColor(getResources().getColor(R.color.colorWhite));
+                            collectionImg.setVisibility(View.VISIBLE);
                         } else {
                             collectRequest.setValue(String.valueOf(0));
                             collection.setChecked(false);
+                            collection.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                            collectionImg.setVisibility(View.GONE);
                         }
                         if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
                             AbnormalRequest.setValue(String.valueOf(1));
                             abnormal.setChecked(true);
+                            abnormal.setTextColor(getResources().getColor(R.color.colorWhite));
+                            abnormalTv.setVisibility(View.VISIBLE);
                         } else {
                             AbnormalRequest.setValue(String.valueOf(0));
                             abnormal.setChecked(false);
+                            abnormal.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                            abnormalTv.setVisibility(View.GONE);
                         }
                     }
                 });
@@ -427,7 +443,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 final List<ReviewStudentsResponse.DataBean> dataBeanList = studentsResponse.getData();
                 GetStudentMarkDataRequest getStudentMarkDataRequest = new GetStudentMarkDataRequest();
                 if (studentsResponse.getData() == null || studentsResponse.getData().size() < 1) {
+                    Looper.prepare();
                     ToastUtils.showToast(context, "暂无数据");
+                    Looper.loop();
                     //暂无数据
                     return;
                 } else {
@@ -458,16 +476,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 if (getMarkNextStudentResponse.getData().getStudentData().isCollect()) {
                                     collectRequest.setValue(String.valueOf(1));
                                     collection.setChecked(true);
+                                    collection.setTextColor(getResources().getColor(R.color.colorWhite));
+                                    collectionImg.setVisibility(View.VISIBLE);
                                 } else {
                                     collectRequest.setValue(String.valueOf(0));
                                     collection.setChecked(false);
+                                    collection.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                    collectionImg.setVisibility(View.GONE);
                                 }
                                 if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
                                     AbnormalRequest.setValue(String.valueOf(1));
                                     abnormal.setChecked(true);
+                                    abnormal.setTextColor(getResources().getColor(R.color.colorWhite));
+                                    abnormalTv.setVisibility(View.VISIBLE);
                                 } else {
                                     AbnormalRequest.setValue(String.valueOf(0));
                                     abnormal.setChecked(false);
+                                    abnormal.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                    abnormalTv.setVisibility(View.GONE);
                                 }
                                 initUpDateData(getMarkNextStudentResponse);
                                 showSueecssPage(getMarkNextStudentResponse);
@@ -686,9 +712,22 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         mSpenSimpleSurfaceView.setTouchListener(new SpenTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        isDoubleFinger = false;
+                        break;
+                    case MotionEvent.ACTION_POINTER_DOWN:
+                        isDoubleFinger = true;
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        break;
+                    case MotionEvent.ACTION_POINTER_UP:
+                        break;
+                }
                 if (stepScore.isChecked()) { //步骤分模式
                     Log.e(TAG, "onTouch: 步骤分 ");
-                    if (tabType.equals(TYPE_STEPPOINTS)) {
+                    if (tabType.equals(TYPE_STEPPOINTS) && !isDoubleFinger) {
+                        boolean isReduce = PreferencesService.getInstance(context).getStepMode();
                         switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN:
                                 next = true;
@@ -703,12 +742,23 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         for (Map.Entry<Integer, Double> map : tab.entrySet()) {
                                             stepScoreModeScore += map.getValue();
                                         }
-                                        if (stepScoreModeScore + (Double.valueOf(tableStepScore)) > Double.valueOf(TOTAL)) {
-                                            if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) != SpenSimpleSurfaceView.ACTION_SELECTION
-                                                    && mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER) != SpenSimpleSurfaceView.ACTION_SELECTION) {
-                                                ToastUtils.showToast(context, "不能超过题目总分");
+                                        if (PreferencesService.getInstance(context).getStepMode()) {
+                                            Log.e(TAG, "onTouch当前得分是: " + (Double.parseDouble(TOTAL) - stepScoreModeScore));
+                                            if (Double.parseDouble(TOTAL) + (stepScoreModeScore + (Double.parseDouble("-" + tableStepScore))) < 0) {
+                                                if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) != SpenSimpleSurfaceView.ACTION_SELECTION
+                                                        && mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER) != SpenSimpleSurfaceView.ACTION_SELECTION) {
+                                                    ToastUtils.showToast(context, "不能不能小于0分");
+                                                }
+                                                next = false;
                                             }
-                                            next = false;
+                                        } else {
+                                            if (stepScoreModeScore + (Double.parseDouble(tableStepScore)) > Double.parseDouble(TOTAL)) {
+                                                if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) != SpenSimpleSurfaceView.ACTION_SELECTION
+                                                        && mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER) != SpenSimpleSurfaceView.ACTION_SELECTION) {
+                                                    ToastUtils.showToast(context, "不能超过题目总分");
+                                                }
+                                                next = false;
+                                            }
                                         }
                                         if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) == SpenSimpleSurfaceView.ACTION_SELECTION) {
                                             next = false;
@@ -726,35 +776,67 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         switch (String.valueOf(scoreAdapter.getChectValue())) {
                                             case "0.5":
                                                 Log.e(TAG, "onTouch: 0.5");
-                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus0_5);
+                                                if (isReduce) {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce0_5);
+                                                } else {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus0_5);
+                                                }
                                                 break;
                                             case "1.0":
                                                 Log.e(TAG, "onTouch: 1.0");
-                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus1);
+                                                if (isReduce) {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce1);
+                                                } else {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus1);
+                                                }
                                                 break;
                                             case "1.5":
                                                 Log.e(TAG, "onTouch: 1.5");
-                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus1_5);
+                                                if (isReduce) {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce1_5);
+                                                } else {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus1_5);
+                                                }
                                                 break;
                                             case "2.0":
                                                 Log.e(TAG, "onTouch: 2.0");
-                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus2);
+                                                if (isReduce) {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce2);
+                                                } else {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus2);
+                                                }
                                                 break;
                                             case "3.0":
                                                 Log.e(TAG, "onTouch: 3.0");
-                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus3);
+                                                if (isReduce) {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce3);
+                                                } else {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus3);
+                                                }
                                                 break;
                                             case "4.0":
                                                 Log.e(TAG, "onTouch: 4.0");
-                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus4);
+                                                if (isReduce) {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce4);
+                                                } else {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus4);
+                                                }
                                                 break;
                                             case "5.0":
                                                 Log.e(TAG, "onTouch: 5.0");
-                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus5);
+                                                if (isReduce) {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce5);
+                                                } else {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus5);
+                                                }
                                                 break;
                                             case "6.0":
                                                 Log.e(TAG, "onTouch: 6.0");
-                                                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus6);
+                                                if (isReduce) {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce6);
+                                                } else {
+                                                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.plus6);
+                                                }
                                                 break;
                                         }
                                         if (bitmap == null) {
@@ -787,6 +869,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         for (Map.Entry<Integer, Double> map : tab.entrySet()) {
                                             stepScoreModeScore += map.getValue();
                                         }
+                                        if (PreferencesService.getInstance(context).getStepMode()) {
+                                            stepScoreModeScore = getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore() + stepScoreModeScore;
+                                        }
                                         if (stepScoreModeScore == (int) stepScoreModeScore) {
                                             questionScore.setText(String.valueOf(((int) stepScoreModeScore)));
                                             saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(((int) stepScoreModeScore)));
@@ -813,7 +898,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 break;
                         }
                     } else if (!TYPE_STEPPOINTS.equals(tabType) && !TYPE_NONE.equals(tabType)) {
-                        if (event.getAction() == MotionEvent.ACTION_UP) {
+                        if (event.getAction() == MotionEvent.ACTION_UP && !isDoubleFinger) {
                             SpenObjectImage objectImage = new SpenObjectImage();
                             objectImage.setImage(bitmap);
                             //获取点击位置
@@ -848,7 +933,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         Log.e(TAG, "onTouch: 电子笔");
                     }
                     if (event.getAction() == MotionEvent.ACTION_UP && !TYPE_STEPPOINTS.equals(tabType)
-                            && !TYPE_NONE.equals(tabType)) {
+                            && !TYPE_NONE.equals(tabType) && !isDoubleFinger) {
                         SpenObjectImage objectImage = new SpenObjectImage();
                         objectImage.setImage(bitmap);
                         //获取点击位置
@@ -904,8 +989,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             tab.put(arrayList.get(i).getRuntimeHandle(), objectValue);
                         } else {
                             if (TYPE_STEPPOINTS.equals(tabType)) {
-                                tab.put(arrayList.get(i).getRuntimeHandle(),
-                                        scoreAdapter.getChectValue() == (int) scoreAdapter.getChectValue() ? (int) scoreAdapter.getChectValue() : scoreAdapter.getChectValue());
+                                if (PreferencesService.getInstance(context).getStepMode()) {
+                                    tab.put(arrayList.get(i).getRuntimeHandle(),
+                                            scoreAdapter.getChectValue() == (int) scoreAdapter.getChectValue() ? (int) -scoreAdapter.getChectValue() : -scoreAdapter.getChectValue());
+                                } else {
+                                    tab.put(arrayList.get(i).getRuntimeHandle(),
+                                            scoreAdapter.getChectValue() == (int) scoreAdapter.getChectValue() ? (int) scoreAdapter.getChectValue() : scoreAdapter.getChectValue());
+                                }
                             } else {
                                 tab.put(arrayList.get(i).getRuntimeHandle(), 0.0);
                             }
@@ -919,7 +1009,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         } else {
                             stepScore.setField(tabType);
                             if (TYPE_STEPPOINTS.equals(tabType)) {
-                                stepScore.setParams(scoreAdapter.getChectValue());
+                                if (PreferencesService.getInstance(context).getStepMode()) {
+                                    stepScore.setParams(-scoreAdapter.getChectValue());
+                                } else {
+                                    stepScore.setParams(scoreAdapter.getChectValue());
+                                }
                             } else {
                                 stepScore.setParams(0);
                             }
@@ -928,14 +1022,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         stepScore.setX((drawnRect.left + ((drawnRect.right - drawnRect.left) / 2f)) / scale);
                         stepScore.setY((drawnRect.top + ((drawnRect.bottom - drawnRect.top) / 2f)) / scale);
                         stepDatas.put(arrayList.get(i).getRuntimeHandle(), stepScore);
-                        Log.e(TAG, "onObjectAdded-----: " + new Gson().toJson(stepDatas));
                     } else if (arrayList.get(i).getType() == SpenObjectBase.TYPE_STROKE) {
+                        arrayList.get(i).setSelectable(false);
                         if (addStrokeMode) {
                             strokeColor.put(arrayList.get(i).getRuntimeHandle(), "");
                         } else {
                             strokeColor.put(arrayList.get(i).getRuntimeHandle(), PreferencesService.getInstance(context).getSpenColor());
                         }
-                        Log.e(TAG, "onObjectAdded---添加笔迹---: " + new Gson().toJson(strokeColor));
                     }
                 }
             }
@@ -950,24 +1043,26 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         }
                     }
                 }
-                stepScoreModeScore = 0;
-                if (arrayList.size() > 1) {
-                    tab.clear();
-                    stepDatas.clear();
-                } else {
-                    for (Map.Entry<Integer, Double> map : tab.entrySet()) {
-                        stepScoreModeScore += map.getValue();
-                    }
-                    if (stepScoreModeScore == (int) stepScoreModeScore) {
-                        questionScore.setText(String.valueOf((int) stepScoreModeScore));
-                        saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf((int) stepScoreModeScore));
-                        questionNumAdapter.updateScore(minLocation, String.valueOf((int) stepScoreModeScore));
+                if (stepScore.isChecked()) {
+                    stepScoreModeScore = 0;
+                    if (arrayList.size() > 1) {
+                        tab.clear();
+                        stepDatas.clear();
                     } else {
-                        questionScore.setText(String.valueOf(stepScoreModeScore));
-                        saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
-                        questionNumAdapter.updateScore(minLocation, String.valueOf(stepScoreModeScore));
+                        for (Map.Entry<Integer, Double> map : tab.entrySet()) {
+                            stepScoreModeScore += map.getValue();
+                        }
+                        if (stepScoreModeScore == (int) stepScoreModeScore) {
+                            questionScore.setText(String.valueOf((int) stepScoreModeScore));
+                            saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf((int) stepScoreModeScore));
+                            questionNumAdapter.updateScore(minLocation, String.valueOf((int) stepScoreModeScore));
+                        } else {
+                            questionScore.setText(String.valueOf(stepScoreModeScore));
+                            saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(stepScoreModeScore));
+                            questionNumAdapter.updateScore(minLocation, String.valueOf(stepScoreModeScore));
+                        }
+                        questionNumAdapter.notifyDataSetChanged();
                     }
-                    questionNumAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -1005,7 +1100,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      * @param fullScore 当前题目总分
      */
     private ScorePanel getScoreList(double score, double fullScore) {
-        Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score + "   是否是步骤分模式" + stepScore.isChecked());
+        if (scoreAdapter != null) {
+            scoreAdapter.setStepMode(PreferencesService.getInstance(context).getStepMode());
+            scoreAdapter.notifyDataSetChanged();
+        }
+        Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score + "   是否是步骤分模式:" + stepScore.isChecked() + "  是否是步骤分减分模式？" + PreferencesService.getInstance(context).getStepMode());
         Log.e(TAG, "置顶分数: " + PreferencesService.getInstance(context).getTopScore());
         //Math.ceil(12.2)//返回13.0
         //Math.ceil(12.7)//返回13.0
@@ -1162,24 +1261,21 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
             }
         } else { //是步骤分模式
-            if ("英语".equals(response.getTestpaper().getPaperName())) { //是否是英语
-                for (int i = 0; i < 6; i++) {
-                    if (i == 1) {
-                        scores.add(String.valueOf(i));
-                        scoresCheck.add(false);
-                        scores.add(String.valueOf(1.5));
-                        scoresCheck.add(false);
-                    } else {
-                        scores.add(String.valueOf(i));
-                        scoresCheck.add(false);
-                    }
+            for (int i = 0; i < 9; i++) {
+                if (i == 0) {
+                    scores.add(String.valueOf(0));
+                } else if (i == 1) {
+                    scores.add(String.valueOf((double) (i - 0.5)));
+                } else if (i == 2) {
+                    scores.add(String.valueOf((i - 1)));
+                } else if (i == 3) {
+                    scores.add(String.valueOf((double) (i - 1.5)));
+                } else {
+                    scores.add(String.valueOf((i - 2)));
                 }
-            } else {
-                for (int i = 0; i < 6; i++) {
-                    scores.add(String.valueOf(i));
-                    scoresCheck.add(false);
-                }
+                scoresCheck.add(false);
             }
+
             if (!TextUtils.isEmpty(tableStepScore)) { //步骤分模式不需要刷新列表
                 for (int i = 0; i < scores.size(); i++) {
                     if (tableStepScore.equals(scores.get(i))) {
@@ -1240,6 +1336,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
                     scale = bitmap.getWidth() * 1f / mSpenPageDoc.getWidth();
                 }
+                Log.e(TAG, "onSuccess当前缩放率是: " + scale);
 
                 //设置背景图片
                 mSpenPageDoc.setBackgroundImage(localImageData.getPath());
@@ -1263,22 +1360,21 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             spenLayoutShow.setVisibility(View.GONE);
             stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
             mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_NONE);
+            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
             PreferencesService.getInstance(context).saveAutoSubmit(true);
         }
         if (!TextUtils.isEmpty(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore())) {
             comments.setChecked(false);
             comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+            spenLayoutShow.setVisibility(View.GONE);
             if (nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getGradeData().contains("\"gradeMode\":3")) {
                 tabType = TYPE_STEPPOINTS;
-                spenLayoutShow.setVisibility(View.VISIBLE);
                 stepScore.setChecked(true);
                 stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
                 PreferencesService.getInstance(context).saveAutoSubmit(false);
                 submiss.setVisibility(View.VISIBLE);
             } else {
                 tabType = TYPE_NONE;
-                spenLayoutShow.setVisibility(View.GONE);
                 stepScore.setChecked(false);
                 stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
                 PreferencesService.getInstance(context).saveAutoSubmit(true);
@@ -1287,6 +1383,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             addStepScore(nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getStepScore(),
                     nextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getGradeData());
             mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+            mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
         }
         initUI(nextStudentResponse);
     }
@@ -1300,7 +1397,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount()
                             && response.getTeacherTask().getTaskCount() != response.getTeacherTask().getMarkSum()) {
                         goOnParent.setVisibility(View.VISIBLE);
-                        if (TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate()) && TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getStepScore())) {
+                        if (TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate())
+                                && TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getStepScore())) {
                             comments.setChecked(false);
                             comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
                             stepScore.setChecked(false);
@@ -1310,19 +1408,16 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     } else {
                         goOnParent.setVisibility(View.GONE);
                     }
+                    eliminate.setChecked(false);
+                    eliminate.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    labe.setChecked(false);
+                    labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    spenLayoutShow.setVisibility(View.GONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
                 } else {
                     goOnParent.setVisibility(View.GONE);
                 }
-
-                /*identification_dui.setChecked(false);
-                identification_bandui.setChecked(false);
-                identification_cuo.setChecked(false);
-                identification_objSelect.setChecked(false);
-                if (stepScore.isChecked()) {
-                    tabType = TYPE_STEPPOINTS;
-                } else {
-                    tabType = TYPE_NONE;
-                }*/
 
                 //题号数据源
                 strings = getQuestions(getMarkNextStudentResponse1.getData().getStudentData().getQuestions());
@@ -1359,6 +1454,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             //只有一个题号不需要进行操作
                             return;
                         }
+                        if (eliminate.isChecked() && identification_objSelect.isChecked()) {
+                            identification_objSelect.setChecked(false);
+                            identification_objSelect.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                            mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_GESTURE);
+                        }
                         int loc = minLocation;
                         saveNowPageData(loc);
                         tab.clear();
@@ -1368,7 +1469,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         stepScoreModeScore = 0;
                         // 小题切换
                         minLocation = positon;
-                        questionNum.setText(strings.get(positon));
+                        questionNum.setText(strings.get(minLocation));
                         if ("-1".equals(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())) {
                             questionScore.setText(String.valueOf(0));
                         } else {
@@ -1379,7 +1480,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 questionScore.setText(String.valueOf(markScore));
                             }
                         }
-                        questionNumAdapter.setPos(positon);
+                        questionNumAdapter.setPos(minLocation);
                         questionNumAdapter.notifyDataSetChanged();
                         double fullScore = getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFullScore();
                         if (fullScore == (int) fullScore) {
@@ -1420,14 +1521,19 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         stepScore.setChecked(true);
                                         stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
                                     }
+                                    if (saveMarkDataBean.getQuestions().get(minLocation).getGradeData().contains("true")) {
+                                        PreferencesService.getInstance(context).saveStepMode(false);
+                                    } else {
+                                        PreferencesService.getInstance(context).saveStepMode(true);
+                                    }
                                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
                                 }
                                 //添加笔记
                                 if (!TextUtils.isEmpty(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate())) {
                                     addStroke(saveMarkDataBean.getQuestions().get(minLocation).getCoordinate());
-                                    comments.setChecked(true);
+                                    /*comments.setChecked(true);
                                     comments.setTextColor(getResources().getColor(R.color.colorBlue));
-                                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
+                                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);*/
                                 }
                             }
                             scoreAdapter.updataData(getScoreList(Double.valueOf(saveMarkDataBean.getQuestions().get(positon).getMarkScore()),
@@ -1493,12 +1599,21 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 scorePanel = getScoreList(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getScore(),
                         getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFullScore());
                 scoreAdapter = new ScoreAdapter(context, scorePanel);
+                if (!TextUtils.isEmpty(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getGradeData())) {
+                    if (getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getGradeData().contains("\"stepModeAdd\":true")) {
+                        PreferencesService.getInstance(context).saveStepMode(false);
+                        scoreAdapter.setStepMode(false);
+                    } else {
+                        PreferencesService.getInstance(context).saveStepMode(true);
+                        scoreAdapter.setStepMode(true);
+                    }
+                }
+                scoreAdapter.notifyDataSetChanged();
                 if (stepScore.isChecked()) {
                     scoreAdapter.setStepScore(true);
                 } else {
                     scoreAdapter.setStepScore(false);
                 }
-
                 if (!"-1".equals(SCORE) && !stepScore.isChecked()) {
                     for (int i = 0; i < scorePanel.getScores().size(); i++) {
                         if (scorePanel.getScores().get(i).equals(SCORE)) {
@@ -1520,6 +1635,14 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         questionScore.post(new Runnable() {
                             @Override
                             public void run() {
+
+                                if (eliminate.isChecked() && identification_objSelect.isChecked()) {
+                                    identification_objSelect.setChecked(false);
+                                    identification_objSelect.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_GESTURE);
+                                }
+
                                 if (stepScore.isChecked()) {
                                     if (position == 0) {
                                         saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(0));
@@ -1666,34 +1789,34 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
                 } else {
                     switch (String.valueOf(stepScores.get(i).getParams())) {
-                        case "0.5":
+                        case "-0.5":
                             bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce0_5);
                             break;
-                        case "1":
-                        case "1.0":
+                        case "-1":
+                        case "-1.0":
                             bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce1);
                             break;
-                        case "1.5":
+                        case "-1.5":
                             bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce1_5);
                             break;
-                        case "2":
-                        case "2.0":
+                        case "-2":
+                        case "-2.0":
                             bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce2);
                             break;
-                        case "3":
-                        case "3.0":
+                        case "-3":
+                        case "-3.0":
                             bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce3);
                             break;
-                        case "4":
-                        case "4.0":
+                        case "-4":
+                        case "-4.0":
                             bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce4);
                             break;
-                        case "5":
-                        case "5.0":
+                        case "-5":
+                        case "-5.0":
                             bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce5);
                             break;
-                        case "6":
-                        case "6.0":
+                        case "-6":
+                        case "-6.0":
                             bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce6);
                             break;
                         default:
@@ -1824,10 +1947,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      */
 
     private void saveNowPageData(int loc) {
-        if (!"-1".equals(saveMarkDataBean.getQuestions().get(loc).getMarkScore())) {
-            if (mSpenPageDoc.getObjectList().size() != 0) {
-                getPageDocObject(loc);
-            }
+        if (mSpenPageDoc.getObjectList().size() != 0) {
+            getPageDocObject(loc);
         }
     }
 
@@ -1863,7 +1984,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             PointF[] pointFS = new PointF[pointS.length];
             for (int j = 0; j < pointS.length; j++) {
                 PointF pointF = new PointF();
-                pointF.set(pointS[j].x / scale, pointS[j].y / scale);
+                pointF.set(pointS[j].x * scale, pointS[j].y * scale);
                 pointFS[j] = pointF;
             }
             base.setPoints(pointFS, yali, time);
@@ -2048,7 +2169,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 questionNumAdapter.updateScore(minLocation, String.valueOf(-1));
                 questionNumAdapter.notifyDataSetChanged();
                 if (stepScore.isChecked()) {
-                    tabType = TYPE_STEPPOINTS;
+                    if (TYPE_NONE.equals(tabType)) {
+                        tabType = TYPE_STEPPOINTS;
+                    }
                     stepScoreModeScore = 0;
                     ToastUtils.showToast(context, "开启步骤分");
                     stepScore.setText("步骤分");
@@ -2064,8 +2187,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     scoreAdapter.notifyDataSetChanged();
                     stepScore.setChecked(true);
                     stepScore.setTextColor(getResources().getColor(R.color.colorBlue));
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_NONE);
+                    if (comments.isChecked() && spenRadio.isChecked()) {
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_STROKE);
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_STROKE);
+                    } else {
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
+                    }
                     scoreAdapter.updataData(getScoreList(getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getScore(), 0));
                     scoreAdapter.setStepScore(true);
                     scoreAdapter.setScoreCheck(-1);
@@ -2077,18 +2205,22 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     stepScore.setChecked(false);
                     stepScore.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     stepScore.setText("总 分");
-                    if (spenRadio.isChecked()) {
-                        tabType = TYPE_NONE;
+                    if (comments.isChecked()) {
+                        if (spenRadio.isChecked()) {
+                            tabType = TYPE_NONE;
+                        } else {
+                            if (identification_dui.isChecked()) {
+                                tabType = TYPE_TICK;
+                            }
+                            if (identification_bandui.isChecked()) {
+                                tabType = TYPE_HALFTICK;
+                            }
+                            if (identification_cuo.isChecked()) {
+                                tabType = TYPE_CROSS;
+                            }
+                        }
                     } else {
-                        if (identification_dui.isChecked()) {
-                            tabType = TYPE_TICK;
-                        }
-                        if (identification_bandui.isChecked()) {
-                            tabType = TYPE_HALFTICK;
-                        }
-                        if (identification_cuo.isChecked()) {
-                            tabType = TYPE_CROSS;
-                        }
+                        tabType = TYPE_NONE;
                     }
                     tableStepScore = null;
                     if (getMarkNextStudentResponse.getData().getStudentData().getQuestions().size() == 1) {
@@ -2109,7 +2241,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     mSpenSimpleSurfaceView.update();
                     saveMarkDataBean.getQuestions().get(minLocation).setStepScore("");
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER, SpenSimpleSurfaceView.ACTION_GESTURE);
                     saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(-1));
                     scoreAdapter.updataData(getScoreList(-1, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore()));
                     scoreAdapter.setStepScore(false);
@@ -2134,12 +2266,18 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     spenRadio.setChecked(true);
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_STROKE);
+                    tabType = TYPE_NONE;
                 } else {
                     comments.setChecked(false);
                     comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     spenLayoutShow.setVisibility(View.GONE);
+                    if (stepScore.isChecked()) {
+                        tabType = TYPE_STEPPOINTS;
+                    } else {
+                        tabType = TYPE_NONE;
+                    }
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_GESTURE);
                 }
                 break;
             case R.id.eliminateP:
@@ -2162,11 +2300,16 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     //spenRadio.setChecked(false);
                     tabType = TYPE_NONE;
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_GESTURE);
                 } else {
                     eliminate.setChecked(false);
                     eliminate.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     spenLayoutShow.setVisibility(View.GONE);
+                    if (stepScore.isChecked()) {
+                        tabType = TYPE_STEPPOINTS;
+                    }
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_GESTURE);
                 }
                 break;
             case R.id.collectionP:
@@ -2186,34 +2329,42 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     //spenRadio.setChecked(false);
                     tabType = TYPE_NONE;
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_GESTURE);
                 } else {
                     labe.setChecked(false);
                     labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     spenLayoutShow.setVisibility(View.GONE);
+                    if (stepScore.isChecked()) {
+                        tabType = TYPE_STEPPOINTS;
+                    } else {
+                        tabType = TYPE_NONE;
+                    }
                 }
                 break;
             case R.id.clear_all: //清除笔记
                 if (mSpenPageDoc.getObjectList().size() == 0) {
                     ToastUtils.showToast(context, "页面没有数据");
                 } else {
+                    Log.e(TAG, "onClick: " + mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN));
                     if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) == SpenSimpleSurfaceView.ACTION_SELECTION) {
                         mSpenPageDoc.removeSelectedObject();
                         mSpenSimpleSurfaceView.closeControl();
                         mSpenSimpleSurfaceView.update();
                     } else {
                         mSpenPageDoc.removeAllObject();
-                        tab.clear();
-                        stepDatas.clear();
-                        stepScoreModeScore = 0;
                         mSpenSimpleSurfaceView.update();
-                        questionScore.setText("0");
-                        questionNumAdapter.updateScore(minLocation, "0");
-                        questionNumAdapter.notifyDataSetChanged();
-                        ToastUtils.showToast(context, "清除成功");
-                        saveMarkDataBean.getQuestions().get(minLocation).setMarkScore("-1");
+                        if (stepScore.isChecked()) {
+                            tab.clear();
+                            stepDatas.clear();
+                            stepScoreModeScore = 0;
+                            questionScore.setText("0");
+                            questionNumAdapter.updateScore(minLocation, "0");
+                            questionNumAdapter.notifyDataSetChanged();
+                            saveMarkDataBean.getQuestions().get(minLocation).setMarkScore("-1");
+                            saveMarkDataBean.getQuestions().get(minLocation).setStepScore(null);
+                        }
                         saveMarkDataBean.getQuestions().get(minLocation).setCoordinate(null);
-                        saveMarkDataBean.getQuestions().get(minLocation).setStepScore(null);
+                        ToastUtils.showToast(context, "清除成功");
                         if (stepScore.isChecked()) {
                             submiss.setVisibility(View.GONE);
                         }
@@ -2223,33 +2374,23 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.objsearch: //选择对象
                 if (identification_objSelect.isChecked()) {
                     identification_objSelect.setChecked(true);
-                    identification_objSelect.setTextColor(getResources().getColor(R.color.colorBlue));
+                    identification_objSelect.setTextColor(getResources().getColor(R.color.colorWhite));
                     clearAll.setText("删 除");
                     bitmap = null;
-                    tabType = TYPE_NONE;
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_SELECTION);
-                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_SELECTION);
                     identification_dui.setChecked(false);
                     identification_bandui.setChecked(false);
                     identification_cuo.setChecked(false);
+                    tabType = TYPE_NONE;
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_SELECTION);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_SELECTION);
                 } else {
                     identification_objSelect.setChecked(false);
                     identification_objSelect.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     clearAll.setText("清除所有");
                     bitmap = null;
-                    if (spenRadio.isChecked()) {
-                        tabType = TYPE_NONE;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_STROKE);
-                    } else if (stepScore.isChecked()) {
-                        tabType = TYPE_STEPPOINTS;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
-                    } else {
-                        tabType = TYPE_NONE;
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
-                        mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_NONE);
-                    }
+                    tabType = TYPE_NONE;
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_GESTURE);
                 }
                 break;
             case R.id.collection: //收藏
@@ -2281,7 +2422,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     ToastUtils.showToast(context, "收藏成功");
                                     collectionImg.setVisibility(View.VISIBLE);
                                     collection.setChecked(true);
-                                    collection.setTextColor(getResources().getColor(R.color.colorBlue));
+                                    collection.setTextColor(getResources().getColor(R.color.colorWhite));
                                 }
                             }
                         });
@@ -2322,7 +2463,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     ToastUtils.showToast(context, "试卷异常");
                                     abnormalTv.setVisibility(View.VISIBLE);
                                     abnormal.setChecked(true);
-                                    abnormal.setTextColor(getResources().getColor(R.color.colorBlue));
+                                    abnormal.setTextColor(getResources().getColor(R.color.colorWhite));
                                 }
                             }
                         });
@@ -2355,6 +2496,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.settingP: //设置
             case R.id.setting: //设置
+                _stepMode = PreferencesService.getInstance(context).getStepMode();
                 showSettingPage();
                 break;
             case R.id.questionSubmiss: //提交
@@ -2406,6 +2548,26 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     ToastUtils.showTopToast(context, Html.fromHtml("<font color = '#FF0000'>关闭</font>0.5赋分"), R.style.Toast_Animation);
                 }
                 PreferencesService.getInstance(context).savePointFive(pointFiveSwitch.isChecked());
+                break;
+            case R.id.stepModeView:
+                if (stepModeSwitch.isChecked()) {
+                    stepModeSwitch.setChecked(false);
+                    ToastUtils.showTopToast(context, Html.fromHtml("<font color = '#FF0000'>关闭</font>步骤分减分模式"), R.style.Toast_Animation);
+                } else {
+                    stepModeSwitch.setChecked(true);
+                    ToastUtils.showTopToast(context, Html.fromHtml("<font color = '#FF0000'>开启</font>步骤分减分模式"), R.style.Toast_Animation);
+                }
+                PreferencesService.getInstance(context).saveStepMode(stepModeSwitch.isChecked());
+                break;
+            case R.id.stepModeSwitch:
+                if (stepModeSwitch.isChecked()) {
+                    stepModeSwitch.setChecked(true);
+                    ToastUtils.showTopToast(context, Html.fromHtml("<font color = '#FF0000'>开启</font>步骤分减分模式"), R.style.Toast_Animation);
+                } else {
+                    stepModeSwitch.setChecked(false);
+                    ToastUtils.showTopToast(context, Html.fromHtml("<font color = '#FF0000'>关闭</font>步骤分减分模式"), R.style.Toast_Animation);
+                }
+                PreferencesService.getInstance(context).saveStepMode(stepModeSwitch.isChecked());
                 break;
             case R.id.autoSubmitSwitch: //自动提交switch
                 if (stepScore.isChecked() || doubleMode) {
@@ -2603,6 +2765,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     scoreAdapter.updataData(getScoreList(integers.get(integers.size() - 1), Double.valueOf(TOTAL) - Double.valueOf(doubleScore) + 1));
                 }
                 scoreAdapter.notifyDataSetChanged();
+                double_markScore.setEnabled(false);
                 //submiss.setVisibility(View.VISIBLE);
                 new Thread(new Runnable() {
                     @Override
@@ -2614,6 +2777,23 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 @Override
                                 public void run() {
                                     autoSubmitData();
+                                }
+                            });
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+                //防止连续点击
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(1000);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    double_markScore.setEnabled(true);
                                 }
                             });
                         } catch (InterruptedException e) {
@@ -2658,16 +2838,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 if (getMarkNextStudentResponse.getData().getStudentData().isCollect()) {
                                     collectRequest.setValue(String.valueOf(1));
                                     collection.setChecked(true);
+                                    collection.setTextColor(getResources().getColor(R.color.colorWhite));
+                                    collectionImg.setVisibility(View.VISIBLE);
                                 } else {
                                     collectRequest.setValue(String.valueOf(0));
                                     collection.setChecked(false);
+                                    collection.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                    collectionImg.setVisibility(View.GONE);
                                 }
                                 if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
                                     AbnormalRequest.setValue(String.valueOf(1));
                                     abnormal.setChecked(true);
+                                    abnormal.setTextColor(getResources().getColor(R.color.colorWhite));
+                                    abnormalTv.setVisibility(View.VISIBLE);
                                 } else {
                                     AbnormalRequest.setValue(String.valueOf(0));
                                     abnormal.setChecked(false);
+                                    abnormal.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                    abnormalTv.setVisibility(View.GONE);
                                 }
                             }
                         });
@@ -2722,7 +2910,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     PointF[] pointF = new PointF[spenObjectStroke.getPoints().length];
                     for (int j = 0; j < points.length; j++) {
                         PointF pointF1 = new PointF();
-                        pointF1.set(points[j].x * scale, points[j].y * scale);
+                        pointF1.set(points[j].x / scale, points[j].y / scale);
                         pointF[j] = pointF1;
                     }
                     stroke.setPointS(pointF);
@@ -2745,14 +2933,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             } else {
                 gradeData.setGradeMode(1);
             }
-            gradeData.setStepModeAdd(true);
-            if (scoreAdapter.getChectValue() == (int) scoreAdapter.getChectValue()) {
-                gradeData.setStepLength("+" + (int) scoreAdapter.getChectValue());
+            if (PreferencesService.getInstance(context).getStepMode()) {
+                gradeData.setStepModeAdd(false);
+                if (scoreAdapter.getChectValue() == (int) scoreAdapter.getChectValue()) {
+                    gradeData.setStepLength("-" + (int) scoreAdapter.getChectValue());
+                } else {
+                    gradeData.setStepLength("-" + scoreAdapter.getChectValue());
+                }
             } else {
-                gradeData.setStepLength("+" + scoreAdapter.getChectValue());
+                gradeData.setStepModeAdd(true);
+                if (scoreAdapter.getChectValue() == (int) scoreAdapter.getChectValue()) {
+                    gradeData.setStepLength("+" + (int) scoreAdapter.getChectValue());
+                } else {
+                    gradeData.setStepLength("+" + scoreAdapter.getChectValue());
+                }
             }
             saveMarkDataBean.getQuestions().get(minLocation).setGradeData(new Gson().toJson(gradeData));
         }
+        Log.e(TAG, "getPageDocObject: " + new Gson().toJson(saveMarkDataBean));
     }
 
     /**
@@ -2782,7 +2980,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     for (int j = 0; j < split.length; j++) {
                         if (j == split.length - 1) {
                             CustomBean customBean = new CustomBean();
-                            if (i == Double.valueOf(split[j])) {
+                            if (i == Double.parseDouble(split[j])) {
                                 customBean.setSelect(true);
                             } else {
                                 customBean.setSelect(false);
@@ -2792,7 +2990,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             num++;
                             break;
                         } else {
-                            if (i == Double.valueOf(split[j])) {
+                            if (i == Double.parseDouble(split[j])) {
                                 CustomBean customBean = new CustomBean();
                                 customBean.setSelect(true);
                                 customBean.setScore(i);
@@ -2809,10 +3007,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         if (j == list1.size() - 1) {
                             CustomBean customBean = new CustomBean();
                             if (Integer.valueOf(list1.get(j)) == i) {
-                                customBean.setScore(Double.valueOf(String.valueOf(list1.get(j))));
+                                customBean.setScore(Double.parseDouble(String.valueOf(list1.get(j))));
                                 customBean.setSelect(true);
                             } else {
-                                customBean.setScore(Double.valueOf(String.valueOf(i)));
+                                customBean.setScore(Double.parseDouble(String.valueOf(i)));
                                 customBean.setSelect(false);
                             }
                             data.put(i, customBean);
@@ -2820,7 +3018,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         } else {
                             if (Integer.valueOf(list1.get(j)) == i) {
                                 CustomBean customBean = new CustomBean();
-                                customBean.setScore(Double.valueOf(String.valueOf(list1.get(j))));
+                                customBean.setScore(Double.parseDouble(String.valueOf(list1.get(j))));
                                 customBean.setSelect(true);
                                 data.put(i, customBean);
                                 break;
@@ -2836,19 +3034,19 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     CustomBean bean = new CustomBean();
                     bean.setSelect(false);
                     if ((int) i == i) {  //强制转换后来会丢失精度,如果丢源失精度的数和原数相等，说明就是整数
-                        bean.setScore(Double.valueOf(String.valueOf(i)));
+                        bean.setScore(Double.parseDouble(String.valueOf(i)));
                         data.put(num, bean);
                     } else {
-                        bean.setScore(Double.valueOf(String.valueOf(i)));
+                        bean.setScore(Double.parseDouble(String.valueOf(i)));
                         data.put(num, bean);
                     }
                     num++;
                 }
             } else {
-                for (int i = 0; i < MaxScore + 1; i++) {
+                for (int i = 0; i < MaxScore; i++) {
                     CustomBean bean = new CustomBean();
                     bean.setSelect(false);
-                    bean.setScore(Double.valueOf(String.valueOf(i)));
+                    bean.setScore(Double.parseDouble(String.valueOf(i)));
                     data.put(i, bean);
                 }
             }
@@ -2975,16 +3173,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                     if (getMarkNextStudentResponse.getData().getStudentData().isCollect()) {
                                                         collectRequest.setValue(String.valueOf(1));
                                                         collection.setChecked(true);
+                                                        collection.setTextColor(getResources().getColor(R.color.colorWhite));
+                                                        collectionImg.setVisibility(View.VISIBLE);
                                                     } else {
                                                         collectRequest.setValue(String.valueOf(0));
                                                         collection.setChecked(false);
+                                                        collection.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                                        collectionImg.setVisibility(View.GONE);
                                                     }
                                                     if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
                                                         AbnormalRequest.setValue(String.valueOf(1));
                                                         abnormal.setChecked(true);
+                                                        abnormal.setTextColor(getResources().getColor(R.color.colorWhite));
+                                                        abnormalTv.setVisibility(View.VISIBLE);
                                                     } else {
                                                         AbnormalRequest.setValue(String.valueOf(0));
                                                         abnormal.setChecked(false);
+                                                        abnormal.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                                        abnormalTv.setVisibility(View.GONE);
                                                     }
                                                     initUpDateData(getMarkNextStudentResponse);
                                                     showSueecssPage(getMarkNextStudentResponse);
@@ -3204,16 +3410,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                     if (getMarkNextStudentResponse.getData().getStudentData().isCollect()) {
                                                         collectRequest.setValue(String.valueOf(1));
                                                         collection.setChecked(true);
+                                                        collection.setTextColor(getResources().getColor(R.color.colorWhite));
+                                                        collectionImg.setVisibility(View.VISIBLE);
                                                     } else {
                                                         collectRequest.setValue(String.valueOf(0));
                                                         collection.setChecked(false);
+                                                        collection.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                                        collectionImg.setVisibility(View.GONE);
                                                     }
                                                     if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
                                                         AbnormalRequest.setValue(String.valueOf(1));
                                                         abnormal.setChecked(true);
+                                                        abnormal.setTextColor(getResources().getColor(R.color.colorWhite));
+                                                        abnormalTv.setVisibility(View.VISIBLE);
                                                     } else {
                                                         AbnormalRequest.setValue(String.valueOf(0));
                                                         abnormal.setChecked(false);
+                                                        abnormal.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                                                        abnormalTv.setVisibility(View.GONE);
                                                     }
                                                     initUpDateData(getMarkNextStudentResponse);
                                                     showSueecssPage(getMarkNextStudentResponse);
@@ -3403,16 +3617,24 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         if (getMarkNextStudentResponse.getData().getStudentData().isCollect()) {
             collectRequest.setValue(String.valueOf(1));
             collection.setChecked(true);
+            collection.setTextColor(getResources().getColor(R.color.colorWhite));
+            collectionImg.setVisibility(View.VISIBLE);
         } else {
             collectRequest.setValue(String.valueOf(0));
             collection.setChecked(false);
+            collection.setTextColor(getResources().getColor(R.color.colorScoreItem));
+            collectionImg.setVisibility(View.GONE);
         }
         if (getMarkNextStudentResponse.getData().getStudentData().isAbnormal()) {
             AbnormalRequest.setValue(String.valueOf(1));
             abnormal.setChecked(true);
+            abnormal.setTextColor(getResources().getColor(R.color.colorWhite));
+            abnormalTv.setVisibility(View.VISIBLE);
         } else {
             AbnormalRequest.setValue(String.valueOf(0));
             abnormal.setChecked(false);
+            abnormal.setTextColor(getResources().getColor(R.color.colorScoreItem));
+            abnormalTv.setVisibility(View.GONE);
         }
         initUpDateData(getMarkNextStudentResponse);
         loadCacheImg(Tool.IMAGEPATH + "/" + getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId() + ".jpeg");
@@ -3547,6 +3769,16 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 if (getMarkNextStudentResponse == null) {
                     return;
                 }
+                if (_stepMode != PreferencesService.getInstance(context).getStepMode()) {
+                    saveMarkDataBean.getQuestions().get(minLocation).setStepScore("");
+                    saveMarkDataBean.getQuestions().get(minLocation).setMarkScore("-1");
+                    saveMarkDataBean.getQuestions().get(minLocation).setGradeData(null);
+                    questionScore.setText("0");
+                    tab.clear();
+                    stepDatas.clear();
+                    mSpenPageDoc.removeAllObject();
+                    mSpenSimpleSurfaceView.update();
+                }
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -3618,6 +3850,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         setting_back = view.findViewById(R.id.setting_back);
         pointFiveView = view.findViewById(R.id.pointFiveView);
         pointFiveSwitch = view.findViewById(R.id.pointFiveSwitch);
+        stepModeView = view.findViewById(R.id.stepModeView);
+        stepModeSwitch = view.findViewById(R.id.stepModeSwitch);
         autoSubmitView = view.findViewById(R.id.autoSubmitView);
         autoSubmitSwitch = view.findViewById(R.id.autoSubmitSwitch);
         topScoreView = view.findViewById(R.id.topScoreView);
@@ -3662,7 +3896,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
         setting_back.setOnClickListener(this);
         pointFiveView.setOnClickListener(this);
+        stepModeView.setOnClickListener(this);
         pointFiveSwitch.setOnClickListener(this);
+        stepModeSwitch.setOnClickListener(this);
         autoSubmitSwitch.setOnClickListener(this);
         autoSubmitSwitch.setEnabled(true);
         topScoreView.setOnClickListener(this);
@@ -3676,6 +3912,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             pointFiveSwitch.setChecked(true);
         } else {
             pointFiveSwitch.setChecked(false);
+        }
+        if (PreferencesService.getInstance(context).getStepMode()) {
+            stepModeSwitch.setChecked(true);
+        } else {
+            stepModeSwitch.setChecked(false);
         }
         if (PreferencesService.getInstance(context).getAutoSubmit()) {
             autoSubmitSwitch.setChecked(true);

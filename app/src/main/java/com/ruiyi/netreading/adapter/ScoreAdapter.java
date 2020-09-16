@@ -1,5 +1,6 @@
 package com.ruiyi.netreading.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +23,7 @@ public class ScoreAdapter extends BaseAdapter {
     private List<Boolean> scoreCheck;
     private boolean status = true; //当前状态是否可以进行修改分数操作
     private boolean isStepScore; //是否是步骤分模式
+    private boolean isReduce; //是否为步骤分减分模式
 
     public ScoreAdapter(Context cont, ScorePanel data) {
         this.context = cont;
@@ -45,6 +47,7 @@ public class ScoreAdapter extends BaseAdapter {
         return position;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -73,7 +76,11 @@ public class ScoreAdapter extends BaseAdapter {
             if (position == 0) {
                 holder.scoreItem.setText(scores.get(position));
             } else {
-                holder.scoreItem.setText("+" + scores.get(position));
+                if (isReduce) {
+                    holder.scoreItem.setText("-" + scores.get(position));
+                } else {
+                    holder.scoreItem.setText("+" + scores.get(position));
+                }
             }
         } else {
             holder.scoreItem.setText(scores.get(position));
@@ -126,6 +133,11 @@ public class ScoreAdapter extends BaseAdapter {
     //是否是步骤分模式
     public void setStepScore(boolean b) {
         this.isStepScore = b;
+    }
+
+    //是否开启步骤分减分模式
+    public void setStepMode(boolean b) {
+        this.isReduce = b;
     }
 
     //得到当前选中的值

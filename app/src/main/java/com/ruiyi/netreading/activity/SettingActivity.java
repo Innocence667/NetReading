@@ -277,7 +277,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             public void onSuccess(Object model) {
                 Response response = (Response) model;
                 progressDialog.setMax((int) (response.body().contentLength() / 1024));
-                progressDialog.setProgressNumberFormat("0KB/" + response.body().contentLength() + "KB");
+                progressDialog.setProgressNumberFormat("0B/" + response.body().contentLength() + "B");
                 InputStream is = null;
                 FileOutputStream fos = null;
                 is = response.body().byteStream();

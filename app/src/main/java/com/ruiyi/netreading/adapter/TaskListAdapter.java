@@ -209,8 +209,6 @@ public class TaskListAdapter extends BaseExpandableListAdapter {
                 } else {
                     if (childs.get(childPosition).getTeacherData().getTeacherNumber() == 0) {
                         chileViewHolder.startTask.setText("开始阅卷");
-                    } else if (childs.get(childPosition).getTeacherData().getTeacherNumber() == childs.get(childPosition).getTeacherData().getTeacherCount()) {
-                        chileViewHolder.startTask.setText("回评");
                     } else {
                         chileViewHolder.startTask.setText("继续阅卷");
                     }
