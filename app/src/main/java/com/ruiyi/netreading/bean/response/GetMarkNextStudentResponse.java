@@ -30,15 +30,25 @@ public class GetMarkNextStudentResponse {
     public static class DataBean {
         /**
          * studentData : {"taskGuid":"e7d9aa5873b42794ff4ffdcd344b9583","studentGuid":"882e435092d34a3c8e73a8bf24196e22","testCode":"10000","collect":false,"imagePath":"[{\"PageName\":\"A\",\"Path\":\"D:/Scan/20200508092814/41/raw/1206174759856/3_20191206174807\",\"Region\":null}]","questions":[{"id":192992,"number":31,"subNumber":"0","score":-1,"fullScore":0}]}
+         * isOnline : 0
          * imageHeight : 566
          * imageWidth : 1361
          * imageArr : [{"src":"data:image/jpeg;base64","index":0}]
          */
 
+        private String isOnline; //0线下、1线上、2导入
         private StudentDataBean studentData;
         private int imageHeight;
         private int imageWidth;
         private List<ImageArrBean> imageArr;
+
+        public String getIsOnline() {
+            return isOnline;
+        }
+
+        public void setIsOnline(String isOnline) {
+            this.isOnline = isOnline;
+        }
 
         public StudentDataBean getStudentData() {
             return studentData;

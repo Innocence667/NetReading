@@ -51,7 +51,7 @@ public class GetExamContextResponse {
          * canMark : true //是否是自己的任务
          * style : 1
          * isonline : false
-         * IsPublish ：false //是否发布,发布后无法进行回评修改操作，按钮已发布
+         * IsPublish ：false
          */
 
         private String taskGuid;
@@ -68,7 +68,7 @@ public class GetExamContextResponse {
         private int isonline; //0线下、1线上、2导入
         private int identity;//身份(0,1、2、教师1-2 3、仲裁)
         private int arbCount; //数量(异常数量-仲裁数量)
-        private boolean IsPublish;
+        private boolean isPublish; //是否发布,发布后无法进行回评修改操作，按钮已发布
 
         public String getTaskGuid() {
             return taskGuid;
@@ -183,11 +183,11 @@ public class GetExamContextResponse {
         }
 
         public boolean isPublish() {
-            return IsPublish;
+            return isPublish;
         }
 
         public void setPublish(boolean publish) {
-            IsPublish = publish;
+            isPublish = publish;
         }
 
         public static class QuestionsBean {

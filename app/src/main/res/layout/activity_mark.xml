@@ -353,7 +353,8 @@
             android:layout_toRightOf="@+id/sideslip"
             android:elevation="5dp"
             android:fillViewport="true"
-            android:outlineProvider="bounds">
+            android:outlineProvider="bounds"
+            android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -364,9 +365,8 @@
 
                 <RelativeLayout
                     android:id="@+id/stepScoreP"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_height="match_parent">
 
                     <CheckBox
                         android:id="@+id/stepScore"
@@ -391,10 +391,35 @@
                 </RelativeLayout>
 
                 <RelativeLayout
+                    android:id="@+id/rotateP"
+                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/rotateTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:drawableLeft="@drawable/rotate"
+                        android:drawablePadding="5dp"
+                        android:gravity="center"
+                        android:text="旋 转"
+                        android:textColor="@color/colorScoreItem"
+                        android:textSize="18sp" />
+
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@color/colorGrey2" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/commentsP"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_height="match_parent">
 
                     <CheckBox
                         android:id="@+id/comments"
@@ -419,9 +444,8 @@
 
                 <RelativeLayout
                     android:id="@+id/eliminateP"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_height="match_parent">
 
                     <CheckBox
                         android:id="@+id/eliminate"
@@ -448,9 +472,8 @@
 
                 <RelativeLayout
                     android:id="@+id/collectionP"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_height="match_parent">
 
                     <CheckBox
                         android:id="@+id/label"
@@ -476,9 +499,8 @@
 
                 <RelativeLayout
                     android:id="@+id/historyP"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_height="match_parent">
 
                     <TextView
                         android:id="@+id/history"
@@ -504,9 +526,8 @@
 
                 <RelativeLayout
                     android:id="@+id/goOnParent"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/functional_button_width"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:visibility="gone">
 
                     <TextView
@@ -533,9 +554,8 @@
 
                 <RelativeLayout
                     android:id="@+id/scoringDatailsP"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_height="match_parent">
 
                     <TextView
                         android:id="@+id/scoringDatails"
@@ -561,9 +581,8 @@
 
                 <RelativeLayout
                     android:id="@+id/settingP"
-                    android:layout_width="0dp"
+                    android:layout_width="@dimen/functional_button_width"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:gravity="center">
 
                     <TextView

@@ -83,6 +83,7 @@ import com.ruiyi.netreading.bean.response.SavaDataResponse;
 import com.ruiyi.netreading.controller.ActivityCollector;
 import com.ruiyi.netreading.controller.MyCallBack;
 import com.ruiyi.netreading.controller.MyModel;
+import com.ruiyi.netreading.util.Interfaces;
 import com.ruiyi.netreading.util.LoadingUtil;
 import com.ruiyi.netreading.util.LogUtils;
 import com.ruiyi.netreading.util.PreferencesService;
@@ -204,8 +205,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     private HorizontalScrollView scrollView; //功能区
     //步骤分、批注、清除笔迹、收藏、回评、继续阅卷、评分详情、设置
-    private RelativeLayout commentsP, eliminateP, stepScoreP, collectionP, historyP, goOnParent, scoringDatailsP, settingP;
+    private RelativeLayout commentsP, rotateP, eliminateP, stepScoreP, collectionP, historyP, goOnParent, scoringDatailsP, settingP;
     private CheckBox stepScore; //步骤分
+    private TextView rotateTv; //旋转
     private CheckBox comments; //批注
     private CheckBox eliminate;//清除笔记
     private CheckBox labe;//标签
@@ -214,10 +216,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private TextView scoringDatails; //评分详情
     private TextView setting; //设置
     private AlertDialog settingDialog; //设置dialog
+    private AlertDialog rotateDialog; //旋转图片dialog
     private boolean _stepMode = false;//点击设置之前当前的步骤分模式
 
     private List<ImageData> imageDataList; //存放每张图片的宽高
     private ImageData imageData;
+    private List<String> imgPath; //存放线上考试选择图片时用到的图片url
 
     private GetMarkDataResponse response; //获取试卷试卷
     private GetMarkDataRequest request; //获取新数据请求模型
@@ -298,7 +302,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         @Override
                         public void onSuccess(Object model) {
                             response = (GetMarkDataResponse) model;
-                            if (response.getTeacherTask().getMarkCount() != response.getTeacherTask().getTaskCount()) { //任务没有完成
+                            if (response.getTeacherTask().getMarkSum() != response.getTeacherTask().getTaskCount()) { //任务没有完成
                                 if (response.getTeacherTask().getStyle() != 2) { //不是双评
                                     if (response.getTeacherTask().getStyle() == 1) { //单评
                                         normalMOde(); //正常阅卷
@@ -632,6 +636,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
         commentsP = findViewById(R.id.commentsP);
         commentsP.setOnClickListener(this);
+        rotateP = findViewById(R.id.rotateP);
+        rotateP.setOnClickListener(this);
         comments = findViewById(R.id.comments);
         comments.setOnClickListener(this);
         eliminateP = findViewById(R.id.eliminateP);
@@ -644,6 +650,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         stepScoreP.setOnClickListener(this);
         stepScore = findViewById(R.id.stepScore);
         stepScore.setOnClickListener(this);
+        rotateTv = findViewById(R.id.rotateTv);
+        rotateTv.setOnClickListener(this);
         collectionP = findViewById(R.id.collectionP);
         collectionP.setOnClickListener(this);
         collection = findViewById(R.id.collection);
@@ -883,7 +891,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         }
                                         questionNumAdapter.notifyDataSetChanged();
                                         for (Map.Entry<Integer, Double> map : tab.entrySet()) {
-                                            if (map.getValue() > 0) {
+                                            if (map.getValue() != 0) {
                                                 submiss.setVisibility(View.VISIBLE);
                                                 break;
                                             } else {
@@ -1247,7 +1255,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             scores.add(String.valueOf(i));
                             if (d == i) {
                                 if (Double.valueOf(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore()) - score == i) {
-                                    scoresCheck.add(true);
+                                    if (i == 0) {
+                                        scoresCheck.add(false);
+                                    } else {
+                                        scoresCheck.add(true);
+                                    }
                                 } else {
                                     scoresCheck.add(false);
                                 }
@@ -1299,7 +1311,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     nextStudentResponse.getData().getImageArr().get(i).getHeigth());
             imageDataList.add(imageData1);
         }
-        Tool.base64ToBitmap(nextStudentResponse.getData().getImageArr(), nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId(), new MyCallBack() {
+        Tool.base64ToBitmap(nextStudentResponse, new MyCallBack() {
             @Override
             public void onSuccess(Object model) {
                 mSpenPageDoc.removeAllObject();
@@ -1393,6 +1405,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if ("0".equals(getMarkNextStudentResponse1.getData().getIsOnline())) {
+                    rotateP.setVisibility(View.GONE);
+                } else {
+                    rotateP.setVisibility(View.VISIBLE);
+                }
                 if (reviewMode) {
                     if (response.getTeacherTask().getMarkNumber() != response.getTeacherTask().getMarkCount()
                             && response.getTeacherTask().getTaskCount() != response.getTeacherTask().getMarkSum()) {
@@ -1880,12 +1897,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             if (PreferencesService.getInstance(context).getAutoSubmit()) {
                 submitData();
             } else {
-                if (doubleMode && (scoreAdapter.getChectValue() == 0 || Double.parseDouble(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())
+                /*if (doubleMode && (scoreAdapter.getChectValue() == 0 || Double.parseDouble(saveMarkDataBean.getQuestions().get(minLocation).getMarkScore())
                         == getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(minLocation).getFullScore())) {
                     submitData();
                 } else {
                     submiss.setVisibility(View.VISIBLE);
-                }
+                }*/
+                submiss.setVisibility(View.VISIBLE);
             }
         } else {
             submiss.setVisibility(View.GONE);
@@ -2249,6 +2267,40 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     questionScore.setText(String.valueOf(0));
                 }
                 scoreAdapter.notifyDataSetChanged();
+                break;
+            case R.id.rotateP:
+            case R.id.rotateTv: //图片旋转
+                imgPath = new ArrayList<>();
+                for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
+                    String str = getMarkNextStudentResponse.getData().getImageArr().get(i).getSrc();
+                    imgPath.add(str.substring(str.indexOf("YunExam") + 7));
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                View view = LayoutInflater.from(context).inflate(R.layout.rotateimg_layout, null);
+                builder.setView(view);
+                rotateDialog = builder.create();
+                LinearLayout linearLayout = view.findViewById(R.id.imgLocation);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(80, 40);
+                params.setMargins(5, 5, 5, 5);
+                for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
+                    final TextView tv = new TextView(context);
+                    tv.setText(String.valueOf((getMarkNextStudentResponse.getData().getImageArr().get(i).getIndex() + 1)));
+                    tv.setTextColor(getResources().getColor(R.color.colorWhite));
+                    tv.setTextSize(18);
+                    tv.setTag(i);
+                    tv.setGravity(Gravity.CENTER);
+                    tv.setBackground(ContextCompat.getDrawable(context, R.drawable.begin_btn_style));
+                    tv.setLayoutParams(params);
+                    linearLayout.addView(tv);
+                    tv.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            RotatePicture((Integer) tv.getTag());
+                            rotateDialog.dismiss();
+                        }
+                    });
+                }
+                rotateDialog.show();
                 break;
             case R.id.comments: //批注
                 if (comments.isChecked()) {
@@ -2756,6 +2808,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 doubleScore = String.valueOf(integers.get(integers.size() - 1));
                 doubleScoreTableAdapter.setLast();
                 doubleScoreTableAdapter.notifyDataSetChanged();
+                questionNumAdapter.updateScore(minLocation, TOTAL);
+                questionNumAdapter.notifyDataSetChanged();
                 saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(TOTAL);
                 SCORE = TOTAL;
                 questionScore.setText(TOTAL);
@@ -2803,6 +2857,28 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }).start();
                 break;
         }
+    }
+
+    //选择图片请求
+    private void RotatePicture(int index) {
+        myModel.RotateAnswerImg(Interfaces.getInstance(context).ROTOTEANSWERIMG, "?imgUrl=" + imgPath.get(index) + "&angle=-90", new MyCallBack() {
+            @Override
+            public void onSuccess(Object model) {
+                String json = (String) model;
+                if (json.contains("\"code\":200") && json.contains("\"data\":true")) {
+
+                } else {
+                    ToastUtils.showToast(context, "操作失败");
+                    LoadingUtil.closeDialog();
+                }
+            }
+
+            @Override
+            public void onFailed(String str) {
+                ToastUtils.showToast(context, "操作失败");
+                LoadingUtil.closeDialog();
+            }
+        });
     }
 
     //更新双栏模式的选项
@@ -3251,7 +3327,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 GetMarkNextStudentResponse nextStudentResponse = (GetMarkNextStudentResponse) model;
                 cachePool.add(nextStudentResponse);
                 Log.e(TAG, "缓存数据成功，当前的数量是" + cachePool.size());
-                Tool.base64ToBitmap(nextStudentResponse.getData().getImageArr(), nextStudentResponse.getData().getStudentData().getQuestions().get(0).getId(), new MyCallBack() {
+                Tool.base64ToBitmap(nextStudentResponse, new MyCallBack() {
                     @Override
                     public void onSuccess(Object model) {
                         LocalImageData localImageData = (LocalImageData) model;
@@ -3294,7 +3370,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             public void onSuccess(Object model) {
                 GetMarkNextStudentResponse reviewStudentResponse = (GetMarkNextStudentResponse) model;
                 cachePool.add(reviewStudentResponse);
-                Tool.base64ToBitmap(reviewStudentResponse.getData().getImageArr(), reviewStudentResponse.getData().getStudentData().getQuestions().get(0).getId(), new MyCallBack() {
+                Tool.base64ToBitmap(reviewStudentResponse, new MyCallBack() {
                     @Override
                     public void onSuccess(Object model) {
                         LocalImageData localImageData = (LocalImageData) model;

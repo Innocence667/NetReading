@@ -49,6 +49,8 @@ public class Interfaces {
     public String AUTHENTICATE;
     //最新版本下载接口
     public String DOWNLOAD;
+    //图片旋转接口
+    public String ROTOTEANSWERIMG;
 
 
     //我的任务列表接口
@@ -87,6 +89,7 @@ public class Interfaces {
         GETMARKAVGSCORE = RUIYI + "GetMarkAvgScore";
         AUTHENTICATE = RUIYI + "Authenticate";
         DOWNLOAD = RUIYI + "Download";
+        ROTOTEANSWERIMG = SERVICEPATH + "/YunExam/ExamAPIExpose/RotateAnswerImg";
 
 
         TASKS = RUIYI + "Tasks";

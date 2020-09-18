@@ -321,7 +321,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        servicePath = "https://" + location.getText().toString().trim() + ".lexuewang.cn:" + port.getText().toString().trim();
+                        if (!TextUtils.isEmpty(port.getText().toString().trim())) {
+                            servicePath = "https://" + location.getText().toString().trim() + ".lexuewang.cn:" + port.getText().toString().trim();
+                        } else {
+                            servicePath = "https://" + location.getText().toString().trim() + ".lexuewang.cn";
+                        }
                         if (TextUtils.isEmpty(location.getText().toString().trim())) {
                             servicePath = "https://riyun.lexuewang.cn:" + port.getText().toString().trim();
                         }

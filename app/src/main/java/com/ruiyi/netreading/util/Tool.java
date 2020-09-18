@@ -88,40 +88,48 @@ public class Tool {
     /**
      * 解析base64数据
      *
-     * @param imageArrBeanList 图片base64数据集合
-     * @param id               题目id(保存图片的名称)
-     * @param callBack         回调
+     * @param getMarkNextStudentResponse 获取的学生数据
+     * @param callBack                   回调
      * @return
      */
-    public static void base64ToBitmap(List<GetMarkNextStudentResponse.DataBean.ImageArrBean> imageArrBeanList, int id, MyCallBack callBack) {
+    public static void base64ToBitmap(GetMarkNextStudentResponse getMarkNextStudentResponse, MyCallBack callBack) {
         LocalImageData imageData = new LocalImageData();
         List<ImageData> imageDataList = new ArrayList<>();
-        List<GetMarkNextStudentResponse.DataBean.ImageArrBean> imgArrData = imageArrBeanList;
+        List<GetMarkNextStudentResponse.DataBean.ImageArrBean> imgArrData = getMarkNextStudentResponse.getData().getImageArr();
         if (imgArrData == null || imgArrData.size() == 0) {
             callBack.onFailed("图片数据异常，再试一次。");
         } else {
-            //排序
-            Collections.sort(imgArrData);
-            //获取第一个对象
-            String base = imgArrData.get(0).getSrc();
-            if (base.contains("data:image/jpeg;base64,")) {
-                base = base.replace("data:image/jpeg;base64,", "");
-            }
-            byte[] bytes = Base64.decode(base, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            imageDataList.add(new ImageData(bitmap.getWidth(), bitmap.getHeight()));
+            if ("0".equals(getMarkNextStudentResponse.getData().getIsOnline())) { //线下考试
+                //排序
+                Collections.sort(imgArrData);
+                //获取第一个对象
+                String base = imgArrData.get(0).getSrc();
+                if (base.contains("data:image/jpeg;base64,")) {
+                    base = base.replace("data:image/jpeg;base64,", "");
+                }
+                byte[] bytes = Base64.decode(base, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                imageDataList.add(new ImageData(bitmap.getWidth(), bitmap.getHeight()));
 
-            if (imgArrData.size() != 1) {
-                imgArrData.remove(0);
-                Bitmap bitmap1 = base64ToBitmap2(imageDataList, imgArrData);
-                Bitmap pictur = MergePictur(bitmap, bitmap1);
-                imageData.setPath(savePic(pictur, id));
-                imageData.setList(imageDataList);
-                callBack.onSuccess(imageData);
-            } else {
-                imageData.setPath(savePic(bitmap, id));
-                imageData.setList(imageDataList);
-                callBack.onSuccess(imageData);
+                if (imgArrData.size() != 1) {
+                    imgArrData.remove(0);
+                    Bitmap bitmap1 = base64ToBitmap2(imageDataList, imgArrData);
+                    Bitmap pictur = MergePictur(bitmap, bitmap1);
+                    imageData.setPath(savePic(pictur, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId()));
+                    imageData.setList(imageDataList);
+                    callBack.onSuccess(imageData);
+                } else {
+                    imageData.setPath(savePic(bitmap, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId()));
+                    imageData.setList(imageDataList);
+                    callBack.onSuccess(imageData);
+                }
+            } else if ("1".equals(getMarkNextStudentResponse.getData().getIsOnline())) { //线上考试
+                List<String> paths = new ArrayList<>();
+                for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
+                    paths.add(getMarkNextStudentResponse.getData().getImageArr().get(i).getSrc());
+                }
+                new BitMapUtil().downLoadPicture(paths,callBack);
+                LoadingUtil.closeDialog();
             }
         }
     }

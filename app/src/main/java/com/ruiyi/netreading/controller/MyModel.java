@@ -460,4 +460,35 @@ public class MyModel {
             }
         });
     }
+
+    /**
+     * 线上考试图片旋转操作
+     *
+     * @param url       接口地址
+     * @param parameter imgUrl=/resource/AnswerFile/20200911/07a8f51453fb4f8ab9f4824db04b28c7_1.jpeg&angle=-90
+     * @param callBack
+     */
+    public void RotateAnswerImg(String url, String parameter, final MyCallBack callBack) {
+        Call call = HttpUtil.getInstance().RotateImg(url, parameter);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                callBack.onFailed("RotateAnswerImg:" + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String json = response.body().string();
+                try {
+                    if (response.code() == 200 && json.contains("\"code\":200")) {
+                        callBack.onSuccess(json);
+                    } else {
+                        callBack.onFailed("RotateAnswerImg:" + json);
+                    }
+                } catch (Exception e) {
+                    callBack.onFailed(e.getMessage());
+                }
+            }
+        });
+    }
 }

@@ -1,5 +1,7 @@
 package com.ruiyi.netreading.util;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.ruiyi.netreading.bean.UserBean;
 
@@ -134,5 +136,14 @@ public class HttpUtil {
 
     public Call DownLoadFile(String url) {
         return _DownLoadFile(url);
+    }
+
+    //旋转图片
+    public Call RotateImg(String url, String json) {
+        Log.e("RotateImg", "RotateImg: " + url + json);
+        RequestBody body = RequestBody.Companion.create("", TYPEJSON);
+        Request request = new Request.Builder().url(url + json).post(body).build();
+        Call call = okHttpClient.newCall(request);
+        return call;
     }
 }
