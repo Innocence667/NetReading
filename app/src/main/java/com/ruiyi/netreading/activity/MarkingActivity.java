@@ -203,11 +203,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private ImageView collectionImg;
     private TextView abnormalTv;
 
+    private LinearLayout imageLocation; //图片选择父布局
+
     private HorizontalScrollView scrollView; //功能区
     //步骤分、批注、清除笔迹、收藏、回评、继续阅卷、评分详情、设置
     private RelativeLayout commentsP, rotateP, eliminateP, stepScoreP, collectionP, historyP, goOnParent, scoringDatailsP, settingP;
     private CheckBox stepScore; //步骤分
-    private TextView rotateTv; //旋转
+    private CheckBox rotateTv; //旋转
     private CheckBox comments; //批注
     private CheckBox eliminate;//清除笔记
     private CheckBox labe;//标签
@@ -631,6 +633,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         abnormal.setOnClickListener(this);
         collectionImg = findViewById(R.id.collectionImg);
         abnormalTv = findViewById(R.id.abnormalTv);
+
+        imageLocation = findViewById(R.id.imageLocation);
 
         scrollView = findViewById(R.id.function);
 
@@ -2270,37 +2274,67 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.rotateP:
             case R.id.rotateTv: //图片旋转
-                imgPath = new ArrayList<>();
-                for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
-                    String str = getMarkNextStudentResponse.getData().getImageArr().get(i).getSrc();
-                    imgPath.add(str.substring(str.indexOf("YunExam") + 7));
+                if (rotateTv.isChecked()) {
+                    rotateTv.setChecked(true);
+                    rotateTv.setTextColor(getResources().getColor(R.color.colorBlue));
+                    spenLayoutShow.setVisibility(View.VISIBLE);
+                    radioGroup.setVisibility(View.GONE);
+                    clearParent.setVisibility(View.GONE);
+                    labelParent.setVisibility(View.GONE);
+                    imageLocation.setVisibility(View.VISIBLE);
+                    comments.setChecked(false);
+                    eliminate.setChecked(false);
+                    labe.setChecked(false);
+                    comments.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    eliminate.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_NONE);
+                    mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_FINGER, SpenSurfaceView.ACTION_GESTURE);
+                    tabType = TYPE_NONE;
+                    imgPath = new ArrayList<>();
+                    for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
+                        String str = getMarkNextStudentResponse.getData().getImageArr().get(i).getSrc();
+                        imgPath.add(str.substring(str.indexOf("YunExam") + 7));
+                    }
+                    imageLocation.removeAllViews();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    View view = LayoutInflater.from(context).inflate(R.layout.rotateimg_layout, null);
+                    builder.setView(view);
+                    rotateDialog = builder.create();
+                    LinearLayout linearLayout = view.findViewById(R.id.imgLocation);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(40, 40);
+                    params.setMargins(5, 0, 5, 0);
+                    for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
+                        final TextView tv = new TextView(context);
+                        tv.setText(String.valueOf((getMarkNextStudentResponse.getData().getImageArr().get(i).getIndex() + 1)));
+                        tv.setTextColor(getResources().getColor(R.color.colorWhite));
+                        tv.setTextSize(18);
+                        tv.setTag(i);
+                        tv.setGravity(Gravity.CENTER);
+                        tv.setBackground(ContextCompat.getDrawable(context, R.drawable.begin_btn_style));
+                        tv.setLayoutParams(params);
+                        //linearLayout.addView(tv);
+                        imageLocation.addView(tv);
+                        tv.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                LoadingUtil.showDialog(context);
+                                RotatePicture((Integer) tv.getTag());
+                                rotateDialog.dismiss();
+                            }
+                        });
+                    }
+                    //rotateDialog.show();
+                } else {
+                    rotateTv.setChecked(false);
+                    rotateTv.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    spenLayoutShow.setVisibility(View.GONE);
+                    if (stepScore.isChecked()) {
+                        tabType = TYPE_STEPPOINTS;
+                    } else {
+                        tabType = TYPE_NONE;
+                    }
                 }
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                View view = LayoutInflater.from(context).inflate(R.layout.rotateimg_layout, null);
-                builder.setView(view);
-                rotateDialog = builder.create();
-                LinearLayout linearLayout = view.findViewById(R.id.imgLocation);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(80, 40);
-                params.setMargins(5, 5, 5, 5);
-                for (int i = 0; i < getMarkNextStudentResponse.getData().getImageArr().size(); i++) {
-                    final TextView tv = new TextView(context);
-                    tv.setText(String.valueOf((getMarkNextStudentResponse.getData().getImageArr().get(i).getIndex() + 1)));
-                    tv.setTextColor(getResources().getColor(R.color.colorWhite));
-                    tv.setTextSize(18);
-                    tv.setTag(i);
-                    tv.setGravity(Gravity.CENTER);
-                    tv.setBackground(ContextCompat.getDrawable(context, R.drawable.begin_btn_style));
-                    tv.setLayoutParams(params);
-                    linearLayout.addView(tv);
-                    tv.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            RotatePicture((Integer) tv.getTag());
-                            rotateDialog.dismiss();
-                        }
-                    });
-                }
-                rotateDialog.show();
                 break;
             case R.id.comments: //批注
                 if (comments.isChecked()) {
@@ -2310,10 +2344,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     eliminate.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     labe.setChecked(false);
                     labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    rotateTv.setChecked(false);
+                    rotateTv.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     spenLayoutShow.setVisibility(View.VISIBLE);
                     radioGroup.setVisibility(View.VISIBLE);
                     clearParent.setVisibility(View.GONE);
                     labelParent.setVisibility(View.GONE);
+                    imageLocation.setVisibility(View.GONE);
                     identification_objSelect.setChecked(false);
                     spenRadio.setChecked(true);
                     mSpenSimpleSurfaceView.setToolTypeAction(SpenSurfaceView.TOOL_SPEN, SpenSurfaceView.ACTION_STROKE);
@@ -2340,14 +2377,17 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     eliminate.setChecked(true);
                     eliminate.setTextColor(getResources().getColor(R.color.colorBlue));
                     labe.setChecked(false);
+                    labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
+                    rotateTv.setChecked(false);
+                    rotateTv.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     identification_objSelect.setChecked(false);
                     identification_objSelect.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     clearAll.setText("清除所有");
-                    labe.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     spenLayoutShow.setVisibility(View.VISIBLE);
                     radioGroup.setVisibility(View.GONE);
                     clearParent.setVisibility(View.VISIBLE);
                     labelParent.setVisibility(View.GONE);
+                    imageLocation.setVisibility(View.GONE);
                     identification_objSelect.setChecked(false);
                     //spenRadio.setChecked(false);
                     tabType = TYPE_NONE;
@@ -2373,10 +2413,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     eliminate.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     labe.setChecked(true);
                     labe.setTextColor(getResources().getColor(R.color.colorBlue));
+                    rotateTv.setChecked(false);
+                    rotateTv.setTextColor(getResources().getColor(R.color.colorScoreItem));
                     spenLayoutShow.setVisibility(View.VISIBLE);
                     radioGroup.setVisibility(View.GONE);
                     clearParent.setVisibility(View.GONE);
                     labelParent.setVisibility(View.VISIBLE);
+                    imageLocation.setVisibility(View.GONE);
                     identification_objSelect.setChecked(false);
                     //spenRadio.setChecked(false);
                     tabType = TYPE_NONE;
@@ -2866,17 +2909,96 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             public void onSuccess(Object model) {
                 String json = (String) model;
                 if (json.contains("\"code\":200") && json.contains("\"data\":true")) {
+                    Tool.base64ToBitmap(getMarkNextStudentResponse, new MyCallBack() {
+                        @Override
+                        public void onSuccess(Object model) {
+                            mSpenPageDoc.removeAllObject();
+                            LocalImageData localImageData = (LocalImageData) model;
+                            Bitmap bitmap = BitmapFactory.decodeFile(localImageData.getPath());
+                            imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
+                            Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
+                            Log.e(TAG, "图片保存到本地：" + localImageData.getPath());
 
+                            Rect rect = Tool.getScreenparameters(MarkingActivity.this);
+                            Log.e(TAG, "当前屏幕的宽高是:" + rect.width() + "_" + rect.height());
+                            if (bitmap.getHeight() > rect.height() - Tool.getStatusBarHeight(context) || bitmap.getWidth() > rect.width() - 80) { //图片比屏幕大
+                                scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
+                                if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
+                                    initSpenNoteDoc(rect.width() - 80, bitmap.getHeight() * (rect.width() - 80) / bitmap.getWidth());
+                                } else if (bitmap.getWidth() < bitmap.getHeight()) { //长图
+                                    scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
+                                    if ("语文".equals(response.getTestpaper().getPaperName()) && bitmap.getHeight() > 2000) {
+                                        initSpenNoteDoc(1024 - 80, bitmap.getHeight() * (1024 - 80) / bitmap.getWidth());
+                                    } else {
+                                        initSpenNoteDoc(bitmap.getWidth() * rect.height() / bitmap.getHeight(), rect.height());
+                                    }
+                                } else {
+                                    //可能存在方图，暂时不处理
+                                }
+                            } else { //图片没有屏幕大
+                                Log.e(TAG, "图片没有屏幕大 ");
+                                initSpenNoteDoc(bitmap.getWidth(), bitmap.getHeight());
+                                //自动填充屏幕大小
+                                if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
+                                    mSpenSimpleSurfaceView.setZoom(0, 0, (rect.width() - 80) * 1f / bitmap.getWidth());
+                                } else { //高图
+                                    mSpenSimpleSurfaceView.setZoom(0, 0, rect.height() * 1f / bitmap.getHeight());
+                                }
+                                scale = bitmap.getWidth() * 1f / mSpenPageDoc.getWidth();
+                            }
+                            Log.e(TAG, "onSuccess当前缩放率是: " + scale);
+
+                            //设置背景图片
+                            mSpenPageDoc.setBackgroundImage(localImageData.getPath());
+                            mSpenSimpleSurfaceView.update();
+                            saveMarkDataBean.getQuestions().get(minLocation).setGradeData(null);
+                            saveMarkDataBean.getQuestions().get(minLocation).setMarkScore(String.valueOf(0));
+                            saveMarkDataBean.getQuestions().get(minLocation).setStepScore(null);
+                            saveMarkDataBean.getQuestions().get(minLocation).setCoordinate(null);
+                            /*new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Thread.sleep(1000);
+                                        LoadingUtil.closeDialog();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }).start();*/
+                        }
+
+                        @Override
+                        public void onFailed(final String str) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showFailedPage(str);
+                                    LoadingUtil.closeDialog();
+                                }
+                            });
+                        }
+                    });
                 } else {
-                    ToastUtils.showToast(context, "操作失败");
-                    LoadingUtil.closeDialog();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ToastUtils.showToast(context, "操作失败");
+                            LoadingUtil.closeDialog();
+                        }
+                    });
                 }
             }
 
             @Override
             public void onFailed(String str) {
-                ToastUtils.showToast(context, "操作失败");
-                LoadingUtil.closeDialog();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtils.showToast(context, "操作失败");
+                        LoadingUtil.closeDialog();
+                    }
+                });
             }
         });
     }

@@ -328,7 +328,7 @@
 
                 <CheckBox
                     android:id="@+id/abnormal"
-                    android:layout_width="40dp"
+                    android:layout_width="60dp"
                     android:layout_height="40dp"
                     android:layout_centerInParent="true"
                     android:layout_margin="10dp"
@@ -339,6 +339,16 @@
                     android:textColor="@color/colorScoreItem" />
 
             </LinearLayout>
+
+            <!--图片旋转-->
+            <LinearLayout
+                android:id="@+id/imageLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:padding="3dp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -395,12 +405,13 @@
                     android:layout_width="@dimen/functional_button_width"
                     android:layout_height="match_parent">
 
-                    <TextView
+                    <CheckBox
                         android:id="@+id/rotateTv"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_centerInParent="true"
-                        android:drawableLeft="@drawable/rotate"
+                        android:button="@null"
+                        android:drawableLeft="@drawable/rotate_style"
                         android:drawablePadding="5dp"
                         android:gravity="center"
                         android:text="旋 转"
