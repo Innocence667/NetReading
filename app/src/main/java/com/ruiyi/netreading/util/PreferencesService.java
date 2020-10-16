@@ -57,6 +57,17 @@ public class PreferencesService {
         return sharedPreferences.getString("servicePath", "");
     }
 
+    //服务器地址要显示的内容
+    public PreferencesService savePath(String path) {
+        editor.putString("path", path);
+        editor.commit();
+        return this;
+    }
+
+    public String getPath() {
+        return sharedPreferences.getString("path", "");
+    }
+
     /**
      * 保存用户信息
      *
@@ -206,5 +217,17 @@ public class PreferencesService {
 
     public int getSpenSize() {
         return sharedPreferences.getInt("spenSize", 3);
+    }
+
+    // 0横屏-ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+    // 1竖屏-ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    public PreferencesService saveScreenType(int type) {
+        editor.putInt("screen", type);
+        editor.commit();
+        return this;
+    }
+
+    public int getScreenType() {
+        return sharedPreferences.getInt("screen", 0);
     }
 }

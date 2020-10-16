@@ -206,17 +206,17 @@
                 android:text="屏幕模式" />
 
             <CheckBox
+                android:id="@+id/horizontalCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="30dp"
                 android:checked="true"
-                android:enabled="false"
                 android:text="横屏" />
 
             <CheckBox
+                android:id="@+id/verticalCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:enabled="false"
                 android:text="竖屏" />
 
         </LinearLayout>

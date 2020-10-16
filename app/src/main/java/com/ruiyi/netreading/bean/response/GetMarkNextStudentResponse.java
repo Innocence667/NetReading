@@ -23,10 +23,6 @@ public class GetMarkNextStudentResponse {
         return data;
     }
 
-    public void setData(DataBean data) {
-        this.data = data;
-    }
-
     public static class DataBean {
         /**
          * studentData : {"taskGuid":"e7d9aa5873b42794ff4ffdcd344b9583","studentGuid":"882e435092d34a3c8e73a8bf24196e22","testCode":"10000","collect":false,"imagePath":"[{\"PageName\":\"A\",\"Path\":\"D:/Scan/20200508092814/41/raw/1206174759856/3_20191206174807\",\"Region\":null}]","questions":[{"id":192992,"number":31,"subNumber":"0","score":-1,"fullScore":0}]}
@@ -76,10 +72,6 @@ public class GetMarkNextStudentResponse {
 
         public List<ImageArrBean> getImageArr() {
             return imageArr;
-        }
-
-        public void setImageArr(List<ImageArrBean> imageArr) {
-            this.imageArr = imageArr;
         }
 
         public static class StudentDataBean {

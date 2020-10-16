@@ -101,7 +101,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             if (TextUtils.isEmpty(PreferencesService.getInstance(context).getServicePath())) {
                 dialog.show();
             } else {
-                servicePathTv.setText(PreferencesService.getInstance(context).getServicePath());
+                //https://Slzxres.lexuewang.cn:8012
+                //servicePathTv.setText(PreferencesService.getInstance(context).getServicePath());
+                servicePathTv.setText(PreferencesService.getInstance(context).getPath());
             }
         }
         Log.e(TAG, "屏幕分辨率: " + Tool.getDefaultDisplay(LoginActivity.this).x + "-" + Tool.getDefaultDisplay(LoginActivity.this).y);
@@ -334,7 +336,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             PreferencesService.getInstance(context).saveServicePath(servicePath);
                         }
-                        servicePathTv.setText(servicePath);
+                        PreferencesService.getInstance(context).savePath(location.getText().toString().trim() + " (" + port.getText().toString().trim() + ")");
+                        servicePathTv.setText(location.getText().toString().trim() + " (" + port.getText().toString().trim() + ")");
                         dialog.cancel();
                     }
                 });
