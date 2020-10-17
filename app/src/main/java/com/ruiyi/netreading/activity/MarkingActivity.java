@@ -1,4 +1,5 @@
 package com.ruiyi.netreading.activity;
+
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -1336,7 +1337,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onSuccess(Object model) {
                 mSpenPageDoc.removeAllObject();
-                LocalImageData localImageData = (LocalImageData) model;
+                final LocalImageData localImageData = (LocalImageData) model;
                 Bitmap bitmap = BitmapFactory.decodeFile(localImageData.getPath());
                 imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
                 Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
@@ -1371,11 +1372,21 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 Log.e(TAG, "onSuccess当前缩放率是: " + scale);
                 bitmap.recycle();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(500);
+                            //设置背景图片
+                            mSpenPageDoc.setBackgroundImage(localImageData.getPath());
+                            mSpenSimpleSurfaceView.update();
+                            LoadingUtil.closeDialog();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
 
-                //设置背景图片
-                mSpenPageDoc.setBackgroundImage(localImageData.getPath());
-                mSpenSimpleSurfaceView.update();
-                LoadingUtil.closeDialog();
             }
 
             @Override

@@ -336,8 +336,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             PreferencesService.getInstance(context).saveServicePath(servicePath);
                         }
-                        PreferencesService.getInstance(context).savePath(location.getText().toString().trim() + " (" + port.getText().toString().trim() + ")");
-                        servicePathTv.setText(location.getText().toString().trim() + " (" + port.getText().toString().trim() + ")");
+                        if (!TextUtils.isEmpty(port.getText().toString().trim())) {
+                            PreferencesService.getInstance(context).savePath(location.getText().toString().trim() + " (" + port.getText().toString().trim() + ")");
+                            servicePathTv.setText(location.getText().toString().trim() + " (" + port.getText().toString().trim() + ")");
+                        } else {
+                            PreferencesService.getInstance(context).savePath(location.getText().toString().trim());
+                            servicePathTv.setText("riyun");
+                        }
                         dialog.cancel();
                     }
                 });
