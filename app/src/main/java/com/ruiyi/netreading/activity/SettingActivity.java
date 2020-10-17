@@ -36,6 +36,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.Map;
 
 import okhttp3.Response;
@@ -277,7 +278,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             public void onSuccess(Object model) {
                 Response response = (Response) model;
                 progressDialog.setMax((int) (response.body().contentLength() / 1024));
-                progressDialog.setProgressNumberFormat("0B/" + response.body().contentLength() + "B");
+                progressDialog.setProgressNumberFormat("0MB/" + (response.body().contentLength() / 1024 / 1024) + "MB");
                 InputStream is = null;
                 FileOutputStream fos = null;
                 is = response.body().byteStream();
@@ -296,7 +297,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                             a += len;
                             Log.e("downloadAPK", "文件写入中……" + a);
                             progressDialog.setProgress((int) (a / 1024));
-                            progressDialog.setProgressNumberFormat(a + "KB/" + response.body().contentLength() + "KB");
+                            progressDialog.setProgressNumberFormat(new DecimalFormat("0.00").format(a * 1.0f / 1024 / 1024) + "MB/" + new DecimalFormat("0.00").format(response.body().contentLength() * 1.0f / 1024 / 1024) + "MB");
                         }
                         progressDialog.cancel();
                         OpenFile(new File(Tool.DOWNFILE, "update.apk"));
