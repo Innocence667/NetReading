@@ -106,7 +106,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 servicePathTv.setText(PreferencesService.getInstance(context).getPath());
             }
         }
-        Log.e(TAG, "屏幕分辨率: " + Tool.getDefaultDisplay(LoginActivity.this).x + "-" + Tool.getDefaultDisplay(LoginActivity.this).y);
+        Log.i(TAG, "屏幕分辨率: " + Tool.getDefaultDisplay(LoginActivity.this).x + "-" + Tool.getDefaultDisplay(LoginActivity.this).y);
     }
 
     private void initView() {
@@ -133,7 +133,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.e(TAG, "你选择了" + paths[position]);
+                Log.i(TAG, "你选择了" + paths[position]);
                 servicePath = paths[position];
                 String path = "";
                 switch (servicePath) {
@@ -214,8 +214,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         //动态设置控件宽高
         Rect rect = Tool.getScreenparameters(this);
-        Log.e(TAG, "屏幕的宽高是：" + rect.width() + " - " + rect.height());
-        Log.e(TAG, "状态栏的高度是： " + Tool.getStatusBarHeight(this));
+        Log.i(TAG, "屏幕的宽高是：" + rect.width() + " - " + rect.height());
+        Log.i(TAG, "状态栏的高度是： " + Tool.getStatusBarHeight(this));
         if (rect.width() == 1024 && rect.height() == 768) { //三星p350
             login_main.setBackgroundResource(R.drawable.login_bg0);
             loginBg.setVisibility(View.GONE);
@@ -227,11 +227,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             float hZoom = 1536 * 1f / (rect.height() - Tool.getStatusBarHeight(this));
             //计算登录白框的大小
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int) (1386 / wZoom), (int) (922 / hZoom) + 200);
-            Log.e(TAG, "initView: paramsW-" + (1386 / wZoom));
-            Log.e(TAG, "initView: paramsH-" + (922 / hZoom));
+            Log.i(TAG, "initView: paramsW-" + (1386 / wZoom));
+            Log.i(TAG, "initView: paramsH-" + (922 / hZoom));
             //计算距离顶部padding
             int topPadding = (int) ((rect.height() - Tool.getStatusBarHeight(this) - 63 - (922 / hZoom)) / 2);
-            Log.e(TAG, "topPadding: " + topPadding);
+            Log.i(TAG, "topPadding: " + topPadding);
             params.setMargins(0, topPadding, 0, 0);
             params.addRule(RelativeLayout.CENTER_HORIZONTAL);
             loginBg.setLayoutParams(params);
@@ -356,7 +356,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         testUrlBtn.setEnabled(true);
                         testProgress.setVisibility(View.GONE);
                         testUrlBtn.setVisibility(View.VISIBLE);
-                        LogUtils.logE("testUrl", "连接服务器失败，请检查服务器地址或端口号");
+                        LogUtils.logI("testUrl", "连接服务器失败，请检查服务器地址或端口号");
                         ToastUtils.showToast(context, str);
                     }
                 });
@@ -464,7 +464,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 loginBtn.setText("登 录");
                 loginBtn.setBackground(getResources().getDrawable(R.drawable.btn_login_click));
                 //LoadingUtil.getInstance(context).closeDialog();
-                Log.e(TAG, "登录失败：" + str);
+                Log.i(TAG, "登录失败：" + str);
                 ToastUtils.showToast(context, str);
             }
         });
@@ -485,7 +485,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_PERMISSION_CODE) { //申请成功
             for (int i = 0; i < permissions.length; i++) {
-                Log.e("MainActivity", "申请的权限为：" + permissions[i] + ",申请结果：" + grantResults[i]);
+                Log.i("MainActivity", "申请的权限为：" + permissions[i] + ",申请结果：" + grantResults[i]);
                 if (grantResults[i] == -1) {
                     AlertDialog dialog = new AlertDialog.Builder(this)
                             .setTitle("警告")

@@ -140,7 +140,7 @@ public class HttpUtil {
 
     //旋转图片
     public Call RotateImg(String url, String json) {
-        Log.e("RotateImg", "RotateImg: " + url + json);
+        Log.i("RotateImg", "RotateImg: " + url + json);
         RequestBody body = RequestBody.Companion.create("", TYPEJSON);
         Request request = new Request.Builder().url(url + json).post(body).build();
         Call call = okHttpClient.newCall(request);

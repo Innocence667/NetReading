@@ -443,7 +443,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //回评模式
     private void goBackMode() {
-        Log.e("goBackMode", "goBackMode: 回评阅卷");
+        Log.i("goBackMode", "goBackMode: 回评阅卷");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -735,6 +735,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             //Toast.makeText(context, "设备不支持Spen. \n 你可以用手指画笔画", Toast.LENGTH_SHORT).show();
         }
         mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN, SpenSimpleSurfaceView.ACTION_NONE);
+        //mSpenSimpleSurfaceView.setToolTypeAction(SpenSimpleSurfaceView.TOOL_PEN_BUTTON, SpenSimpleSurfaceView.ACTION_ERASER);
         mSpenSimpleSurfaceView.setTouchListener(new SpenTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -751,7 +752,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         break;
                 }
                 if (stepScore.isChecked()) { //步骤分模式
-                    Log.e(TAG, "onTouch: 步骤分 ");
+                    Log.i(TAG, "onTouch: 步骤分 ");
                     if (tabType.equals(TYPE_STEPPOINTS) && !isDoubleFinger) {
                         boolean isReduce = PreferencesService.getInstance(context).getStepMode();
                         switch (event.getAction()) {
@@ -769,7 +770,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                             stepScoreModeScore += map.getValue();
                                         }
                                         if (PreferencesService.getInstance(context).getStepMode()) {
-                                            Log.e(TAG, "onTouch当前得分是: " + (Double.parseDouble(TOTAL) - stepScoreModeScore));
+                                            Log.i(TAG, "onTouch当前得分是: " + (Double.parseDouble(TOTAL) - stepScoreModeScore));
                                             if (Double.parseDouble(TOTAL) + (stepScoreModeScore + (Double.parseDouble("-" + tableStepScore))) < 0) {
                                                 if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) != SpenSimpleSurfaceView.ACTION_SELECTION
                                                         && mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_FINGER) != SpenSimpleSurfaceView.ACTION_SELECTION) {
@@ -801,7 +802,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         SpenObjectImage objectImage = new SpenObjectImage();
                                         switch (String.valueOf(scoreAdapter.getChectValue())) {
                                             case "0.5":
-                                                Log.e(TAG, "onTouch: 0.5");
+                                                Log.i(TAG, "onTouch: 0.5");
                                                 if (isReduce) {
                                                     bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce0_5);
                                                 } else {
@@ -809,7 +810,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                 }
                                                 break;
                                             case "1.0":
-                                                Log.e(TAG, "onTouch: 1.0");
+                                                Log.i(TAG, "onTouch: 1.0");
                                                 if (isReduce) {
                                                     bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce1);
                                                 } else {
@@ -817,7 +818,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                 }
                                                 break;
                                             case "1.5":
-                                                Log.e(TAG, "onTouch: 1.5");
+                                                Log.i(TAG, "onTouch: 1.5");
                                                 if (isReduce) {
                                                     bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce1_5);
                                                 } else {
@@ -825,7 +826,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                 }
                                                 break;
                                             case "2.0":
-                                                Log.e(TAG, "onTouch: 2.0");
+                                                Log.i(TAG, "onTouch: 2.0");
                                                 if (isReduce) {
                                                     bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce2);
                                                 } else {
@@ -833,7 +834,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                 }
                                                 break;
                                             case "3.0":
-                                                Log.e(TAG, "onTouch: 3.0");
+                                                Log.i(TAG, "onTouch: 3.0");
                                                 if (isReduce) {
                                                     bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce3);
                                                 } else {
@@ -841,7 +842,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                 }
                                                 break;
                                             case "4.0":
-                                                Log.e(TAG, "onTouch: 4.0");
+                                                Log.i(TAG, "onTouch: 4.0");
                                                 if (isReduce) {
                                                     bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce4);
                                                 } else {
@@ -849,7 +850,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                 }
                                                 break;
                                             case "5.0":
-                                                Log.e(TAG, "onTouch: 5.0");
+                                                Log.i(TAG, "onTouch: 5.0");
                                                 if (isReduce) {
                                                     bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce5);
                                                 } else {
@@ -857,7 +858,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                 }
                                                 break;
                                             case "6.0":
-                                                Log.e(TAG, "onTouch: 6.0");
+                                                Log.i(TAG, "onTouch: 6.0");
                                                 if (isReduce) {
                                                     bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.reduce6);
                                                 } else {
@@ -866,7 +867,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                                 break;
                                         }
                                         if (bitmap == null) {
-                                            Log.e(TAG, "onTouch: 标签图片是空的");
+                                            Log.i(TAG, "onTouch: 标签图片是空的");
                                             return false;
                                         }
                                         objectImage.setImage(bitmap);
@@ -918,7 +919,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                         }
                                         return false;
                                     } else {
-                                        Log.e(TAG, "onTouch: 超出了有效范围");
+                                        Log.i(TAG, "onTouch: 超出了有效范围");
                                     }
                                 }
                                 break;
@@ -952,12 +953,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
 
                 } else if (comments.isChecked()) { //是批注模式
-                    if (event.getToolType(0) == MotionEvent.TOOL_TYPE_FINGER) {
-                        Log.e(TAG, "onTouch: 手指");
-                    }
-                    if (event.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS) {
-                        Log.e(TAG, "onTouch: 电子笔");
-                    }
                     if (event.getAction() == MotionEvent.ACTION_UP && !TYPE_STEPPOINTS.equals(tabType)
                             && !TYPE_NONE.equals(tabType) && !isDoubleFinger) {
                         SpenObjectImage objectImage = new SpenObjectImage();
@@ -993,7 +988,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     //初始化SpenPageView
     private void initSpenNoteDoc(int w, int h) {
         try {
-            Log.e(TAG, "spenView的宽高是：" + w + "  --  " + h);
+            Log.i(TAG, "spenView的宽高是：" + w + "  --  " + h);
             mSpenNotDoc = new SpenNoteDoc(context, w, h);
         } catch (IOException e) {
             Toast.makeText(context, "创建NoteDoc失败", Toast.LENGTH_SHORT).show();
@@ -1049,7 +1044,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         stepScore.setY((drawnRect.top + ((drawnRect.bottom - drawnRect.top) / 2f)) / scale);
                         stepDatas.put(arrayList.get(i).getRuntimeHandle(), stepScore);
                     } else if (arrayList.get(i).getType() == SpenObjectBase.TYPE_STROKE) {
-                        arrayList.get(i).setSelectable(false);
+                        arrayList.get(i).setSelectable(true); //可以选中
+                        arrayList.get(i).setMovable(false); //禁止移动
+                        arrayList.get(i).setRotatable(false); //禁止旋转
+                        arrayList.get(i).setResizeOption(SpenObjectBase.RESIZE_OPTION_DISABLE);//禁止缩放
+                        Log.e(TAG, "onObjectAdded: " + arrayList.get(i).getRect().toString());
                         if (addStrokeMode) {
                             strokeColor.put(arrayList.get(i).getRuntimeHandle(), "");
                         } else {
@@ -1134,8 +1133,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             scoreAdapter.setStepMode(PreferencesService.getInstance(context).getStepMode());
             scoreAdapter.notifyDataSetChanged();
         }
-        Log.e(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score + "   是否是步骤分模式:" + stepScore.isChecked() + "  是否是步骤分减分模式？" + PreferencesService.getInstance(context).getStepMode());
-        Log.e(TAG, "置顶分数: " + PreferencesService.getInstance(context).getTopScore());
+        Log.i(TAG, "getScoreList: 题目分数：" + fullScore + "   题目得分：" + score + "   是否是步骤分模式:" + stepScore.isChecked() + "  是否是步骤分减分模式？" + PreferencesService.getInstance(context).getStepMode());
+        Log.i(TAG, "置顶分数: " + PreferencesService.getInstance(context).getTopScore());
         //Math.ceil(12.2)//返回13.0
         //Math.ceil(12.7)//返回13.0
         //Math.ceil(12.0)//返回12.0
@@ -1340,11 +1339,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 final LocalImageData localImageData = (LocalImageData) model;
                 Bitmap bitmap = BitmapFactory.decodeFile(localImageData.getPath());
                 imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
-                Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
-                Log.e(TAG, "图片保存到本地：" + localImageData.getPath());
+                Log.i(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
+                Log.i(TAG, "图片保存到本地：" + localImageData.getPath());
 
                 Rect rect = Tool.getScreenparameters(MarkingActivity.this);
-                Log.e(TAG, "当前屏幕的宽高是:" + rect.width() + "_" + rect.height());
+                Log.i(TAG, "当前屏幕的宽高是:" + rect.width() + "_" + rect.height());
                 if (bitmap.getHeight() > rect.height() - Tool.getStatusBarHeight(context) || bitmap.getWidth() > rect.width() - 80) { //图片比屏幕大
                     scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
                     if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
@@ -1360,7 +1359,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         //可能存在方图，暂时不处理
                     }
                 } else { //图片没有屏幕大
-                    Log.e(TAG, "图片没有屏幕大 ");
+                    Log.i(TAG, "图片没有屏幕大 ");
                     initSpenNoteDoc(bitmap.getWidth(), bitmap.getHeight());
                     //自动填充屏幕大小
                     if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
@@ -1370,7 +1369,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     }
                     scale = bitmap.getWidth() * 1f / mSpenPageDoc.getWidth();
                 }
-                Log.e(TAG, "onSuccess当前缩放率是: " + scale);
+                Log.i(TAG, "onSuccess当前缩放率是: " + scale);
                 bitmap.recycle();
                 new Thread(new Runnable() {
                     @Override
@@ -1794,9 +1793,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      * @param gradeData 当前题目的操作模式
      */
     private void addStepScore(String stepScore, String gradeData) {
-        Log.e(TAG, "addStepScore: 设置步骤分数据");
-        Log.e(TAG, "stepScore: " + stepScore);
-        Log.e(TAG, "gradeData: " + gradeData);
+        Log.i(TAG, "addStepScore: 设置步骤分数据");
+        Log.i(TAG, "stepScore: " + stepScore);
+        Log.i(TAG, "gradeData: " + gradeData);
         List<StepScore> stepScores = new Gson().fromJson(stepScore, new TypeToken<List<StepScore>>() {
         }.getType());
         if (stepScores == null || stepScores.size() == 0) {
@@ -1901,7 +1900,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.erroe);
                         break;
                     case "": //文本
-                        Log.e(TAG, "步骤分暂不支持文本格式");
+                        Log.i(TAG, "步骤分暂不支持文本格式");
                         break;
                 }
             }
@@ -2024,7 +2023,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //给SpenPageDoc添加笔迹数据
     private void addStroke(String s) {
-        Log.e(TAG, "addStroke: 添加笔迹数据  " + s);
+        Log.i(TAG, "addStroke: 添加笔迹数据  " + s);
         List<SpenStroke> list = new Gson().fromJson(s, new TypeToken<List<SpenStroke>>() {
         }.getType());
         if (list == null || list.size() == 0) {
@@ -2064,7 +2063,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             strokeColor.put(map.getKey(), colors.get(i));
             i++;
         }
-        Log.e(TAG, "addStroke结束后: " + new Gson().toJson(strokeColor));
+        Log.i(TAG, "addStroke结束后: " + new Gson().toJson(strokeColor));
     }
 
     //获取当前数据的题目列表
@@ -2100,7 +2099,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void run() {
                 LoadingUtil.closeDialog();
-                LogUtils.logE("showFailedPage", str);
+                LogUtils.logI("showFailedPage", str);
                 //failed to connect to riyun.lexuewang.cn/116.62.133.77 (port 8002) after 10000ms
                 if (str.contains("failed to connect to") && str.contains("after 10000ms")) {
                     ToastUtils.showToast(context, "请求服务器超时");
@@ -2490,7 +2489,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 if (mSpenPageDoc.getObjectList().size() == 0) {
                     ToastUtils.showToast(context, "页面没有数据");
                 } else {
-                    Log.e(TAG, "onClick: " + mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN));
+                    Log.i(TAG, "onClick: " + mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN));
                     if (mSpenSimpleSurfaceView.getToolTypeAction(SpenSimpleSurfaceView.TOOL_SPEN) == SpenSimpleSurfaceView.ACTION_SELECTION) {
                         mSpenPageDoc.removeSelectedObject();
                         mSpenSimpleSurfaceView.closeControl();
@@ -2990,11 +2989,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                             LocalImageData localImageData = (LocalImageData) model;
                             Bitmap bitmap = BitmapFactory.decodeFile(localImageData.getPath());
                             imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
-                            Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
-                            Log.e(TAG, "图片保存到本地：" + localImageData.getPath());
+                            Log.i(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
+                            Log.i(TAG, "图片保存到本地：" + localImageData.getPath());
 
                             Rect rect = Tool.getScreenparameters(MarkingActivity.this);
-                            Log.e(TAG, "当前屏幕的宽高是:" + rect.width() + "_" + rect.height());
+                            Log.i(TAG, "当前屏幕的宽高是:" + rect.width() + "_" + rect.height());
                             if (bitmap.getHeight() > rect.height() - Tool.getStatusBarHeight(context) || bitmap.getWidth() > rect.width() - 80) { //图片比屏幕大
                                 scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
                                 if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
@@ -3010,7 +3009,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                     //可能存在方图，暂时不处理
                                 }
                             } else { //图片没有屏幕大
-                                Log.e(TAG, "图片没有屏幕大 ");
+                                Log.i(TAG, "图片没有屏幕大 ");
                                 initSpenNoteDoc(bitmap.getWidth(), bitmap.getHeight());
                                 //自动填充屏幕大小
                                 if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
@@ -3020,7 +3019,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                                 }
                                 scale = bitmap.getWidth() * 1f / mSpenPageDoc.getWidth();
                             }
-                            Log.e(TAG, "onSuccess当前缩放率是: " + scale);
+                            Log.i(TAG, "onSuccess当前缩放率是: " + scale);
 
                             //设置背景图片
                             mSpenPageDoc.setBackgroundImage(localImageData.getPath());
@@ -3230,7 +3229,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             }
             saveMarkDataBean.getQuestions().get(minLocation).setGradeData(new Gson().toJson(gradeData));
         }
-        Log.e(TAG, "getPageDocObject: " + new Gson().toJson(saveMarkDataBean));
+        Log.i(TAG, "getPageDocObject: " + new Gson().toJson(saveMarkDataBean));
     }
 
     /**
@@ -3521,7 +3520,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 // LoadingUtil.showDialog(context);
             }
         });
-        Log.e(TAG, "getNextStudentCache: 缓存一个未批阅学生的数据");
+        Log.i(TAG, "getNextStudentCache: 缓存一个未批阅学生的数据");
         GetMarkDataRequest cacheRequest = new GetMarkDataRequest();
         cacheRequest.setTaskGuid(taskGuid);
         cacheRequest.setTeacherGuid(teacherGuid);
@@ -3530,16 +3529,16 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             public void onSuccess(Object model) {
                 GetMarkNextStudentResponse nextStudentResponse = (GetMarkNextStudentResponse) model;
                 cachePool.add(nextStudentResponse);
-                Log.e(TAG, "缓存数据成功，当前的数量是" + cachePool.size());
+                Log.i(TAG, "缓存数据成功，当前的数量是" + cachePool.size());
                 Tool.base64ToBitmap(nextStudentResponse, new MyCallBack() {
                     @Override
                     public void onSuccess(Object model) {
                         LocalImageData localImageData = (LocalImageData) model;
-                        Log.e(TAG, "缓存数据图片：" + localImageData.getPath());
+                        Log.i(TAG, "缓存数据图片：" + localImageData.getPath());
                         /*Bitmap bitmap = BitmapFactory.decodeFile(localImageData.getPath());
                         imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
-                        Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
-                        Log.e(TAG, "图片保存到本地的地址是：" + localImageData.getPath());*/
+                        Log.i(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
+                        Log.i(TAG, "图片保存到本地的地址是：" + localImageData.getPath());*/
                         if (isNext) {
                             getNextStudentCache(false);
                         }
@@ -3567,7 +3566,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //获取一个已阅学生的缓存数据
     private void getReviewStudentCache(GetStudentMarkDataRequest reviewStudent) {
-        Log.e(TAG, "getReviewStudentCache: 缓存已批阅学生的数据");
+        Log.i(TAG, "getReviewStudentCache: 缓存已批阅学生的数据");
         myModel.getStudentMarkData(context, reviewStudent, new MyCallBack() {
             @Override
             public void onSuccess(Object model) {
@@ -3579,8 +3578,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         LocalImageData localImageData = (LocalImageData) model;
                         /*Bitmap bitmap = BitmapFactory.decodeFile(localImageData.getPath());
                         imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
-                        Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
-                        Log.e(TAG, "图片保存到本地的地址是：" + localImageData.getPath());*/
+                        Log.i(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
+                        Log.i(TAG, "图片保存到本地的地址是：" + localImageData.getPath());*/
                     }
 
                     @Override
@@ -3606,9 +3605,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         if (mSpenPageDoc.getObjectList().size() != 0) {
             getPageDocObject(minLocation);
         }
-        LogUtils.logE(TAG, "提交的数据是: " + new GsonBuilder().serializeNulls().create().toJson(saveMarkDataBean));
+        LogUtils.logI(TAG, "提交的数据是: " + new GsonBuilder().serializeNulls().create().toJson(saveMarkDataBean));
         if (reviewMode) {
-            Log.e(TAG, "onClick: 回评模式");
+            Log.i(TAG, "onClick: 回评模式");
             //回评模式
             myModel.upDateMarkData(context, saveMarkDataBean, new MyCallBack() {
                 @Override
@@ -3734,7 +3733,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
             });
         } else {
-            Log.e(TAG, "onClick: 正常模式");
+            Log.i(TAG, "onClick: 正常模式");
             //正常批阅模式
             myModel.saveMarkData(context, saveMarkDataBean, new MyCallBack() {
                 @Override
@@ -3744,7 +3743,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     strokeColor.clear();
                     if (cachePool != null && cachePool.size() > 0) {
                         cachePool.remove(0); //清除第一个数据
-                        Log.e(TAG, "提交数据成功，清除第一个缓存数据后的长度是：" + cachePool.size());
+                        Log.i(TAG, "提交数据成功，清除第一个缓存数据后的长度是：" + cachePool.size());
                     }
                     saveResponse = (SavaDataResponse) model;
                     runOnUiThread(new Runnable() {
@@ -3890,7 +3889,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
 
     //加载缓存数据
     private void loadCacheData() {
-        Log.e(TAG, "loadCacheData: 加载缓存数据");
+        Log.i(TAG, "loadCacheData: 加载缓存数据");
         minLocation = 0;
         collectRequest = new CollectRequest();
         AbnormalRequest = new CollectRequest();
@@ -3945,16 +3944,16 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
      * @param imgPath
      */
     private void loadCacheImg(String imgPath) {
-        Log.e(TAG, "加载缓存图片：" + imgPath);
+        Log.i(TAG, "加载缓存图片：" + imgPath);
         mSpenPageDoc.removeAllObject();
         Bitmap bitmap = BitmapFactory.decodeFile(imgPath);
         if (bitmap == null) {
             ToastUtils.showToast(context, "获取图片异常");
-            Log.e(TAG, "loadCacheImg: 获取图片异常");
+            Log.i(TAG, "loadCacheImg: 获取图片异常");
             return;
         }
         imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
-        Log.e(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
+        Log.i(TAG, "本地图片的宽: " + bitmap.getWidth() + "  高:" + bitmap.getHeight());
 
         Rect rect = Tool.getScreenparameters(MarkingActivity.this);
         if (bitmap.getHeight() > rect.height() - Tool.getStatusBarHeight(context) || bitmap.getWidth() > rect.width() - 80) { //图片比屏幕大
@@ -4216,6 +4215,13 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             autoSubmitSwitch.setChecked(true);
         } else {
             autoSubmitSwitch.setChecked(false);
+        }
+        if (PreferencesService.getInstance(context).getScreenType() == 0) {
+            horizontalCheckBox.setChecked(true);
+            verticalCheckBox.setChecked(false);
+        } else {
+            horizontalCheckBox.setChecked(false);
+            verticalCheckBox.setChecked(true);
         }
     }
 

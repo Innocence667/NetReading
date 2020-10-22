@@ -9,6 +9,7 @@ public class StepScore {
      * params : 2.0
      * x : 589
      * y : 82
+     * pageName : 试卷A、B面
      */
 
     private int id; //序号
@@ -65,5 +66,13 @@ public class StepScore {
 
     public void setY(float y) {
         this.y = y;
+    }
+
+    public String getPageName() {
+        return pageName;
+    }
+
+    public void setPageName(String pageName) {
+        this.pageName = pageName;
     }
 }

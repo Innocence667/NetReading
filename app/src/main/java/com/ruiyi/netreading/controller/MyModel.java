@@ -43,7 +43,7 @@ public class MyModel {
 
     //测试用户输入地址是否正确
     public void testUrl(Context context, String url, final MyCallBack callBack) {
-        Log.e("testUrl", "testUrl: " + url);
+        Log.i("testUrl", "testUrl: " + url);
         Call call = HttpUtil.getInstance().PostResponse(url, "");
         call.enqueue(new Callback() {
             @Override
@@ -55,7 +55,7 @@ public class MyModel {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
                 if (response.code() == 200) {
-                    Log.e("testUrl", response.code() + "   返回结果：" + json);
+                    Log.i("testUrl", response.code() + "   返回结果：" + json);
                     callBack.onSuccess(response.code());
                 } else {
                     callBack.onFailed("testUrl:" + json);
@@ -66,8 +66,8 @@ public class MyModel {
 
     //登录账号
     public void getUser(Context context, UserBean userBean, final MyCallBack callback) {
-        Log.e("getUser", gson.toJson(userBean));
-        Log.e("getUser", "getUser: " + Interfaces.getInstance(context).LOGIN);
+        Log.i("getUser", gson.toJson(userBean));
+        Log.i("getUser", "getUser: " + Interfaces.getInstance(context).LOGIN);
         Call call = HttpUtil.getInstance().Login(Interfaces.getInstance(context).LOGIN,
                 gson.toJson(userBean));
         call.enqueue(new Callback() {
@@ -81,7 +81,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && (json.contains("\"code\":200,\"message\":\"SUCCESS\"") || json.contains("\"code\":200,\"msg\":\"SUCCESS\""))) {
-                        LogUtils.logE("getUser", "登录返回结果" + json);
+                        LogUtils.logI("getUser", "登录返回结果" + json);
                         callback.onSuccess(gson.fromJson(json, LoginResponse.class));
                     } else {
                         callback.onFailed("getUser:" + json);
@@ -95,11 +95,12 @@ public class MyModel {
 
     //获取考试列表
     public void getTaskList(Context context, GetExamListRequest examListRequest, final MyCallBack callback) {
-        Log.e("getTaskList", gson.toJson(examListRequest));
+        Log.i("getTaskList", gson.toJson(examListRequest));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).GETEXAMLISTAPP, gson.toJson(examListRequest));
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Log.i("getTaskList", "onFailure: " + e.getMessage());
                 callback.onFailed("getTaskList:" + e.getMessage());
             }
 
@@ -108,7 +109,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("getTaskList", "获取考试列表：" + json);
+                        LogUtils.logI("getTaskList", "获取考试列表：" + json);
                         callback.onSuccess(gson.fromJson(json, GetExamListResponse.class));
                     } else {
                         callback.onFailed("getTaskList:" + json);
@@ -122,7 +123,7 @@ public class MyModel {
 
     //获取考试题目列表
     public void getTaskContext(Context context, final GetExamContextRequest request, final MyCallBack childCallback) {
-        Log.e("getTaskContext", gson.toJson(request));
+        Log.i("getTaskContext", gson.toJson(request));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).GETTEACHERTASKLIST, gson.toJson(request));
         call.enqueue(new Callback() {
             @Override
@@ -135,7 +136,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("getTaskContext", "获取考试题目列表：" + json);
+                        LogUtils.logI("getTaskContext", "获取考试题目列表：" + json);
                         childCallback.onSuccess(gson.fromJson(json, GetExamContextResponse.class));
                     } else {
                         childCallback.onFailed("getTaskContext:" + json);
@@ -149,7 +150,7 @@ public class MyModel {
 
     //判断是否可以进行帮阅
     public void OtherTask(Context context, final GetMarkDataRequest request, final MyCallBack callBack) {
-        Log.e("OtherTask", "检测是否可以帮阅: " + gson.toJson(request));
+        Log.i("OtherTask", "检测是否可以帮阅: " + gson.toJson(request));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).OTHERTASK, gson.toJson(request));
         call.enqueue(new Callback() {
             @Override
@@ -161,7 +162,7 @@ public class MyModel {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 String json = response.body().string();
                 if (response.code() == 200 && json.contains("\"success\":200")) {
-                    LogUtils.logE("OtherTask", json);
+                    LogUtils.logI("OtherTask", json);
                     callBack.onSuccess(json);
                 } else {
                     callBack.onFailed("OtherTask:" + json);
@@ -172,7 +173,7 @@ public class MyModel {
 
     //获取阅卷数据
     public void getMarkData(Context context, final GetMarkDataRequest request, final MyCallBack callBack) {
-        Log.e("getMarkData", gson.toJson(request));
+        Log.i("getMarkData", gson.toJson(request));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).GETMARKDATA, gson.toJson(request));
         call.enqueue(new Callback() {
             @Override
@@ -185,7 +186,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("getMarkData", "获取阅卷数据：" + json);
+                        LogUtils.logI("getMarkData", "获取阅卷数据：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkDataResponse.class));
                     } else {
                         callBack.onFailed("getMarkData:" + json);
@@ -199,7 +200,7 @@ public class MyModel {
 
     //获取下一个未批阅的学生数据
     public void getMarkNextStudent(Context context, final GetMarkDataRequest request, final MyCallBack callBack) {
-        Log.e("getMarkNextStudent", gson.toJson(request));
+        Log.i("getMarkNextStudent", gson.toJson(request));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).MARKNEXTSTUDENT, gson.toJson(request));
         call.enqueue(new Callback() {
             @Override
@@ -216,7 +217,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        //LogUtils.logE("getMarkNextStudent", "获取新数据结果：" + json);
+                        //LogUtils.logI("getMarkNextStudent", "获取新数据结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
                     } else {
                         callBack.onFailed("getMarkNextStudent:" + json);
@@ -230,7 +231,7 @@ public class MyModel {
 
     //获取已批阅的学生数据
     public void getStudentMarkData(Context context, final GetStudentMarkDataRequest request, final MyCallBack callBack) {
-        Log.e("getStudentMarkData", gson.toJson(request));
+        Log.i("getStudentMarkData", gson.toJson(request));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).GETSTUDENTMARKDATA, gson.toJson(request));
         call.enqueue(new Callback() {
             @Override
@@ -243,7 +244,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        //LogUtils.logE("getStudentMarkData", "获取已批阅数据：" + json);
+                        //LogUtils.logI("getStudentMarkData", "获取已批阅数据：" + json);
                         callBack.onSuccess(gson.fromJson(json, GetMarkNextStudentResponse.class));
                     } else {
                         callBack.onFailed("getStudentMarkData:" + json);
@@ -257,7 +258,7 @@ public class MyModel {
 
     //调用回评列表接口
     public void reviewStudents(Context context, final ReviewStudentsRequest request, final MyCallBack callBack) {
-        Log.e("reviewStudents", gson.toJson(request));
+        Log.i("reviewStudents", gson.toJson(request));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).REVIEWSTUDENTS, gson.toJson(request));
         call.enqueue(new Callback() {
             @Override
@@ -270,7 +271,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("reviewStudents", "回评列表接口:" + json);
+                        LogUtils.logI("reviewStudents", "回评列表接口:" + json);
                         callBack.onSuccess(gson.fromJson(json, ReviewStudentsResponse.class));
                     } else {
                         callBack.onFailed("reviewStudents:" + json);
@@ -284,7 +285,7 @@ public class MyModel {
 
     //新数据提交保存
     public void saveMarkData(Context context, SaveMarkDataBean saveData, final MyCallBack callBack) {
-        Log.e("saveMarkData", gson.toJson(saveData));
+        Log.i("saveMarkData", gson.toJson(saveData));
         Call call = (HttpUtil.getInstance()).PostResponse(Interfaces.getInstance(context).SAVEMARKDATA, new GsonBuilder().serializeNulls().create().toJson(saveData));
         call.enqueue(new Callback() {
             @Override
@@ -297,7 +298,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("saveMarkData", "新数据提交返回结果：" + json);
+                        LogUtils.logI("saveMarkData", "新数据提交返回结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
                     } else {
                         if (json.contains("当前教师或任务不存在！")) {
@@ -315,7 +316,7 @@ public class MyModel {
 
     //回评数据提交
     public void upDateMarkData(Context context, SaveMarkDataBean saveData, final MyCallBack callBack) {
-        Log.e("upDateMarkData", gson.toJson(saveData));
+        Log.i("upDateMarkData", gson.toJson(saveData));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).UPDATEMARKDATA, gson.toJson(saveData));
         call.enqueue(new Callback() {
             @Override
@@ -328,7 +329,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("upDateMarkData", "回评数据提交返回结果：" + json);
+                        LogUtils.logI("upDateMarkData", "回评数据提交返回结果：" + json);
                         callBack.onSuccess(gson.fromJson(json, SavaDataResponse.class));
                     } else {
                         callBack.onFailed("upDateMarkData:" + json);
@@ -349,7 +350,7 @@ public class MyModel {
      * @param callBack
      */
     public void collectQuestion(Context context, final CollectRequest request, int type, final MyCallBack callBack) {
-        Log.e("collectQuestion   type-" + type, gson.toJson(request));
+        Log.i("collectQuestion   type-" + type, gson.toJson(request));
         Call call;
         if (type == 1) {
             call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).COLLECTQUEXTION, gson.toJson(request));
@@ -367,7 +368,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"success\":200")) {
-                        LogUtils.logE("collectQuestion", "收藏、取消题目结果：" + json);
+                        LogUtils.logI("collectQuestion", "收藏、取消题目结果：" + json);
                         callBack.onSuccess(null);
                     } else {
                         callBack.onFailed("collectQuestion:" + json);
@@ -381,7 +382,7 @@ public class MyModel {
 
     //获取评分详情
     public void getMarkAvgScore(Context context, GetMarkAvgScoreRequest request, final MyCallBack callBack) {
-        Log.e("getMarkAvgScore", gson.toJson(request));
+        Log.i("getMarkAvgScore", gson.toJson(request));
         Call call = HttpUtil.getInstance().PostResponse(Interfaces.getInstance(context).GETMARKAVGSCORE, gson.toJson(request));
         call.enqueue(new Callback() {
             @Override
@@ -398,7 +399,7 @@ public class MyModel {
                 }
                 try {
                     if (response.code() == 200) {
-                        LogUtils.logE("getMarkAvgScore", "获取评分详情结果：" + json);
+                        LogUtils.logI("getMarkAvgScore", "获取评分详情结果：" + json);
                         // TODO Gson解析集合
                         List<GetMarkAvgScoreResponse> avgScoreResponseList = gson.fromJson(json, new TypeToken<List<GetMarkAvgScoreResponse>>() {
                         }.getType());
@@ -427,7 +428,7 @@ public class MyModel {
                 String json = response.body().string();
                 try {
                     if (response.code() == 200 && json.contains("\"version\":\"MarkApp")) {
-                        Log.e("Authenticate", "获取版本信息: " + json);
+                        Log.i("Authenticate", "获取版本信息: " + json);
                         callBack.onSuccess(json);
                     } else {
                         callBack.onFailed("Authenticate:" + json);
@@ -450,7 +451,7 @@ public class MyModel {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                Log.e("Download", "onResponse: " + response.body().contentLength());
+                Log.i("Download", "onResponse: " + response.body().contentLength());
                 if (response.body().contentLength() <= 0) {
                     callBack.onFailed("文件下载失败:" + response.body().contentLength());
                 } else {

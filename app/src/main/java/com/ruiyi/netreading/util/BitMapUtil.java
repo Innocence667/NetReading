@@ -44,7 +44,7 @@ public class BitMapUtil {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            Log.e("BitMapUtil", "onPostExecute: 图片下载成功");
+            Log.i("BitMapUtil", "onPostExecute: 图片下载成功");
             File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/123.jpg");
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
@@ -55,7 +55,7 @@ public class BitMapUtil {
                 localImageData.setPath(file.getAbsolutePath());
                 callBack.onSuccess(localImageData);
             } catch (FileNotFoundException e) {
-                Log.e("downLoadPicture", "onPostExecute: 图片保存失败");
+                Log.i("downLoadPicture", "onPostExecute: 图片保存失败");
                 e.printStackTrace();
             }
         }
@@ -78,10 +78,10 @@ public class BitMapUtil {
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888;
                 Bitmap bitmap = BitmapFactory.decodeStream(connection.getInputStream(), null, options);
                 if (imgUrls.size() == 1) {
-                    Log.e("BitMapUtil", "downBitmap:单个图片");
+                    Log.i("BitMapUtil", "downBitmap:单个图片");
                     return bitmap;
                 } else {
-                    Log.e("BitMapUtil", "downBitmap:多个图片");
+                    Log.i("BitMapUtil", "downBitmap:多个图片");
                     imgUrls.remove(0);
                     Bitmap bitmap1 = downBitmap(imgUrls);
                     return imageMerge(bitmap, bitmap1);
@@ -90,8 +90,8 @@ public class BitMapUtil {
                 callBack.onFailed("downBitmap:图片下载异常");
             }
         } catch (IOException e) {
-            Log.e("BitMapUtil", "downBitmap: " + e.getMessage());
-            Log.e("BitMapUtil", "downBitmap:图片下载异常");
+            Log.i("BitMapUtil", "downBitmap: " + e.getMessage());
+            Log.i("BitMapUtil", "downBitmap:图片下载异常");
             e.printStackTrace();
         } finally {
             connection.disconnect();
@@ -100,7 +100,7 @@ public class BitMapUtil {
     }
 
     private Bitmap imageMerge(Bitmap bitmap1, Bitmap bitmap2) {
-        Log.e("BitMapUtil", "imageMerge: 图片拼接");
+        Log.i("BitMapUtil", "imageMerge: 图片拼接");
         int width = Math.max(bitmap1.getWidth(), bitmap2.getWidth());
         int height = bitmap1.getHeight() + bitmap2.getHeight();
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);

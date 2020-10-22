@@ -227,7 +227,7 @@ public class Tool {
         File file = new File(Tool.IMAGEPATH + "/" + picName + ".jpeg");
         try {
             FileOutputStream fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, fos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, fos);
             try {
                 fos.flush();
                 fos.close();
@@ -235,12 +235,12 @@ public class Tool {
                 return file.getAbsolutePath();
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("savePic", "savePic: " + e.getMessage());
+                Log.i("savePic", "savePic: " + e.getMessage());
                 return null;
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            Log.e("savePic", "savePic: " + e.getMessage());
+            Log.i("savePic", "savePic: " + e.getMessage());
             return null;
         }
     }

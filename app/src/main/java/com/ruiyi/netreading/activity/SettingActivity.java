@@ -295,7 +295,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                         while ((len = is.read(bytes)) != -1) {
                             fos.write(bytes, 0, len);
                             a += len;
-                            Log.e("downloadAPK", "文件写入中……" + a);
+                            Log.i("downloadAPK", "文件写入中……" + a);
                             progressDialog.setProgress((int) (a / 1024));
                             progressDialog.setProgressNumberFormat(new DecimalFormat("0.00").format(a * 1.0f / 1024 / 1024) + "MB/" + new DecimalFormat("0.00").format(response.body().contentLength() * 1.0f / 1024 / 1024) + "MB");
                         }
@@ -307,7 +307,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                         e.printStackTrace();
                     }
                 } else {
-                    Log.e("downloadAPK", "InputStream为空");
+                    Log.i("downloadAPK", "InputStream为空");
                 }
                 try {
                     fos.flush();

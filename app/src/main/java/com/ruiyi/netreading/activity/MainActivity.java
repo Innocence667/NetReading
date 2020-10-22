@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         context = this;
         initView();
-        Log.e(TAG, "屏幕分辨率: " + Tool.getDefaultDisplay(this).x + "-" + Tool.getDefaultDisplay(this).y);
+        Log.i(TAG, "屏幕分辨率: " + Tool.getDefaultDisplay(this).x + "-" + Tool.getDefaultDisplay(this).y);
         myModel = new MyModel();
         Intent intent = getIntent();
         teacherGuid = intent.getStringExtra("userid");
@@ -130,9 +130,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     } else {
                                         ToastUtils.showToast(context, "参数异常");
                                         if (TextUtils.isEmpty(teacherGuid)) {
-                                            Log.e(TAG, "myOnclickListenet: 参数teacherGuid为null");
+                                            Log.i(TAG, "myOnclickListenet: 参数teacherGuid为null");
                                         } else {
-                                            Log.e(TAG, "myOnclickListenet: 参数taskGuid为null");
+                                            Log.i(TAG, "myOnclickListenet: 参数taskGuid为null");
                                         }
                                     }
                                 }
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         public void run() {
                                             //failed to connect to riyun.lexuewang.cn/116.62.133.77 (port 8002) after 3000ms
                                             showFailedPage(str);
-                                            Log.e(TAG, "获取任务详情请求失败," + str);
+                                            Log.i(TAG, "获取任务详情请求失败," + str);
                                         }
                                     });
                                 }
@@ -232,9 +232,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Log.e(TAG, "下拉刷新  已更新任务列表");
+                                Log.i(TAG, "下拉刷新  已更新任务列表");
                                 if (getExamContextResponse == null) {
-                                    Log.e(TAG, "run: getExamContextResponse是空的");
+                                    Log.i(TAG, "run: getExamContextResponse是空的");
                                     return;
                                 }
                                 //TODO 二级列表全部关闭
@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             @Override
                                             public void run() {
                                                 showFailedPage(str);
-                                                Log.e(TAG, "获取任务详情请求失败," + str);
+                                                Log.i(TAG, "获取任务详情请求失败," + str);
                                             }
                                         });
                                     }
@@ -367,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 @Override
                                 public void run() {
                                     showFailedPage(str);
-                                    Log.e(TAG, "获取任务详情请求失败," + str);
+                                    Log.i(TAG, "获取任务详情请求失败," + str);
                                 }
                             });
                         }
@@ -450,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void run() {
                             showFailedPage("获取任务失败");
-                            Log.e(TAG, "获取任务详情请求失败," + str);
+                            Log.i(TAG, "获取任务详情请求失败," + str);
                         }
                     });
                 }

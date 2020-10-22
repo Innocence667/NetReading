@@ -95,6 +95,6 @@ public class QuestionNumAdapter extends RecyclerView.Adapter<QuestionNumAdapter.
     //更新指定位置的分数
     public void updateScore(int pos, String score) {
         scores.set(pos, score);
-        Log.e("QuestionNumAdapter", "updateScore: " + pos + "-" + score);
+        Log.i("QuestionNumAdapter", "updateScore: " + pos + "-" + score);
     }
 }

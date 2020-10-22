@@ -14,19 +14,19 @@ public class LogUtils {
      * @param tag
      * @param content
      */
-    public static void logE(String tag, String content) {
+    public static void logI(String tag, String content) {
         int p = 2048;
         long length = content.length();
         if (length < p || length == p)
-            Log.e(tag, content);
+            Log.i(tag, content);
         else {
             while (content.length() > p) {
                 String logContent = content.substring(0, p);
                 //把原来的值替换为空
                 content = content.replace(logContent, "");
-                Log.e(tag, logContent);
+                Log.i(tag, logContent);
             }
-            Log.e(tag, content);
+            Log.i(tag, content);
         }
     }
 
