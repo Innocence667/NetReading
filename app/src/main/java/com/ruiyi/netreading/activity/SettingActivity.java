@@ -128,6 +128,14 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 dialog.show();
                 break;
             case R.id.dialog_determine:
+                File imageCache = new File(Tool.IMAGEPATH);
+                if (imageCache.exists()) {
+                    File[] files = imageCache.listFiles();
+                    for (int i = 0; i < files.length; i++) {
+                        files[i].delete();
+                    }
+                    Log.i("SettingActivity", "已清空图片缓存！");
+                }
                 dialog.cancel();
                 //ActivityCollector.finishAll();
                 PreferencesService.getInstance(context).clearUserData();

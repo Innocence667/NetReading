@@ -105,27 +105,45 @@ public class Tool {
             callBack.onFailed("图片数据异常，再试一次。");
         } else {
             if ("0".equals(getMarkNextStudentResponse.getData().getIsOnline())) { //线下考试
-                //排序
-                Collections.sort(imgArrData);
-                //获取第一个对象
-                String base = imgArrData.get(0).getSrc();
-                if (base.contains("data:image/jpeg;base64,")) {
-                    base = base.replace("data:image/jpeg;base64,", "");
-                }
-                byte[] bytes = Base64.decode(base, Base64.DEFAULT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                imageDataList.add(new ImageData(bitmap.getWidth(), bitmap.getHeight()));
-                if (imgArrData.size() != 1) {
-                    //imgArrData.remove(0);
-                    index = 1;
-                    Bitmap bitmap1 = base64ToBitmap2(imageDataList, imgArrData, index);
-                    Bitmap pictur = MergePictur(bitmap, bitmap1);
-                    imageData.setPath(savePic(pictur, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId()));
-                    imageData.setList(imageDataList);
-                    callBack.onSuccess(imageData);
-                    bitmap1.recycle();
+                File file = new File(Tool.IMAGEPATH + "/" +
+                        getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId() + ".jpeg");
+                if (!file.exists()) {
+                    //排序
+                    Collections.sort(imgArrData);
+                    //获取第一个对象
+                    String base = imgArrData.get(0).getSrc();
+                    if (base.contains("data:image/jpeg;base64,")) {
+                        base = base.replace("data:image/jpeg;base64,", "");
+                    }
+                    byte[] bytes = Base64.decode(base, Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    imageDataList.add(new ImageData(bitmap.getWidth(), bitmap.getHeight()));
+                    if (imgArrData.size() != 1) {
+                        //imgArrData.remove(0);
+                        index = 1;
+                        Bitmap bitmap1 = base64ToBitmap2(imageDataList, imgArrData, index);
+                        Bitmap pictur = MergePictur(bitmap, bitmap1);
+                        imageData.setPath(savePic(pictur, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId()));
+                        imageData.setList(imageDataList);
+                        callBack.onSuccess(imageData);
+                        bitmap1.recycle();
+                    } else {
+                        imageData.setPath(savePic(bitmap, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId()));
+                        imageData.setList(imageDataList);
+                        callBack.onSuccess(imageData);
+                    }
                 } else {
-                    imageData.setPath(savePic(bitmap, getMarkNextStudentResponse.getData().getStudentData().getQuestions().get(0).getId()));
+                    for (int i = 0; i < imgArrData.size(); i++) {
+                        String base = imgArrData.get(i).getSrc();
+                        if (base.contains("data:image/jpeg;base64,")) {
+                            base = base.replace("data:image/jpeg;base64,", "");
+                        }
+                        byte[] bytes = Base64.decode(base, Base64.DEFAULT);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        imageDataList.add(new ImageData(bitmap.getWidth(), bitmap.getHeight()));
+                        bitmap.recycle();
+                    }
+                    imageData.setPath(file.getAbsolutePath());
                     imageData.setList(imageDataList);
                     callBack.onSuccess(imageData);
                 }
@@ -225,6 +243,11 @@ public class Tool {
      */
     public static String savePic(Bitmap bitmap, int picName) {
         File file = new File(Tool.IMAGEPATH + "/" + picName + ".jpeg");
+        if (file.exists()) {
+            bitmap.recycle();
+            Log.i("savePic", "图片已存在");
+            return file.getAbsolutePath();
+        }
         try {
             FileOutputStream fos = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 70, fos);

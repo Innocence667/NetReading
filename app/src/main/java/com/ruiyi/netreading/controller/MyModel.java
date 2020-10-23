@@ -290,6 +290,7 @@ public class MyModel {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Log.e("saveMarkData", "onFailure: " + e.getMessage());
                 callBack.onFailed("saveMarkData:" + e.getMessage());
             }
 

@@ -1042,6 +1042,17 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         RectF drawnRect = arrayList.get(i).getDrawnRect();
                         stepScore.setX((drawnRect.left + ((drawnRect.right - drawnRect.left) / 2f)) / scale);
                         stepScore.setY((drawnRect.top + ((drawnRect.bottom - drawnRect.top) / 2f)) / scale);
+                        if (getMarkNextStudentResponse.getData().getImageArr().size() != 1) {
+                            //判断当前的Y值是否高于原图高*缩放率后的值，如果大于则是B面，否则是A面
+                            if ((drawnRect.top + ((drawnRect.bottom - drawnRect.top) / 2f)) / scale <=
+                                    getMarkNextStudentResponse.getData().getImageArr().get(0).getHeigth() * scale) {
+                                stepScore.setPageName(getMarkNextStudentResponse.getData().getImageArr().get(0).getPageName());
+                            } else {
+                                stepScore.setPageName(getMarkNextStudentResponse.getData().getImageArr().get(1).getPageName());
+                            }
+                        } else {
+                            stepScore.setPageName(getMarkNextStudentResponse.getData().getImageArr().get(0).getPageName());
+                        }
                         stepDatas.put(arrayList.get(i).getRuntimeHandle(), stepScore);
                     } else if (arrayList.get(i).getType() == SpenObjectBase.TYPE_STROKE) {
                         arrayList.get(i).setSelectable(true); //可以选中
@@ -3950,6 +3961,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         if (bitmap == null) {
             ToastUtils.showToast(context, "获取图片异常");
             Log.i(TAG, "loadCacheImg: 获取图片异常");
+            LoadingUtil.closeDialog();
             return;
         }
         imageData = new ImageData(bitmap.getWidth(), bitmap.getHeight());
