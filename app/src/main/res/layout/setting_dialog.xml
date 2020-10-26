@@ -7,10 +7,10 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="@dimen/x60"
         android:background="@color/colorTitleBG"
         android:gravity="center"
-        android:padding="10dp"
+        android:padding="@dimen/x10"
         android:text="配置"
         android:textSize="18sp" />
 
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="20dp" />
+        android:padding="@dimen/x20" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,18 +66,18 @@
 
         <Button
             android:id="@+id/testUrlBtnCancel"
-            android:layout_width="90dp"
-            android:layout_height="40dp"
-            android:layout_margin="10dp"
+            android:layout_width="@dimen/x90"
+            android:layout_height="@dimen/x40"
+            android:layout_margin="@dimen/x10"
             android:background="@drawable/btn_login_click"
             android:text="取 消"
             android:textColor="@color/colorWhite" />
 
         <Button
             android:id="@+id/testUrlBtn"
-            android:layout_width="90dp"
-            android:layout_height="40dp"
-            android:layout_margin="10dp"
+            android:layout_width="@dimen/x90"
+            android:layout_height="@dimen/x40"
+            android:layout_margin="@dimen/x10"
             android:background="@drawable/btn_login_click"
             android:text="连接服务器"
             android:textColor="@color/colorWhite" />
@@ -88,7 +88,7 @@
         android:id="@+id/testProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
+        android:layout_margin="@dimen/x10"
         android:visibility="gone" />
 
 </LinearLayout>

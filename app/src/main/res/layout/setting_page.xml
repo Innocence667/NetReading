@@ -8,7 +8,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/x50"
         android:background="@color/colorGrey"
         android:orientation="horizontal">
 
@@ -23,10 +23,10 @@
 
         <ImageView
             android:id="@+id/setting_back"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/x30"
+            android:layout_height="@dimen/x30"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="15dp"
+            android:layout_marginLeft="@dimen/x15"
             android:scaleType="fitStart"
             android:src="@drawable/back"
             android:visibility="gone" />
@@ -42,11 +42,11 @@
         <LinearLayout
             android:id="@+id/pointFiveView"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp">
+            android:paddingLeft="@dimen/x30"
+            android:paddingRight="@dimen/x30">
 
             <TextView
                 android:layout_width="0dp"
@@ -64,19 +64,19 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="@dimen/x2"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_marginRight="@dimen/x30"
             android:background="@color/colorGrey" />
 
         <LinearLayout
             android:id="@+id/stepModeView"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp">
+            android:paddingLeft="@dimen/x30"
+            android:paddingRight="@dimen/x30">
 
             <TextView
                 android:layout_width="0dp"
@@ -94,19 +94,19 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="@dimen/x2"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_marginRight="@dimen/x30"
             android:background="@color/colorGrey" />
 
         <LinearLayout
             android:id="@+id/autoSubmitView"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp">
+            android:paddingLeft="@dimen/x30"
+            android:paddingRight="@dimen/x30">
 
             <TextView
                 android:layout_width="0dp"
@@ -124,19 +124,19 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="@dimen/x2"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_marginRight="@dimen/x30"
             android:background="@color/colorGrey" />
 
         <LinearLayout
             android:id="@+id/topScoreView"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp">
+            android:paddingLeft="@dimen/x30"
+            android:paddingRight="@dimen/x30">
 
             <TextView
                 android:layout_width="0dp"
@@ -154,19 +154,19 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="@dimen/x2"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_marginRight="@dimen/x30"
             android:background="@color/colorGrey" />
 
         <LinearLayout
             android:id="@+id/penSetView"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp">
+            android:paddingLeft="@dimen/x30"
+            android:paddingRight="@dimen/x30">
 
             <TextView
                 android:layout_width="0dp"
@@ -184,18 +184,18 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="@dimen/x2"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_marginRight="@dimen/x30"
             android:background="@color/colorGrey" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp">
+            android:paddingLeft="@dimen/x30"
+            android:paddingRight="@dimen/x30">
 
             <TextView
                 android:layout_width="0dp"
@@ -208,7 +208,7 @@
                 android:id="@+id/horizontalCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="30dp"
+                android:layout_marginRight="@dimen/x30"
                 android:checked="true"
                 android:text="横屏" />
 
@@ -222,19 +222,19 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="@dimen/x2"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_marginRight="@dimen/x30"
             android:background="@color/colorGrey"
             android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
+            android:paddingLeft="@dimen/x30"
+            android:paddingRight="@dimen/x30"
             android:visibility="gone">
 
             <TextView
@@ -247,7 +247,7 @@
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="30dp"
+                android:layout_marginRight="@dimen/x30"
                 android:checked="true"
                 android:enabled="false"
                 android:text="浅色" />
@@ -262,9 +262,9 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_height="@dimen/x2"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_marginRight="@dimen/x30"
             android:background="@color/colorGrey"
             android:visibility="gone" />
 
@@ -282,7 +282,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:padding="5dp"
+            android:padding="@dimen/x5"
             android:text="选中常用的分值，这些值将优先显示"
             android:textSize="18sp" />
 
@@ -303,14 +303,14 @@
             android:layout_centerHorizontal="true"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="20dp">
+            android:padding="@dimen/x20">
 
             <CheckBox
                 android:id="@+id/topSocre_0_5"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_margin="5dp"
-                android:layout_marginLeft="20dp"
+                android:layout_width="@dimen/x48"
+                android:layout_height="@dimen/x48"
+                android:layout_margin="@dimen/x5"
+                android:layout_marginLeft="@dimen/x20"
                 android:background="@drawable/topscore_item_style"
                 android:button="@null"
                 android:gravity="center"
@@ -319,9 +319,9 @@
 
             <TextView
                 android:id="@+id/topScoreClear"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:layout_marginLeft="20dp"
+                android:layout_width="@dimen/x100"
+                android:layout_height="@dimen/x48"
+                android:layout_marginLeft="@dimen/x20"
                 android:background="@drawable/btn_login_bg_up"
                 android:gravity="center"
                 android:text="清空"
@@ -330,9 +330,9 @@
 
             <TextView
                 android:id="@+id/topScoreDetermine"
-                android:layout_width="100dp"
-                android:layout_height="48dp"
-                android:layout_marginLeft="20dp"
+                android:layout_width="@dimen/x100"
+                android:layout_height="@dimen/x48"
+                android:layout_marginLeft="@dimen/x20"
                 android:background="@drawable/btn_login_bg_up"
                 android:gravity="center"
                 android:text="确定"

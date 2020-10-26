@@ -11,9 +11,9 @@
     <include layout="@layout/layout_head" />
 
     <ImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_margin="10dp"
+        android:layout_width="@dimen/x64"
+        android:layout_height="@dimen/x64"
+        android:layout_margin="@dimen/x10"
         android:background="@drawable/userhead" />
 
     <TextView
@@ -36,17 +36,17 @@
         android:id="@+id/checkForUpdates"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="@dimen/x5"
         android:background="@color/colorWhite"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="@dimen/x10">
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
+            android:layout_height="@dimen/x50"
+            android:layout_marginLeft="@dimen/x10"
             android:drawableLeft="@drawable/update"
-            android:drawablePadding="15dp"
+            android:drawablePadding="@dimen/x15"
             android:gravity="center_vertical"
             android:text="检查更新"
             android:textSize="18sp" />
@@ -55,7 +55,7 @@
             android:id="@+id/versionNum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="5dp"
+            android:padding="@dimen/x5"
             android:text="(当前版本vx.x.x)"
             android:textSize="15sp" />
 
@@ -65,19 +65,19 @@
         android:id="@+id/userFeedback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="@dimen/x5"
         android:visibility="gone"
         android:background="@color/colorWhite"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="@dimen/x10">
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginBottom="5dp"
+            android:layout_height="@dimen/x50"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_marginBottom="@dimen/x5"
             android:drawableLeft="@drawable/opinion"
-            android:drawablePadding="15dp"
+            android:drawablePadding="@dimen/x15"
             android:gravity="center_vertical"
             android:text="用户反馈"
             android:textSize="18sp" />
@@ -88,18 +88,18 @@
         android:id="@+id/userExit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/x10"
         android:background="@color/colorWhite"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="@dimen/x10">
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginBottom="5dp"
+            android:layout_height="@dimen/x50"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_marginBottom="@dimen/x5"
             android:drawableLeft="@drawable/change"
-            android:drawablePadding="15dp"
+            android:drawablePadding="@dimen/x15"
             android:gravity="center_vertical"
             android:text="退出登录"
             android:textSize="18sp" />

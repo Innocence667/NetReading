@@ -10,8 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:minWidth="300dp"
-        android:padding="10dp"
+        android:minWidth="@dimen/x300"
+        android:padding="@dimen/x10"
         android:text="测试"
         android:textSize="18sp" />
 </LinearLayout>

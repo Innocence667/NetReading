@@ -2,6 +2,7 @@ package com.ruiyi.netreading;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.util.Log;
 
 import com.ruiyi.netreading.util.PreferencesService;
@@ -40,6 +41,7 @@ public class MyApplication extends Application {
                 .saveAutoSubmit(true) //自动提交
                 .savePointFive(false) //关闭0.5功能
                 .saveDeviceBrand(Tool.getDeviceBrand()) //设备型号
+                .saveScreenType(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) //横屏
                 .saveSpenColor("#CF2257") //spen颜色
                 .saveSpenSize(3); //spen宽度
         Log.i("MyApplication", "设备厂商: " + Tool.getDeviceBrand());

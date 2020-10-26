@@ -295,6 +295,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         request.setTaskGuid(taskGuid);
         request.setTeacherGuid(teacherGuid);
         initView();
+        if (PreferencesService.getInstance(context).getScreenType() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+            MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
         myModel = new MyModel();
         myModel.OtherTask(context, request, new MyCallBack() {
             @Override
@@ -2804,7 +2809,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 topScoreAdapter.notifyDataSetChanged();
                 break;
-            case R.id.horizontalCheckBox:
+            case R.id.horizontalCheckBox: //横屏
                 if (horizontalCheckBox.isChecked()) {
                     verticalCheckBox.setChecked(false);
                     MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -2814,7 +2819,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 PreferencesService.getInstance(context).saveScreenType(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 break;
-            case R.id.verticalCheckBox:
+            case R.id.verticalCheckBox: //竖屏
                 if (verticalCheckBox.isChecked()) {
                     horizontalCheckBox.setChecked(false);
                     MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

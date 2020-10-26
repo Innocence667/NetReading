@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="70dp">
+    android:layout_height="@dimen/x70">
 
     <TextView
         android:id="@+id/examName"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="3dp"
-        android:layout_marginBottom="3dp"
+        android:layout_marginTop="@dimen/x3"
+        android:layout_marginBottom="@dimen/x3"
         android:background="@color/colorWhite"
         android:drawableRight="@drawable/right"
         android:gravity="center"
-        android:padding="5dp"
+        android:padding="@dimen/x5"
         android:textColor="@color/colorBlack"
         android:textSize="18sp" />
 

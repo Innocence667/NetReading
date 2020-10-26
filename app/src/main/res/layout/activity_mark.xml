@@ -28,9 +28,9 @@
 
         <CheckBox
             android:id="@+id/titleNo"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="10dp"
+            android:layout_width="@dimen/x30"
+            android:layout_height="@dimen/x30"
+            android:layout_margin="@dimen/x10"
             android:background="@drawable/shut"
             android:button="@null" />
 
@@ -39,14 +39,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/titleNo"
-            android:layout_margin="10dp"
+            android:layout_margin="@dimen/x10"
             android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/collectionImg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="@dimen/x5"
                 android:background="@drawable/collection_img"
                 android:visibility="gone" />
 
@@ -54,12 +54,12 @@
                 android:id="@+id/abnormalTv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="@dimen/x5"
                 android:background="@drawable/abnormal_style"
-                android:padding="3dp"
+                android:padding="@dimen/x3"
                 android:text="试卷异常"
                 android:textColor="@color/colorRed"
-                android:textSize="18sp"
+                android:textSize="@dimen/x18"
                 android:visibility="gone" />
 
         </LinearLayout>
@@ -68,7 +68,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/myHorizontalScrollview"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/x50"
             android:layout_toLeftOf="@+id/progressTips"
             android:layout_toRightOf="@+id/titleNo"
             android:scrollbars="none" />
@@ -76,10 +76,10 @@
         <!--双栏模式-->
         <LinearLayout
             android:id="@+id/soubleLayout"
-            android:layout_width="60dp"
+            android:layout_width="@dimen/x60"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
-            android:layout_marginBottom="30dp"
+            android:layout_marginTop="@dimen/x100"
+            android:layout_marginBottom="@dimen/x30"
             android:layout_toLeftOf="@+id/reightView"
             android:gravity="center_vertical|right"
             android:orientation="vertical"
@@ -87,17 +87,17 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginBottom="15dp"
+                android:layout_height="@dimen/x40"
+                android:layout_marginBottom="@dimen/x15"
                 android:layout_toLeftOf="@+id/reightView"
                 android:background="@drawable/double_parent_style"
                 android:gravity="center_vertical|right">
 
                 <CheckBox
                     android:id="@+id/douleScoreCheckBox"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginRight="15dp"
+                    android:layout_width="@dimen/x30"
+                    android:layout_height="@dimen/x30"
+                    android:layout_marginRight="@dimen/x15"
                     android:background="@drawable/doublescore_style"
                     android:button="@null" />
 
@@ -113,7 +113,7 @@
         <!--分数面板-->
         <RelativeLayout
             android:id="@+id/reightView"
-            android:layout_width="80dp"
+            android:layout_width="@dimen/x80"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:background="@drawable/scorepanel_bg"
@@ -123,7 +123,7 @@
                 android:id="@+id/questionScoreView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="@dimen/x10"
                 android:gravity="center_horizontal|bottom"
                 android:orientation="horizontal">
 
@@ -139,7 +139,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginLeft="@dimen/x5"
                     android:text="分"
                     android:textColor="@color/colorWhite" />
             </LinearLayout>
@@ -159,14 +159,14 @@
                 android:layout_height="match_parent"
                 android:layout_above="@+id/questionSubmiss"
                 android:layout_below="@+id/questionNum"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginTop="@dimen/x5"
+                android:layout_marginBottom="@dimen/x5"
                 android:divider="@null" />
 
             <Button
                 android:id="@+id/questionSubmiss"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
+                android:layout_height="@dimen/x70"
                 android:layout_alignParentBottom="true"
                 android:background="@drawable/scorepanel_bg"
                 android:text="确 定"
@@ -181,33 +181,33 @@
             android:id="@+id/progressTips"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="@dimen/x10"
             android:layout_toLeftOf="@+id/reightView"
             android:textSize="16sp" />
 
         <!--功能区开关-->
         <CheckBox
             android:id="@+id/sideslip"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/x30"
+            android:layout_height="@dimen/x30"
             android:layout_alignParentBottom="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_marginBottom="@dimen/x25"
             android:background="@drawable/shut"
             android:button="@null"
-            android:padding="10dp" />
+            android:padding="@dimen/x10" />
 
         <LinearLayout
             android:id="@+id/spenLayoutShow"
             android:layout_width="wrap_content"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:layout_above="@+id/function"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="@dimen/x10"
             android:layout_toRightOf="@+id/sideslip"
             android:background="@drawable/pen_layout_show_style"
-            android:elevation="5dp"
+            android:elevation="@dimen/x5"
             android:gravity="center_vertical"
-            android:padding="5dp"
+            android:padding="@dimen/x5"
             android:visibility="gone">
 
             <RadioGroup
@@ -218,40 +218,40 @@
 
                 <RadioButton
                     android:id="@+id/spenRadio"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_margin="5dp"
+                    android:layout_width="@dimen/x40"
+                    android:layout_height="@dimen/x40"
+                    android:layout_margin="@dimen/x5"
                     android:background="@drawable/checkbox_style_spen"
                     android:button="@null"
                     android:checked="true"
-                    android:padding="2dp" />
+                    android:padding="@dimen/x2" />
 
                 <RadioButton
                     android:id="@+id/identification_dui"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_margin="5dp"
+                    android:layout_width="@dimen/x40"
+                    android:layout_height="@dimen/x40"
+                    android:layout_margin="@dimen/x5"
                     android:background="@drawable/checkbox_style_dui"
                     android:button="@null"
-                    android:padding="5dp" />
+                    android:padding="@dimen/x5" />
 
                 <RadioButton
                     android:id="@+id/identification_bandui"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_margin="5dp"
+                    android:layout_width="@dimen/x40"
+                    android:layout_height="@dimen/x40"
+                    android:layout_margin="@dimen/x5"
                     android:background="@drawable/checkbox_style_bandui"
                     android:button="@null"
-                    android:padding="2dp" />
+                    android:padding="@dimen/x2" />
 
                 <RadioButton
                     android:id="@+id/identification_cuo"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_margin="5dp"
+                    android:layout_width="@dimen/x40"
+                    android:layout_height="@dimen/x40"
+                    android:layout_margin="@dimen/x5"
                     android:background="@drawable/checkbox_style_cuo"
                     android:button="@null"
-                    android:padding="2dp" />
+                    android:padding="@dimen/x2" />
             </RadioGroup>
 
             <LinearLayout
@@ -265,34 +265,36 @@
                 <!--android:background="@drawable/obj_select_style"-->
                 <CheckBox
                     android:id="@+id/objsearch"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_margin="10dp"
+                    android:layout_width="@dimen/x40"
+                    android:layout_height="@dimen/x40"
+                    android:layout_margin="@dimen/x10"
                     android:background="@drawable/checkbox_select_style2"
                     android:button="@null"
                     android:checked="false"
                     android:gravity="center"
-                    android:paddingRight="2dp"
+                    android:paddingRight="@dimen/x2"
                     android:text="选 择"
-                    android:textColor="@color/colorScoreItem" />
+                    android:textColor="@color/colorScoreItem"
+                    android:textSize="@dimen/x14" />
 
                 <View
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/x2"
+                    android:layout_height="@dimen/x20"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="2dp"
-                    android:layout_marginRight="2dp"
+                    android:layout_marginLeft="@dimen/x2"
+                    android:layout_marginRight="@dimen/x2"
                     android:background="@color/colorGrey2" />
 
                 <TextView
                     android:id="@+id/clear_all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_margin="@dimen/x10"
                     android:gravity="center"
                     android:text="全部清除"
-                    android:textColor="@color/colorScoreItem" />
+                    android:textColor="@color/colorScoreItem"
+                    android:textSize="@dimen/x14" />
 
             </LinearLayout>
 
@@ -307,36 +309,38 @@
 
                 <CheckBox
                     android:id="@+id/collection"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/x40"
+                    android:layout_height="@dimen/x40"
                     android:layout_centerInParent="true"
-                    android:layout_margin="10dp"
+                    android:layout_margin="@dimen/x10"
                     android:background="@drawable/checkbox_select_style2"
                     android:button="@null"
                     android:gravity="center"
                     android:text="收 藏"
-                    android:textColor="@color/colorScoreItem" />
+                    android:textColor="@color/colorScoreItem"
+                    android:textSize="@dimen/x14" />
 
                 <View
-                    android:layout_width="2dp"
-                    android:layout_height="20dp"
+                    android:layout_width="@dimen/x2"
+                    android:layout_height="@dimen/x20"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="2dp"
-                    android:layout_marginRight="2dp"
+                    android:layout_marginLeft="@dimen/x2"
+                    android:layout_marginRight="@dimen/x2"
                     android:background="@color/colorGrey2" />
 
                 <CheckBox
                     android:id="@+id/abnormal"
-                    android:layout_width="60dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/x60"
+                    android:layout_height="@dimen/x40"
                     android:layout_centerInParent="true"
-                    android:layout_margin="10dp"
+                    android:layout_margin="@dimen/x10"
                     android:background="@drawable/checkbox_select_style2"
                     android:button="@null"
                     android:gravity="center"
                     android:text="试卷异常"
-                    android:textColor="@color/colorScoreItem" />
+                    android:textColor="@color/colorScoreItem"
+                    android:textSize="@dimen/x14" />
 
             </LinearLayout>
 
@@ -347,7 +351,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
-                android:padding="3dp"
+                android:padding="@dimen/x3"
                 android:visibility="gone" />
 
         </LinearLayout>
@@ -356,12 +360,12 @@
         <HorizontalScrollView
             android:id="@+id/function"
             android:layout_width="wrap_content"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:layout_alignParentBottom="true"
-            android:layout_margin="10dp"
+            android:layout_margin="@dimen/x10"
             android:layout_toLeftOf="@+id/reightView"
             android:layout_toRightOf="@+id/sideslip"
-            android:elevation="5dp"
+            android:elevation="@dimen/x5"
             android:fillViewport="true"
             android:outlineProvider="bounds"
             android:scrollbars="none">
@@ -370,12 +374,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@color/colorWhite"
-                android:gravity="center_vertical"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <RelativeLayout
                     android:id="@+id/stepScoreP"
-                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_width="@dimen/x130"
                     android:layout_height="match_parent">
 
                     <CheckBox
@@ -385,15 +389,15 @@
                         android:layout_centerHorizontal="true"
                         android:button="@null"
                         android:drawableLeft="@drawable/stepscore_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:gravity="center"
                         android:text="总 分"
                         android:textColor="@color/colorScoreItem"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                     <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/x2"
+                        android:layout_height="@dimen/x20"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@color/colorGrey2" />
@@ -402,8 +406,9 @@
 
                 <RelativeLayout
                     android:id="@+id/rotateP"
-                    android:layout_width="@dimen/functional_button_width"
-                    android:layout_height="match_parent">
+                    android:layout_width="@dimen/x130"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
 
                     <CheckBox
                         android:id="@+id/rotateTv"
@@ -412,15 +417,15 @@
                         android:layout_centerInParent="true"
                         android:button="@null"
                         android:drawableLeft="@drawable/rotate_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:gravity="center"
                         android:text="旋 转"
                         android:textColor="@color/colorScoreItem"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                     <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/x2"
+                        android:layout_height="@dimen/x20"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@color/colorGrey2" />
@@ -429,7 +434,7 @@
 
                 <RelativeLayout
                     android:id="@+id/commentsP"
-                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_width="@dimen/x130"
                     android:layout_height="match_parent">
 
                     <CheckBox
@@ -439,14 +444,14 @@
                         android:layout_centerInParent="true"
                         android:button="@null"
                         android:drawableLeft="@drawable/comments_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:text="批 注"
                         android:textColor="@color/colorScoreItem"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                     <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/x2"
+                        android:layout_height="@dimen/x20"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@color/colorGrey2" />
@@ -455,7 +460,7 @@
 
                 <RelativeLayout
                     android:id="@+id/eliminateP"
-                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_width="@dimen/x130"
                     android:layout_height="match_parent">
 
                     <CheckBox
@@ -465,16 +470,16 @@
                         android:layout_centerInParent="true"
                         android:button="@null"
                         android:drawableLeft="@drawable/eliminate_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="清 除"
                         android:textColor="@drawable/text_font_style"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                     <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/x2"
+                        android:layout_height="@dimen/x20"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@color/colorGrey2" />
@@ -483,7 +488,7 @@
 
                 <RelativeLayout
                     android:id="@+id/collectionP"
-                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_width="@dimen/x130"
                     android:layout_height="match_parent">
 
                     <CheckBox
@@ -493,15 +498,15 @@
                         android:layout_centerInParent="true"
                         android:button="@null"
                         android:drawableLeft="@drawable/label_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:gravity="center"
                         android:text="标 签"
                         android:textColor="@color/colorScoreItem"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                     <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/x2"
+                        android:layout_height="@dimen/x20"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@color/colorGrey2" />
@@ -510,7 +515,7 @@
 
                 <RelativeLayout
                     android:id="@+id/historyP"
-                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_width="@dimen/x130"
                     android:layout_height="match_parent">
 
                     <TextView
@@ -519,16 +524,16 @@
                         android:layout_height="match_parent"
                         android:layout_centerInParent="true"
                         android:drawableLeft="@drawable/history_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="回 评"
                         android:textColor="@drawable/text_font_style"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                     <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/x2"
+                        android:layout_height="@dimen/x20"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@color/colorGrey2" />
@@ -537,7 +542,7 @@
 
                 <RelativeLayout
                     android:id="@+id/goOnParent"
-                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_width="@dimen/x130"
                     android:layout_height="match_parent"
                     android:visibility="gone">
 
@@ -547,16 +552,16 @@
                         android:layout_height="match_parent"
                         android:layout_centerInParent="true"
                         android:drawableLeft="@drawable/history_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="继续阅卷"
                         android:textColor="@drawable/text_font_style"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                     <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/x2"
+                        android:layout_height="@dimen/x20"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@color/colorGrey2" />
@@ -565,7 +570,7 @@
 
                 <RelativeLayout
                     android:id="@+id/scoringDatailsP"
-                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_width="@dimen/x130"
                     android:layout_height="match_parent">
 
                     <TextView
@@ -574,16 +579,16 @@
                         android:layout_height="match_parent"
                         android:layout_centerInParent="true"
                         android:drawableLeft="@drawable/scoringdatails_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="评分详情"
                         android:textColor="@drawable/text_font_style"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                     <View
-                        android:layout_width="2dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/x2"
+                        android:layout_height="@dimen/x20"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@color/colorGrey2" />
@@ -592,7 +597,7 @@
 
                 <RelativeLayout
                     android:id="@+id/settingP"
-                    android:layout_width="@dimen/functional_button_width"
+                    android:layout_width="@dimen/x130"
                     android:layout_height="match_parent"
                     android:gravity="center">
 
@@ -601,12 +606,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:drawableLeft="@drawable/setting_style"
-                        android:drawablePadding="5dp"
+                        android:drawablePadding="@dimen/x5"
                         android:duplicateParentState="true"
                         android:gravity="center"
                         android:text="设 置"
                         android:textColor="@drawable/text_font_style"
-                        android:textSize="18sp" />
+                        android:textSize="@dimen/x18" />
 
                 </RelativeLayout>
 
@@ -618,7 +623,7 @@
 
     <LinearLayout
         android:id="@+id/reight"
-        android:layout_width="400dp"
+        android:layout_width="@dimen/x400"
         android:layout_height="match_parent"
         android:layout_gravity="right"
         android:background="@color/colorWhite"
@@ -626,11 +631,11 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="@dimen/x60"
             android:background="@color/colorProgress"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:padding="@dimen/x10">
 
             <TextView
                 android:id="@+id/number"
@@ -642,8 +647,8 @@
                 android:textColor="@color/colorWhite" />
 
             <View
-                android:layout_width="2dp"
-                android:layout_height="30dp"
+                android:layout_width="@dimen/x2"
+                android:layout_height="@dimen/x30"
                 android:background="@color/colorWhite" />
 
             <LinearLayout
@@ -664,8 +669,8 @@
             </LinearLayout>
 
             <View
-                android:layout_width="2dp"
-                android:layout_height="30dp"
+                android:layout_width="@dimen/x2"
+                android:layout_height="@dimen/x30"
                 android:background="@color/colorWhite" />
 
             <LinearLayout
@@ -690,14 +695,14 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="@dimen/x2"
             android:background="@color/colorWhite" />
 
         <ListView
             android:id="@+id/reviewListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="5dp" />
+            android:padding="@dimen/x5" />
 
         <TextView
             android:id="@+id/nodatahint"

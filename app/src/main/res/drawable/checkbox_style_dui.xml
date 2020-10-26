@@ -3,10 +3,10 @@
     <item android:drawable="@drawable/checkbox_select_style" />
     <item
         android:drawable="@drawable/icon_correct"
-        android:width="30dp"
-        android:height="30dp"
-        android:bottom="5dp"
-        android:left="5dp"
-        android:right="5dp"
-        android:top="5dp" />
+        android:width="@dimen/x30"
+        android:height="@dimen/x30"
+        android:bottom="@dimen/x5"
+        android:left="@dimen/x5"
+        android:right="@dimen/x5"
+        android:top="@dimen/x5" />
 </layer-list>

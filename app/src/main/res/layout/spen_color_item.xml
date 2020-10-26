@@ -7,8 +7,8 @@
 
     <CheckBox
         android:id="@+id/spenColoeCheck"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/x40"
+        android:layout_height="@dimen/x40"
         android:background="@drawable/spen_check_style"
         android:button="@null" />
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="70dp"
+    android:layout_height="@dimen/x70"
     android:background="@color/colorWhite"
     android:gravity="center_vertical"
     android:orientation="vertical">
@@ -20,7 +20,7 @@
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="2"
-            android:padding="2dp"
+            android:padding="@dimen/x2"
             android:text="第10(1-99)题"
             android:textColor="@color/colorBlack"
             android:textSize="16sp" />
@@ -32,7 +32,7 @@
             android:layout_weight="0.3"
             android:background="@color/colorIdentity"
             android:gravity="center"
-            android:padding="3dp"
+            android:padding="@dimen/x3"
             android:text="单评"
             android:textColor="@color/colorWhite" />
 
@@ -65,7 +65,7 @@
                 android:id="@+id/progress"
                 style="@style/TaskProgressBar"
                 android:layout_width="0dp"
-                android:layout_height="10dp"
+                android:layout_height="@dimen/x10"
                 android:layout_weight="5"
                 android:max="100" />
 
@@ -89,12 +89,12 @@
 
             <Button
                 android:id="@+id/startTask"
-                android:layout_width="90dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/x90"
+                android:layout_height="@dimen/x45"
                 android:background="@drawable/begin_btn_style"
                 android:text="开始阅卷"
                 android:textColor="@color/colorWhite"
-                android:textSize="16sp" />
+                android:textSize="@dimen/x16" />
         </LinearLayout>
 
     </LinearLayout>
@@ -102,9 +102,9 @@
     <View
         android:id="@+id/item_line"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
+        android:layout_height="@dimen/x2"
+        android:layout_marginLeft="@dimen/x20"
+        android:layout_marginRight="@dimen/x20"
         android:background="@drawable/tiem_line" />
 
 </LinearLayout>

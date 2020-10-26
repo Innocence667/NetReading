@@ -7,28 +7,28 @@
     android:orientation="vertical">
 
   <LinearLayout
-      android:layout_width="260dp"
-      android:layout_height="160dp"
+      android:layout_width="@dimen/x260"
+      android:layout_height="@dimen/x160"
       android:gravity="center_horizontal"
       android:orientation="vertical">
 
     <RelativeLayout
-        android:layout_width="62dp"
-        android:layout_marginTop="30dp"
+        android:layout_width="@dimen/x62"
+        android:layout_marginTop="@dimen/x30"
         android:layout_height="wrap_content"
-        android:padding="10dp">
+        android:padding="@dimen/x10">
 
       <TextView
           android:id="@+id/redDot"
-          android:layout_width="12dp"
-          android:layout_height="12dp"
+          android:layout_width="@dimen/x12"
+          android:layout_height="@dimen/x12"
           android:layout_alignParentLeft="true"
           android:background="@drawable/loading_red" />
 
       <TextView
           android:id="@+id/blueDot"
-          android:layout_width="12dp"
-          android:layout_height="12dp"
+          android:layout_width="@dimen/x12"
+          android:layout_height="@dimen/x12"
           android:layout_alignParentRight="true"
           android:background="@drawable/loading_blue" />
     </RelativeLayout>
@@ -36,7 +36,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="@dimen/x40"
         android:text="加载中..."
         android:textColor="#233143"
         android:textSize="20sp" />

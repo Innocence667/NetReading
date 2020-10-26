@@ -7,16 +7,16 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/x50"
         android:background="@color/colorTitleBG"
         android:gravity="center_vertical"
-        android:padding="15dp"
+        android:padding="@dimen/x15"
         android:text="意见反馈" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:padding="20dp">
+        android:layout_height="@dimen/x350"
+        android:padding="@dimen/x20">
 
         <EditText
             android:id="@+id/feedback_input"
@@ -26,7 +26,7 @@
             android:gravity="left"
             android:hint="在使用中有什么问题，或有什么功能建议，欢迎提给我们，谢谢！"
             android:maxLength="500"
-            android:padding="5dp" />
+            android:padding="@dimen/x5" />
 
         <TextView
             android:id="@+id/feedback_fontNum"
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
-            android:layout_margin="10dp"
+            android:layout_margin="@dimen/x10"
             android:text="500/500"
             android:textColor="@color/colorRed" />
 
@@ -48,9 +48,9 @@
 
         <Button
             android:id="@+id/feedback_commit"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_margin="20dp"
+            android:layout_width="@dimen/x150"
+            android:layout_height="@dimen/x50"
+            android:layout_margin="@dimen/x20"
             android:background="@drawable/btn_login_click"
             android:text="提 交"
             android:textColor="@color/colorWhite"
@@ -58,9 +58,9 @@
 
         <Button
             android:id="@+id/feedback_cancel"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
-            android:layout_margin="20dp"
+            android:layout_width="@dimen/x150"
+            android:layout_height="@dimen/x50"
+            android:layout_margin="@dimen/x20"
             android:background="@drawable/btn_login_click"
             android:text="取 消"
             android:textColor="@color/colorWhite"
