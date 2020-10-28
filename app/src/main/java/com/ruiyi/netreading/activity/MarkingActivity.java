@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -222,7 +223,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private boolean _stepMode = false;//点击设置之前当前的步骤分模式
 
     private List<ImageData> imageDataList; //存放每张图片的宽高
-    private ImageData imageData;
+    private ImageData imageData; //合并后图片的宽高
     private List<String> imgPath; //存放线上考试选择图片时用到的图片url
 
     private GetMarkDataResponse response; //获取试卷试卷
@@ -294,12 +295,12 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         request = new GetMarkDataRequest();
         request.setTaskGuid(taskGuid);
         request.setTeacherGuid(teacherGuid);
-        initView();
         if (PreferencesService.getInstance(context).getScreenType() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         } else {
             MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
+        initView();
         myModel = new MyModel();
         myModel.OtherTask(context, request, new MyCallBack() {
             @Override
@@ -993,7 +994,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     //初始化SpenPageView
     private void initSpenNoteDoc(int w, int h) {
         try {
-            Log.i(TAG, "spenView的宽高是：" + w + "  --  " + h);
+            Log.e(TAG, "mSpenPageDoc的宽高是：" + w + "  --  " + h);
             mSpenNotDoc = new SpenNoteDoc(context, w, h);
         } catch (IOException e) {
             Toast.makeText(context, "创建NoteDoc失败", Toast.LENGTH_SHORT).show();
@@ -1359,13 +1360,14 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 Log.i(TAG, "图片保存到本地：" + localImageData.getPath());
 
                 Rect rect = Tool.getScreenparameters(MarkingActivity.this);
-                Log.i(TAG, "当前屏幕的宽高是:" + rect.width() + "_" + rect.height());
                 if (bitmap.getHeight() > rect.height() - Tool.getStatusBarHeight(context) || bitmap.getWidth() > rect.width() - 80) { //图片比屏幕大
-                    scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
+                    //scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
+                    scale = (rect.width() - 80) * 1f / bitmap.getWidth();
                     if (bitmap.getWidth() > bitmap.getHeight()) { //宽图
                         initSpenNoteDoc(rect.width() - 80, bitmap.getHeight() * (rect.width() - 80) / bitmap.getWidth());
                     } else if (bitmap.getWidth() < bitmap.getHeight()) { //长图
-                        scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
+                        //scale = mSpenPageDoc.getWidth() * 1f / bitmap.getWidth();
+                        scale = (rect.width() - 80) * 1f / bitmap.getWidth();
                         if ("语文".equals(response.getTestpaper().getPaperName()) && bitmap.getHeight() > 2000) {
                             initSpenNoteDoc(1024 - 80, bitmap.getHeight() * (1024 - 80) / bitmap.getWidth());
                         } else {
@@ -1383,9 +1385,9 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                     } else { //高图
                         mSpenSimpleSurfaceView.setZoom(0, 0, rect.height() * 1f / bitmap.getHeight());
                     }
-                    scale = bitmap.getWidth() * 1f / mSpenPageDoc.getWidth();
+                    //scale = bitmap.getWidth() * 1f / mSpenPageDoc.getWidth();
+                    scale = bitmap.getWidth() * 1f / (rect.width() - 80);
                 }
-                Log.i(TAG, "onSuccess当前缩放率是: " + scale);
                 bitmap.recycle();
                 new Thread(new Runnable() {
                     @Override
@@ -1505,6 +1507,8 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         soubleLayout.setVisibility(View.VISIBLE);
                         douleScoreCheckBox.setChecked(false);
                         doubleScoreLayout.setVisibility(View.GONE);
+                        PreferencesService.getInstance(context).saveAutoSubmit(true);
+                        submiss.setVisibility(View.GONE);
                     } else {
                         soubleLayout.setVisibility(View.GONE);
                         douleScoreCheckBox.setChecked(false);
@@ -2652,6 +2656,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 tab.clear();
                 stepDatas.clear();
                 strokeColor.clear();
+                cachePool.clear();
                 getNewStudent();
                 break;
             case R.id.settingP: //设置
@@ -2813,21 +2818,23 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 if (horizontalCheckBox.isChecked()) {
                     verticalCheckBox.setChecked(false);
                     MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    PreferencesService.getInstance(context).saveScreenType(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 } else {
                     verticalCheckBox.setChecked(true);
                     MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    PreferencesService.getInstance(context).saveScreenType(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 }
-                PreferencesService.getInstance(context).saveScreenType(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 break;
             case R.id.verticalCheckBox: //竖屏
                 if (verticalCheckBox.isChecked()) {
                     horizontalCheckBox.setChecked(false);
                     MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                    PreferencesService.getInstance(context).saveScreenType(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 } else {
                     horizontalCheckBox.setChecked(true);
                     MarkingActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    PreferencesService.getInstance(context).saveScreenType(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 }
-                PreferencesService.getInstance(context).saveScreenType(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 break;
             case R.id.topScoreClear: //自定义分数选中清空
                 topScoreAdapter.clearSelect();
@@ -3610,6 +3617,21 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 showFailedPage(str);
             }
         });
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        Rect rect = Tool.getScreenparameters(MarkingActivity.this);
+        if (imageData != null) {
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                Log.e(TAG, "onConfigurationChanged: 横屏");
+            } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                Log.e(TAG, "onConfigurationChanged: 竖屏");
+            }
+            scale = (rect.width() - 80) * 1f / imageData.getWidth();
+        }
+        Log.e(TAG, "onConfigurationChanged: 当前缩放率是" + scale);
+        super.onConfigurationChanged(newConfig);
     }
 
     /**

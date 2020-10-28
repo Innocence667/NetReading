@@ -214,8 +214,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         //动态设置控件宽高
         Rect rect = Tool.getScreenparameters(this);
-        Log.i(TAG, "屏幕的宽高是：" + rect.width() + " - " + rect.height());
-        Log.i(TAG, "状态栏的高度是： " + Tool.getStatusBarHeight(this));
         if (rect.width() == 1024 && rect.height() == 768) { //三星p350
             login_main.setBackgroundResource(R.drawable.login_bg0);
             loginBg.setVisibility(View.GONE);
@@ -227,11 +225,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             float hZoom = 1536 * 1f / (rect.height() - Tool.getStatusBarHeight(this));
             //计算登录白框的大小
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams((int) (1386 / wZoom), (int) (922 / hZoom) + 200);
-            Log.i(TAG, "initView: paramsW-" + (1386 / wZoom));
-            Log.i(TAG, "initView: paramsH-" + (922 / hZoom));
             //计算距离顶部padding
             int topPadding = (int) ((rect.height() - Tool.getStatusBarHeight(this) - 63 - (922 / hZoom)) / 2);
-            Log.i(TAG, "topPadding: " + topPadding);
             params.setMargins(0, topPadding, 0, 0);
             params.addRule(RelativeLayout.CENTER_HORIZONTAL);
             loginBg.setLayoutParams(params);

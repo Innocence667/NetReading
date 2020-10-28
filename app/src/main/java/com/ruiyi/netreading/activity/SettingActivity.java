@@ -279,7 +279,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         });
     }
 
-    //现在最新apk
+    //下载最新apk
     private void downloadAPK() {
         myModel.Download(context, new MyCallBack() {
             @Override

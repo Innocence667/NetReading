@@ -149,6 +149,7 @@ public class GetMarkNextStudentResponse {
                 isAbnormal = abnormal;
             }
 
+            //获取新数据和回评数据共用一个模型，所以会出现获取新数据接口中有的参数和模型中的对应不上
             public static class QuestionsBean {
                 /**
                  * id : 192992
@@ -171,6 +172,8 @@ public class GetMarkNextStudentResponse {
                 //gradeMode 1：总分模式 2：键盘打分 3：步骤分模式
                 private String gradeData; //只考虑gradeMode为3的情况，其他值忽略，stepModeAdd：true加分模式，false减法模式
                 private boolean hasArbitrated; //是否仲裁过(默认false)仲裁过的题目,一二评教师回评无法修改
+                private double firstScore; //一评教师分数
+                private double secondScore; //二评教师分数
 
                 public int getId() {
                     return id;
@@ -242,6 +245,22 @@ public class GetMarkNextStudentResponse {
 
                 public void setHasArbitrated(boolean hasArbitrated) {
                     this.hasArbitrated = hasArbitrated;
+                }
+
+                public double getFirstScore() {
+                    return firstScore;
+                }
+
+                public double getSecondScore() {
+                    return secondScore;
+                }
+
+                public void setFirstScore(double firstScore) {
+                    this.firstScore = firstScore;
+                }
+
+                public void setSecondScore(double secondScore) {
+                    this.secondScore = secondScore;
                 }
             }
         }
