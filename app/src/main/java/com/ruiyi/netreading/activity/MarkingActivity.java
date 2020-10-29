@@ -1478,16 +1478,17 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
             public void run() {
                 if (!reviewMode) {
                     if (getMarkNextStudentResponse1.getData().getStudentData().isDisplayScore()) {
-                        Log.e(TAG, "run: 显示1-2评教师分数");
-                        teachersScore.setVisibility(View.VISIBLE);
-                        firstScore.setText(String.valueOf(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFirstScore()));
-                        secondScore.setText(String.valueOf(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getSecondScore()));
+                        if (response.getTeacherTask().getIdentity() == 3) {
+                            teachersScore.setVisibility(View.VISIBLE);
+                            firstScore.setText(String.valueOf(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFirstScore()));
+                            secondScore.setText(String.valueOf(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getSecondScore()));
+                        } else {
+                            teachersScore.setVisibility(View.GONE);
+                        }
                     } else {
-                        Log.e(TAG, "run: 1隐藏1-2评教师分数");
                         teachersScore.setVisibility(View.GONE);
                     }
                 } else {
-                    Log.e(TAG, "run: 2隐藏1-2评教师分数");
                     teachersScore.setVisibility(View.GONE);
                 }
                 if ("0".equals(getMarkNextStudentResponse1.getData().getIsOnline())) {
