@@ -266,6 +266,11 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
     private TopScoreAdapter topScoreAdapter;//置顶分数适配器
     private SpenColorSAdapter spenColorSAdapter;//手写笔颜色设置适配器
 
+    //双评教师分值
+    private LinearLayout teachersScore;
+    private TextView firstScore;
+    private TextView secondScore;
+
     //双栏模式控件
     private LinearLayout soubleLayout; //双栏父布局
     private CheckBox douleScoreCheckBox; //双栏展开/收起来
@@ -471,6 +476,7 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 if (studentsResponse.getData() == null || studentsResponse.getData().size() < 1) {
                     Looper.prepare();
                     ToastUtils.showToast(context, "暂无数据");
+                    LoadingUtil.closeDialog();
                     Looper.loop();
                     //暂无数据
                     return;
@@ -695,6 +701,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         settingP.setOnClickListener(this);
         setting = findViewById(R.id.setting);
         setting.setOnClickListener(this);
+
+        teachersScore = findViewById(R.id.teachersScore);
+        firstScore = findViewById(R.id.firstScore);
+        secondScore = findViewById(R.id.secondScore);
 
         soubleLayout = findViewById(R.id.soubleLayout);
         douleScoreCheckBox = findViewById(R.id.douleScoreCheckBox);
@@ -1466,6 +1476,20 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (!reviewMode) {
+                    if (getMarkNextStudentResponse1.getData().getStudentData().isDisplayScore()) {
+                        Log.e(TAG, "run: 显示1-2评教师分数");
+                        teachersScore.setVisibility(View.VISIBLE);
+                        firstScore.setText(String.valueOf(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getFirstScore()));
+                        secondScore.setText(String.valueOf(getMarkNextStudentResponse1.getData().getStudentData().getQuestions().get(minLocation).getSecondScore()));
+                    } else {
+                        Log.e(TAG, "run: 1隐藏1-2评教师分数");
+                        teachersScore.setVisibility(View.GONE);
+                    }
+                } else {
+                    Log.e(TAG, "run: 2隐藏1-2评教师分数");
+                    teachersScore.setVisibility(View.GONE);
+                }
                 if ("0".equals(getMarkNextStudentResponse1.getData().getIsOnline())) {
                     rotateP.setVisibility(View.GONE);
                 } else {
@@ -2251,6 +2275,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 reviewAdatper.notifyDataSetChanged();
                 break;
             case R.id.stepScore: //步骤分
+                if (questionNumAdapter == null) {
+                    stepScore.setChecked(false);
+                    return;
+                }
                 questionNumAdapter.updateScore(minLocation, String.valueOf(-1));
                 questionNumAdapter.notifyDataSetChanged();
                 if (stepScore.isChecked()) {
@@ -2406,6 +2434,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 break;
             case R.id.comments: //批注
+                if (getMarkNextStudentResponse == null) {
+                    comments.setChecked(false);
+                    return;
+                }
                 if (comments.isChecked()) {
                     comments.setChecked(true);
                     comments.setTextColor(getResources().getColor(R.color.colorBlue));
@@ -2558,6 +2590,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 }
                 break;
             case R.id.collection: //收藏
+                if (getMarkNextStudentResponse == null) {
+                    collection.setChecked(false);
+                    return;
+                }
                 collectRequest.setStudentGuid(getMarkNextStudentResponse.getData().getStudentData().getStudentGuid());
                 collectRequest.setTaskGuid(taskGuid);
                 collectRequest.setIdentity(response.getTeacherTask().getIdentity());
@@ -2599,6 +2635,10 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                 });
                 break;
             case R.id.abnormal: //异常
+                if (getMarkNextStudentResponse == null) {
+                    abnormal.setChecked(false);
+                    return;
+                }
                 AbnormalRequest.setStudentGuid(getMarkNextStudentResponse.getData().getStudentData().getStudentGuid());
                 AbnormalRequest.setTaskGuid(taskGuid);
                 AbnormalRequest.setIdentity(response.getTeacherTask().getIdentity());

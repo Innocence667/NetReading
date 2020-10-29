@@ -91,6 +91,7 @@ public class GetMarkNextStudentResponse {
             private String imagePath;
             private List<QuestionsBean> questions;
             private boolean isAbnormal; //是否是异常
+            private boolean isDisplayScore; //是否显示一二评教师分值
 
             public String getTaskGuid() {
                 return taskGuid;
@@ -147,6 +148,14 @@ public class GetMarkNextStudentResponse {
 
             public void setAbnormal(boolean abnormal) {
                 isAbnormal = abnormal;
+            }
+
+            public boolean isDisplayScore() {
+                return isDisplayScore;
+            }
+
+            public void setDisplayScore(boolean displayScore) {
+                isDisplayScore = displayScore;
             }
 
             //获取新数据和回评数据共用一个模型，所以会出现获取新数据接口中有的参数和模型中的对应不上

@@ -73,6 +73,45 @@
             android:layout_toRightOf="@+id/titleNo"
             android:scrollbars="none" />
 
+        <LinearLayout
+            android:id="@+id/teachersScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/myHorizontalScrollview"
+            android:layout_margin="@dimen/x10"
+            android:layout_toLeftOf="@+id/reightView"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="一评:"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/firstScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:textColor="@color/colorProgress"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="二评:"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/secondScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorProgress"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
         <!--双栏模式-->
         <LinearLayout
             android:id="@+id/soubleLayout"
