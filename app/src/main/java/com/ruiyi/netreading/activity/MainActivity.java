@@ -98,11 +98,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             datas.add(getExamContextResponse.getTaskList().get(i));
                                         }
                                     }
-                                    for (int i = 0; i < getExamContextResponse.getTaskLists().size(); i++) {
-                                        if (getExamContextResponse.getTaskLists().get(i).isCanMark()) {
-                                            datas.add(getExamContextResponse.getTaskLists().get(i));
-                                        }
-                                    }
                                     //自己的任务是否全部都完成
                                     boolean isOver = true;
                                     for (int i = 0; i < datas.size(); i++) {
@@ -117,8 +112,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         }
                                     }
                                     if (!TextUtils.isEmpty(teacherGuid) && !TextUtils.isEmpty(datas.get(position).getTaskGuid())) {
-
-
                                         Intent marking = new Intent(MainActivity.this, MarkingActivity.class);
                                         marking.putExtra("teacherGuid", teacherGuid);
                                         marking.putExtra("taskGuid", datas.get(position).getTaskGuid());
@@ -462,15 +455,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause() {
         super.onPause();
         isFresh = true;
-    }
-
-    //任务获取成功
-    public void showSueecssPage(final LoginResponse loginResponse) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-            }
-        });
     }
 
     //任务获取失败

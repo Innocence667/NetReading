@@ -1413,7 +1413,6 @@ public class MarkingActivity extends AppCompatActivity implements View.OnClickLi
                         }
                     }
                 }).start();
-
             }
 
             @Override

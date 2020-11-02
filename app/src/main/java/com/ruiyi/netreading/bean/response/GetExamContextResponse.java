@@ -69,6 +69,7 @@ public class GetExamContextResponse {
         private int identity;//身份(0,1、2、教师1-2 3、仲裁)
         private int arbCount; //数量(异常数量-仲裁数量)
         private boolean isPublish; //是否发布,发布后无法进行回评修改操作，按钮已发布
+        private int paperStatus; //(2可以阅卷、3统计完成)
 
         public String getTaskGuid() {
             return taskGuid;
@@ -188,6 +189,14 @@ public class GetExamContextResponse {
 
         public void setPublish(boolean publish) {
             isPublish = publish;
+        }
+
+        public int getPaperStatus() {
+            return paperStatus;
+        }
+
+        public void setPaperStatus(int paperStatus) {
+            this.paperStatus = paperStatus;
         }
 
         public static class QuestionsBean {
